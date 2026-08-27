@@ -1,0 +1,83 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}Admin Dashboard — {{ site_name }}{% endblock %}
+
+{% block admin_content %}
+
+<div class="mb-8">
+  <h1 class="text-3xl font-bold">Overview</h1>
+  <p class="mt-1 text-base-content/60">
+    A quick overview of your platform activity.
+  </p>
+</div>
+
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+
+  <!-- New project inquiries -->
+  <div class="card border border-base-300 bg-base-200 shadow-sm">
+    <div class="card-body">
+      <p class="text-sm font-medium uppercase tracking-wide text-base-content/50">
+        New Inquiries
+      </p>
+
+      <h2 class="mt-2 text-3xl font-bold text-primary">
+        {{ stats.new_inquiries }}
+      </h2>
+    </div>
+  </div>
+
+  <!-- Currently active course enrollments -->
+  <div class="card border border-base-300 bg-base-200 shadow-sm">
+    <div class="card-body">
+      <p class="text-sm font-medium uppercase tracking-wide text-base-content/50">
+        Active Enrollments
+      </p>
+
+      <h2 class="mt-2 text-3xl font-bold text-info">
+        {{ stats.active_enrollments }}
+      </h2>
+    </div>
+  </div>
+
+  <!-- Completed course purchases -->
+  <div class="card border border-base-300 bg-base-200 shadow-sm">
+    <div class="card-body">
+      <p class="text-sm font-medium uppercase tracking-wide text-base-content/50">
+        Completed Purchases
+      </p>
+
+      <h2 class="mt-2 text-3xl font-bold">
+        {{ stats.completed_purchases }}
+      </h2>
+    </div>
+  </div>
+
+  <!-- Published portfolio projects -->
+  <div class="card border border-base-300 bg-base-200 shadow-sm">
+    <div class="card-body">
+      <p class="text-sm font-medium uppercase tracking-wide text-base-content/50">
+        Published Projects
+      </p>
+
+      <h2 class="mt-2 text-3xl font-bold">
+        {{ stats.published_projects }}
+      </h2>
+    </div>
+  </div>
+
+  <!-- Published courses -->
+  <div class="card border border-base-300 bg-base-200 shadow-sm">
+    <div class="card-body">
+      <p class="text-sm font-medium uppercase tracking-wide text-base-content/50">
+        Published Courses
+      </p>
+
+      <h2 class="mt-2 text-3xl font-bold">
+        {{ stats.published_courses }}
+      </h2>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

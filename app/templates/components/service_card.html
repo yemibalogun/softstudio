@@ -1,0 +1,31 @@
+<article
+  class="card h-full border border-base-300 bg-base-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl"
+>
+  <div class="card-body">
+
+    <!-- Service title -->
+    <h3 class="card-title text-xl">
+      {{ service.title }}
+    </h3>
+
+    <!-- Short service description -->
+    <p class="text-sm leading-6 text-base-content/60">
+      {{ service.summary }}
+    </p>
+
+    <!--
+      mt-auto keeps the action aligned toward the bottom when cards
+      have different description lengths.
+    -->
+    <div class="mt-auto pt-5">
+      <a
+        href="{{ url_for('services.detail', slug=service.slug) }}"
+        class="btn btn-ghost btn-sm px-0 hover:bg-transparent hover:text-primary"
+      >
+        Learn More
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+
+  </div>
+</article>

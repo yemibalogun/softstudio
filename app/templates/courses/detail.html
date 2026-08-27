@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.meta_title or course.title }} — {{ site_name }}{% endblock %}
+
+{% block meta_description %}
+{{ course.meta_description or course.short_description }}
+{% endblock %}
+
+{% block og_image %}
+{{ course.og_image or course.thumbnail or super() }}
+{% endblock %}
+
+{% block structured_data_extra %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Course",
+  "name": {{ course.title|tojson }},
+  "description": {{ course.short_description|tojson }},
+  "provider": {
+    "@type": "Organization",
+    "name": {{ site_name|tojson }},
+    "sameAs": {{ site_url|tojson }}
+  }
+}
+</script>
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ============================================================
+     COURSE HERO
+     ============================================================ -->
+<section class="py-16 sm:py-20 lg:py-24">
+
+  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+
+    <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+
+      <!-- ======================================================
+           COURSE INFORMATION
+           ====================================================== -->
+      <div>
+
+        {% set crumbs = [
+          ("Courses", url_for('courses.index')),
+          (course.title, None)
+        ] %}
+
+        {% include "components/breadcrumbs.html" %}
+
+
+        <!-- Difficulty -->
+        <span class="badge badge-secondary mt-6">
+          {{ course.difficulty|title }}
+        </span>
+
+
+        <!-- Title -->
+        <h1 class="mt-5 text-4xl font-bold tracking-tight text-base-content sm:text-5xl lg:text-6xl">
+          {{ course.title }}
+        </h1>
+
+
+        <!-- Description -->
+        <p class="mt-6 max-w-3xl text-lg leading-8 text-base-content/65 sm:text-xl">
+          {{ course.short_description }}
+        </p>
+
+
+        <!-- Course statistics -->
+        <div
+          class="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-sm text-base-content/55"
+          aria-label="Course information"
+        >
+
+          <span>
+            {{ course.lesson_count }} lessons
+          </span>
+
+          <span aria-hidden="true">·</span>
+
+          <span>
+            {{ course.sections|length }} sections
+          </span>
+
+        </div>
+
+
+        <!-- ====================================================
+             LEARNING OBJECTIVES
+             ==================================================== -->
+        {% if course.learning_objectives %}
+
+          <div class="mt-12">
+
+            <h2 class="text-2xl font-bold text-base-content">
+              What You'll Learn
+            </h2>
+
+            <ul class="mt-6 space-y-3">
+
+              {% for line in course.learning_objectives.split('\n') if line.strip() %}
+
+                <li class="flex gap-3 text-base leading-7 text-base-content/70">
+
+                  <span
+                    class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success/15 text-success"
+                    aria-hidden="true"
+                  >
+                    ✓
+                  </span>
+
+                  <span>{{ line }}</span>
+
+                </li>
+
+              {% endfor %}
+
+            </ul>
+
+          </div>
+
+        {% endif %}
+
+      </div>
+
+
+      <!-- ======================================================
+           PURCHASE CARD
+           ====================================================== -->
+      <aside class="lg:sticky lg:top-24">
+
+        <div class="card overflow-hidden border border-base-300 bg-base-100 shadow-xl">
+
+          <!-- Course thumbnail -->
+          {% if course.thumbnail %}
+            <figure class="aspect-video overflow-hidden bg-base-200">
+              <img
+                src="{{ course.thumbnail }}"
+                alt="{{ course.title }}"
+                class="h-full w-full object-cover"
+              >
+            </figure>
+          {% endif %}
+
+
+          <div class="card-body">
+
+            <!-- Price -->
+            <div class="mb-5">
+
+              {% if course.discount_price %}
+
+                <span class="text-lg text-base-content/40 line-through">
+                  {{ course.currency }} {{ "%.0f"|format(course.price) }}
+                </span>
+
+                <div class="mt-1 text-3xl font-bold text-base-content">
+                  {{ course.currency }} {{ "%.0f"|format(course.effective_price) }}
+                </div>
+
+              {% else %}
+
+                <div class="text-3xl font-bold text-base-content">
+                  {{ course.currency }} {{ "%.0f"|format(course.effective_price) }}
+                </div>
+
+              {% endif %}
+
+            </div>
+
+
+            <!-- ==================================================
+                 PURCHASE / LEARNING STATE
+
+                 The three states below are deliberately preserved:
+
+                 1. Enrolled user → continue learning
+                 2. Authenticated user → purchase
+                 3. Guest → login before purchase
+                 ================================================== -->
+
+            {% if is_enrolled %}
+
+              <a
+                href="{{ url_for('learning.course_overview', course_slug=course.slug) }}"
+                class="btn btn-secondary btn-lg w-full"
+              >
+                Continue Learning
+              </a>
+
+            {% elif current_user.is_authenticated %}
+
+              <form
+                method="POST"
+                action="{{ url_for('payments.checkout', course_slug=course.slug) }}"
+              >
+
+                <!-- CSRF protection remains exactly as before. -->
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                >
+
+                <button
+                  type="submit"
+                  class="btn btn-secondary btn-lg w-full"
+                >
+                  Buy Course
+                </button>
+
+              </form>
+
+            {% else %}
+
+              <a
+                href="{{ url_for('auth.login', next=request.path) }}"
+                class="btn btn-secondary btn-lg w-full"
+              >
+                Log In to Purchase
+              </a>
+
+            {% endif %}
+
+          </div>
+
+        </div>
+
+      </aside>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ============================================================
+     COURSE CONTENT
+     ============================================================ -->
+<section class="border-y border-base-300 bg-base-200/40 py-16 sm:py-20 lg:py-24">
+
+  <div class="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8">
+
+    <div class="mb-10">
+
+      <span class="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+        Curriculum
+      </span>
+
+      <h2 class="mt-3 text-3xl font-bold tracking-tight text-base-content sm:text-4xl">
+        Course Content
+      </h2>
+
+    </div>
+
+
+    <div class="space-y-4">
+
+      {% for section in course.sections %}
+
+        <article class="card border border-base-300 bg-base-100 shadow-sm">
+
+          <div class="card-body">
+
+            <h3 class="card-title text-lg">
+              {{ section.title }}
+            </h3>
+
+
+            <ul class="mt-2 divide-y divide-base-300">
+
+              {% for lesson in section.lessons %}
+
+                <li class="flex items-center justify-between gap-4 py-4">
+
+                  <span class="text-sm leading-6 text-base-content/70 sm:text-base">
+                    {{ lesson.title }}
+                  </span>
+
+
+                  {% if lesson.is_free_preview %}
+
+                    <span class="badge badge-success shrink-0">
+                      Free Preview
+                    </span>
+
+                  {% else %}
+
+                    <span
+                      class="text-sm text-base-content/40"
+                      aria-label="Locked lesson"
+                      title="Available after purchase"
+                    >
+                      🔒
+                    </span>
+
+                  {% endif %}
+
+                </li>
+
+              {% endfor %}
+
+            </ul>
+
+          </div>
+
+        </article>
+
+      {% endfor %}
+
+    </div>
+
+  </div>
+
+</section>
+
+{% endblock %}

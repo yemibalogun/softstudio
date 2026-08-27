@@ -1,0 +1,87 @@
+{% extends "legal/_legal_base.html" %}
+
+{% block title %}Refund Policy — {{ site_name }}{% endblock %}
+
+{% block legal_title %}Refund Policy{% endblock %}
+
+{% block legal_body %}
+
+<p>
+  This policy explains how refunds work for course purchases on
+  {{ site_name }}.
+</p>
+
+
+<!-- ============================================================
+     ELIGIBILITY
+     ============================================================ -->
+<h2>Eligibility</h2>
+
+<p>
+  Refund requests are considered on a case-by-case basis.
+  [Specific eligibility window and conditions to be defined by the
+  business — e.g. "within 7 days of purchase, if less than 20% of the
+  course has been completed."]
+</p>
+
+
+<!-- ============================================================
+     HOW TO REQUEST A REFUND
+     ============================================================ -->
+<h2>How to Request a Refund</h2>
+
+<p>
+  Contact us with your purchase reference and reason for the request.
+  We aim to respond within a few business days.
+</p>
+
+
+<!-- ============================================================
+     WHAT HAPPENS AFTER A REFUND
+     ============================================================ -->
+<h2>What Happens After a Refund</h2>
+
+<p>
+  If a refund is approved and processed, the associated payment record
+  is marked as refunded and your enrollment in that course is revoked
+  according to this policy. This is handled automatically by the
+  platform once a refund is confirmed by the payment provider or an
+  administrator.
+</p>
+
+
+<!-- ============================================================
+     NON-REFUNDABLE CASES
+     ============================================================ -->
+<h2>Non-Refundable Cases</h2>
+
+<p>
+  Courses substantially completed, or purchases outside the eligibility
+  window described above, are generally not eligible for a refund.
+</p>
+
+
+<!-- ============================================================
+     CHANGES TO THIS POLICY
+     ============================================================ -->
+<h2>Changes to This Policy</h2>
+
+<p>
+  We may update this policy from time to time; the version in effect at
+  the time of your purchase applies to that purchase.
+</p>
+
+
+<!-- ============================================================
+     CONTACT
+     ============================================================ -->
+<h2>Contact</h2>
+
+<p>
+  Refund requests can be sent to
+  <a href="mailto:{{ config.ADMIN_EMAIL }}">
+    {{ config.ADMIN_EMAIL }}
+  </a>.
+</p>
+
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}Testimonials — Admin{% endblock %}
+
+{% block admin_content %}
+
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-3xl font-bold">Testimonials</h1>
+    <p class="mt-1 text-base-content/60">
+      Manage customer testimonials and their visibility.
+    </p>
+  </div>
+
+  <a
+    href="{{ url_for('admin.testimonial_create') }}"
+    class="btn btn-primary btn-sm"
+  >
+    + New Testimonial
+  </a>
+</div>
+
+{% if testimonials %}
+
+<div class="card border border-base-300 bg-base-200 shadow-sm">
+  <div class="card-body p-0">
+
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+
+        <thead>
+          <tr>
+            <th>Author</th>
+            <th>Quote</th>
+            <th>Approved</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for testimonial in testimonials %}
+          <tr>
+
+            <td>
+              <div class="font-semibold">
+                {{ testimonial.author_name }}
+              </div>
+
+              {% if testimonial.author_title %}
+                <div class="text-sm text-base-content/60">
+                  {{ testimonial.author_title }}
+                </div>
+              {% endif %}
+            </td>
+
+            <td class="max-w-xs">
+              <div class="truncate" title="{{ testimonial.quote }}">
+                {{ testimonial.quote[:80] }}{% if testimonial.quote|length > 80 %}…{% endif %}
+              </div>
+            </td>
+
+            <td>
+              <form
+                method="POST"
+                action="{{ url_for('admin.testimonial_toggle_approved', testimonial_id=testimonial.id) }}"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                >
+
+                {% if testimonial.approved %}
+                  <button
+                    type="submit"
+                    class="badge badge-success gap-1 cursor-pointer"
+                    title="Click to unapprove"
+                  >
+                    ✓ Yes
+                  </button>
+                {% else %}
+                  <button
+                    type="submit"
+                    class="badge badge-ghost cursor-pointer"
+                    title="Click to approve"
+                  >
+                    No
+                  </button>
+                {% endif %}
+              </form>
+            </td>
+
+            <td>
+              <div class="flex flex-wrap gap-2">
+
+                <a
+                  href="{{ url_for('admin.testimonial_edit', testimonial_id=testimonial.id) }}"
+                  class="btn btn-secondary btn-sm"
+                >
+                  Edit
+                </a>
+
+                <form
+                  method="POST"
+                  action="{{ url_for('admin.testimonial_delete', testimonial_id=testimonial.id) }}"
+                  onsubmit="return confirm('Delete this testimonial?');"
+                >
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  >
+
+                  <button
+                    type="submit"
+                    class="btn btn-error btn-outline btn-sm"
+                  >
+                    Delete
+                  </button>
+                </form>
+
+              </div>
+            </td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+
+  </div>
+</div>
+
+{% else %}
+
+  {% include "components/empty_state.html" %}
+
+{% endif %}
+
+{% endblock %}

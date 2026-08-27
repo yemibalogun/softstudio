@@ -1,0 +1,15 @@
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-Login
+Flask-WTF
+Flask-Limiter
+Flask-Mail
+Authlib
+psycopg2-binary
+python-dotenv
+gunicorn
+email-validator
+bleach
+itsdangerous
+Werkzeug

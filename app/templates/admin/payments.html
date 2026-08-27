@@ -1,0 +1,89 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}Payments — Admin{% endblock %}
+
+{% block admin_content %}
+
+<div class="mb-8">
+  <h1 class="text-3xl font-bold">Payments</h1>
+  <p class="mt-1 text-base-content/60">
+    Review course purchases and payment statuses.
+  </p>
+</div>
+
+{% if purchases %}
+
+<div class="card border border-base-300 bg-base-200 shadow-sm">
+  <div class="card-body p-0">
+
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Course</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for purchase in purchases %}
+            <tr>
+
+              <td>
+                <a
+                  href="mailto:{{ purchase.user.email }}"
+                  class="link link-hover font-medium"
+                >
+                  {{ purchase.user.email }}
+                </a>
+              </td>
+
+              <td>
+                {{ purchase.course.title }}
+              </td>
+
+              <td class="whitespace-nowrap font-medium">
+                {{ purchase.currency }} {{ "%.2f"|format(purchase.amount) }}
+              </td>
+
+              <td>
+                {% if purchase.status == 'completed' %}
+                  <span class="badge badge-success">
+                    {{ purchase.status }}
+                  </span>
+                {% elif purchase.status == 'failed' %}
+                  <span class="badge badge-error">
+                    {{ purchase.status }}
+                  </span>
+                {% else %}
+                  <span class="badge badge-info">
+                    {{ purchase.status }}
+                  </span>
+                {% endif %}
+              </td>
+
+              <td class="whitespace-nowrap text-sm text-base-content/60">
+                {{ purchase.created_at.strftime('%b %-d, %Y') }}
+              </td>
+
+            </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+
+  </div>
+</div>
+
+{% else %}
+
+  {% include "components/empty_state.html" %}
+
+{% endif %}
+
+{% endblock %}

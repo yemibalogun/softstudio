@@ -1,0 +1,12 @@
+Thanks, {{ inquiry.name.split(' ')[0] }}.
+
+Your project inquiry has been received. Here's a copy of what you submitted:
+
+Project type: {{ inquiry.project_type }}
+{{ inquiry.project_description }}
+
+I'll review the details and get back to you shortly.
+
+—
+{{ site_name }}
+{{ site_url }}

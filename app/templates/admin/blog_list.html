@@ -1,0 +1,172 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}Blog — Admin{% endblock %}
+
+{% block admin_content %}
+
+<!-- ============================================================
+     PAGE HEADER
+     ============================================================ -->
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight text-base-content sm:text-3xl">
+      Blog Posts
+    </h1>
+
+    <p class="mt-1 text-sm text-base-content/60">
+      Create, manage, and publish your articles.
+    </p>
+  </div>
+
+  <a
+    href="{{ url_for('admin.blog_create') }}"
+    class="btn btn-primary btn-sm"
+  >
+    + New Post
+  </a>
+
+</div>
+
+
+<!-- ============================================================
+     BLOG POSTS
+     ============================================================ -->
+{% if posts %}
+
+  <div class="card border border-base-300 bg-base-100 shadow-sm">
+
+    <!--
+      overflow-x-auto keeps the admin table usable on smaller screens
+      without forcing the entire page to overflow horizontally.
+    -->
+    <div class="overflow-x-auto">
+
+      <table class="table table-zebra">
+
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Published</th>
+            <th>Created</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for post in posts %}
+
+            <tr>
+
+              <!-- Title -->
+              <td>
+                <div class="max-w-xs">
+                  <div class="font-semibold text-base-content">
+                    {{ post.title }}
+                  </div>
+
+                  {% if post.slug %}
+                    <div class="mt-1 truncate text-xs text-base-content/50">
+                      /{{ post.slug }}
+                    </div>
+                  {% endif %}
+                </div>
+              </td>
+
+
+              <!-- Category -->
+              <td>
+                {% if post.category %}
+                  <span class="badge badge-outline">
+                    {{ post.category.name }}
+                  </span>
+                {% else %}
+                  <span class="text-base-content/40">—</span>
+                {% endif %}
+              </td>
+
+
+              <!-- Publication status -->
+              <td>
+
+                {% if post.published %}
+
+                  <span class="badge badge-success badge-sm">
+                    Published
+                  </span>
+
+                {% else %}
+
+                  <span class="badge badge-warning badge-sm">
+                    Draft
+                  </span>
+
+                {% endif %}
+
+              </td>
+
+
+              <!-- Created date -->
+              <td class="whitespace-nowrap text-sm text-base-content/60">
+                {{ post.created_at.strftime('%b %-d, %Y') }}
+              </td>
+
+
+              <!-- Actions -->
+              <td>
+
+                <div class="flex justify-end gap-2">
+
+                  <a
+                    href="{{ url_for('admin.blog_edit', post_id=post.id) }}"
+                    class="btn btn-secondary btn-sm"
+                  >
+                    Edit
+                  </a>
+
+                  <form
+                    method="POST"
+                    action="{{ url_for('admin.blog_delete', post_id=post.id) }}"
+                    onsubmit="return confirm('Delete this post?');"
+                  >
+
+                    <input
+                      type="hidden"
+                      name="csrf_token"
+                      value="{{ csrf_token() }}"
+                    >
+
+                    <button
+                      type="submit"
+                      class="btn btn-ghost btn-sm text-error"
+                    >
+                      Delete
+                    </button>
+
+                  </form>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+{% else %}
+
+  {% include "components/empty_state.html" %}
+
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "emails/_base.html" %}
+{% from "emails/_button.html" import email_button %}
+{% block subject %}You're enrolled: {{ course.title }}{% endblock %}
+{% block body %}
+<h1 style="font-size:22px; margin:0 0 16px; color:#F5F7FA;">You're enrolled 🎉</h1>
+<p style="font-size:15px; line-height:1.6; color:#9CA3AF; margin:0 0 16px;">
+  Hi {{ user.full_name.split(' ')[0] }}, you now have full access to
+  <strong style="color:#F5F7FA;">{{ course.title }}</strong> — {{ course.lesson_count }} lessons
+  across {{ course.sections|length }} sections.
+</p>
+{{ email_button(course_url, "Start Course") }}
+{% endblock %}

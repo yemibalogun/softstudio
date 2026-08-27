@@ -1,0 +1,154 @@
+{% extends "admin/_admin_base.html" %}
+{% from "components/admin_form_field.html" import afield %}
+
+{% block title %}Blog Categories — Admin{% endblock %}
+
+{% block admin_content %}
+
+<!-- ============================================================
+     PAGE HEADER
+     ============================================================ -->
+<div class="mb-6">
+
+  <div>
+    <span class="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+      Content Management
+    </span>
+
+    <h1 class="mt-2 text-3xl font-bold tracking-tight text-base-content">
+      Blog Categories
+    </h1>
+
+    <p class="mt-2 text-sm text-base-content/60">
+      Organize your articles into manageable content categories.
+    </p>
+  </div>
+
+</div>
+
+
+<!-- ============================================================
+     ADD CATEGORY
+     ============================================================ -->
+<div class="card mb-8 border border-base-300 bg-base-100 shadow-sm">
+
+  <div class="card-body">
+
+    <h2 class="card-title text-xl">
+      Add Category
+    </h2>
+
+    <p class="mb-2 text-sm text-base-content/60">
+      Create a new category for your blog posts.
+    </p>
+
+    <form method="POST">
+
+      {{ form.hidden_tag() }}
+
+      <div class="grid gap-4 md:grid-cols-2">
+
+        {{ afield(form.name) }}
+        {{ afield(form.slug) }}
+
+      </div>
+
+      <div class="mt-4">
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+        >
+          Add Category
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<!-- ============================================================
+     CATEGORY LIST
+     ============================================================ -->
+<div class="card border border-base-300 bg-base-100 shadow-sm">
+
+  <div class="card-body p-0">
+
+    <div class="border-b border-base-300 px-6 py-4">
+
+      <h2 class="font-semibold text-base-content">
+        Existing Categories
+      </h2>
+
+    </div>
+
+
+    {% if categories %}
+
+      <!--
+        overflow-x-auto prevents the table from breaking the page
+        layout on smaller screens.
+      -->
+      <div class="overflow-x-auto">
+
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Slug</th>
+              <th>Posts</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {% for category in categories %}
+
+              <tr>
+
+                <td>
+                  <span class="font-medium text-base-content">
+                    {{ category.name }}
+                  </span>
+                </td>
+
+                <td>
+                  <code class="text-sm text-base-content/60">
+                    {{ category.slug }}
+                  </code>
+                </td>
+
+                <td>
+                  <span class="badge badge-ghost">
+                    {{ category.posts|length }}
+                  </span>
+                </td>
+
+              </tr>
+
+            {% endfor %}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    {% else %}
+
+      <div class="p-6">
+        {% include "components/empty_state.html" %}
+      </div>
+
+    {% endif %}
+
+  </div>
+
+</div>
+
+{% endblock %}

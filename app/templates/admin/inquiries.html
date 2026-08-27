@@ -1,0 +1,85 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}Project Inquiries — Admin{% endblock %}
+
+{% block admin_content %}
+
+<div class="mb-8">
+  <h1 class="text-3xl font-bold">Project Inquiries</h1>
+  <p class="mt-1 text-base-content/60">
+    Review project inquiries submitted through the website.
+  </p>
+</div>
+
+{% if inquiries %}
+
+<div class="card border border-base-300 bg-base-200 shadow-sm">
+  <div class="card-body p-0">
+
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Received</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for inquiry in inquiries %}
+            <tr>
+
+              <td class="font-medium">
+                {{ inquiry.name }}
+              </td>
+
+              <td>
+                <a
+                  href="mailto:{{ inquiry.email }}"
+                  class="link link-hover"
+                >
+                  {{ inquiry.email }}
+                </a>
+              </td>
+
+              <td>
+                {{ inquiry.project_type }}
+              </td>
+
+              <td>
+                {% if inquiry.status == 'qualified' %}
+                  <span class="badge badge-success">
+                    {{ inquiry.status }}
+                  </span>
+                {% else %}
+                  <span class="badge badge-info">
+                    {{ inquiry.status }}
+                  </span>
+                {% endif %}
+              </td>
+
+              <td class="whitespace-nowrap text-sm text-base-content/60">
+                {{ inquiry.created_at.strftime('%b %-d, %Y') }}
+              </td>
+
+            </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+
+  </div>
+</div>
+
+{% else %}
+
+  {% include "components/empty_state.html" %}
+
+{% endif %}
+
+{% endblock %}

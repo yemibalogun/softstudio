@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.meta_title or project.title }} — {{ site_name }}{% endblock %}
+
+{% block meta_description %}
+{{ project.meta_description or project.short_description }}
+{% endblock %}
+
+{% block og_image %}
+{{ project.og_image or project.thumbnail or super() }}
+{% endblock %}
+
+{% block og_type %}article{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     PROJECT HEADER
+     ============================================================ -->
+<section class="py-16 sm:py-20 lg:py-24">
+  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+
+    {% set crumbs = [
+      ("Applications", url_for('projects.index')),
+      (project.title, None)
+    ] %}
+
+    {% include "components/breadcrumbs.html" %}
+
+    <div class="mt-8 max-w-4xl">
+
+      <!-- Project status -->
+      <span
+        class="badge
+          {% if project.status == 'live' %}
+            badge-success
+          {% else %}
+            badge-primary
+          {% endif %}
+        "
+      >
+        {{ project.status.replace('_', ' ')|title }}
+      </span>
+
+      <!-- Project title -->
+      <h1 class="mt-5 text-4xl font-bold tracking-tight text-base-content sm:text-5xl lg:text-6xl">
+        {{ project.title }}
+      </h1>
+
+      <!-- Short description -->
+      <p class="mt-6 max-w-3xl text-lg leading-8 text-base-content/65">
+        {{ project.short_description }}
+      </p>
+
+      <!-- Technologies -->
+      {% if project.technologies %}
+        <ul
+          class="mt-6 flex flex-wrap gap-2"
+          aria-label="Technologies used"
+        >
+          {% for tech in project.technologies %}
+            <li>
+              <span class="badge badge-secondary badge-outline">
+                {{ tech.name }}
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <!-- External project links -->
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+
+        {% if project.live_url %}
+          <a
+            href="{{ project.live_url }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-secondary"
+          >
+            View Live Application
+            <span aria-hidden="true">↗</span>
+          </a>
+        {% endif %}
+
+        {% if project.github_url %}
+          <a
+            href="{{ project.github_url }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-outline"
+          >
+            View on GitHub
+            <span aria-hidden="true">↗</span>
+          </a>
+        {% endif %}
+
+      </div>
+
+    </div>
+
+    <!-- Hero image -->
+    {% if project.hero_image %}
+      <figure class="mt-14 overflow-hidden rounded-2xl border border-base-300 bg-base-200 shadow-2xl">
+        <img
+          src="{{ project.hero_image }}"
+          alt="{{ project.title }} overview screenshot"
+          class="h-auto w-full object-cover"
+        >
+      </figure>
+    {% endif %}
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     PROBLEM / SOLUTION / RESULTS
+     ============================================================ -->
+{% if project.problem or project.solution or project.results %}
+
+<section class="border-y border-base-300 bg-base-200/40 py-16 sm:py-20">
+  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+
+      {% if project.problem %}
+        <article class="card border border-base-300 bg-base-100 shadow-sm">
+          <div class="card-body">
+
+            <span class="text-xs font-semibold uppercase tracking-[0.15em] text-secondary">
+              The Challenge
+            </span>
+
+            <h2 class="card-title mt-2 text-xl">
+              Problem
+            </h2>
+
+            <p class="text-sm leading-7 text-base-content/60">
+              {{ project.problem }}
+            </p>
+
+          </div>
+        </article>
+      {% endif %}
+
+
+      {% if project.solution %}
+        <article class="card border border-base-300 bg-base-100 shadow-sm">
+          <div class="card-body">
+
+            <span class="text-xs font-semibold uppercase tracking-[0.15em] text-primary">
+              The Approach
+            </span>
+
+            <h2 class="card-title mt-2 text-xl">
+              Solution
+            </h2>
+
+            <p class="text-sm leading-7 text-base-content/60">
+              {{ project.solution }}
+            </p>
+
+          </div>
+        </article>
+      {% endif %}
+
+
+      {% if project.results %}
+        <article class="card border border-base-300 bg-base-100 shadow-sm">
+          <div class="card-body">
+
+            <span class="text-xs font-semibold uppercase tracking-[0.15em] text-success">
+              The Outcome
+            </span>
+
+            <h2 class="card-title mt-2 text-xl">
+              Results
+            </h2>
+
+            <p class="text-sm leading-7 text-base-content/60">
+              {{ project.results }}
+            </p>
+
+          </div>
+        </article>
+      {% endif %}
+
+    </div>
+
+  </div>
+</section>
+
+{% endif %}
+
+
+<!-- ============================================================
+     PROJECT OVERVIEW
+     ============================================================ -->
+{% if project.description %}
+
+<section class="py-16 sm:py-20 lg:py-24">
+  <div class="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
+
+    <span class="text-xs font-semibold uppercase tracking-[0.15em] text-primary">
+      About the Project
+    </span>
+
+    <h2 class="mt-3 text-3xl font-bold tracking-tight text-base-content sm:text-4xl">
+      Overview
+    </h2>
+
+    <div class="mt-6 text-base leading-8 text-base-content/70">
+      {{ project.description }}
+    </div>
+
+  </div>
+</section>
+
+{% endif %}
+
+
+<!-- ============================================================
+     SCREENSHOTS
+     ============================================================ -->
+{% if project.images %}
+
+<section class="border-y border-base-300 bg-base-200/40 py-16 sm:py-20 lg:py-24">
+  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+
+    <div class="mb-10">
+      <span class="text-xs font-semibold uppercase tracking-[0.15em] text-primary">
+        Visual Tour
+      </span>
+
+      <h2 class="mt-3 text-3xl font-bold tracking-tight text-base-content sm:text-4xl">
+        Screenshots
+      </h2>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2">
+
+      {% for image in project.images %}
+
+        <figure class="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-sm">
+
+          <img
+            src="{{ image.image_url }}"
+            alt="{{ image.alt_text or project.title }}"
+            loading="lazy"
+            class="h-auto w-full object-cover transition-transform duration-500 hover:scale-[1.02]"
+          >
+
+        </figure>
+
+      {% endfor %}
+
+    </div>
+
+  </div>
+</section>
+
+{% endif %}
+
+
+<!-- ============================================================
+     FINAL CTA
+     ============================================================ -->
+<section class="py-20 text-center sm:py-28">
+  <div class="mx-auto max-w-2xl px-4 sm:px-6">
+
+    <h2 class="text-3xl font-bold tracking-tight text-base-content sm:text-4xl">
+      Have a similar problem to solve?
+    </h2>
+
+    <p class="mx-auto mt-4 max-w-xl text-base leading-7 text-base-content/60">
+      Let's talk about what you're trying to build and how software can help.
+    </p>
+
+    <a
+      href="{{ url_for('contact.index') }}"
+      class="btn btn-secondary btn-lg mt-8"
+    >
+      Start a Project
+    </a>
+
+  </div>
+</section>
+
+{% endblock %}

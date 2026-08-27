@@ -1,0 +1,11 @@
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "{{ site_name }}",
+  "url": "{{ site_url }}",
+  "logo": "{{ site_url }}/static/images/brand/logo.svg"
+}
+</script>
+{% endblock %}

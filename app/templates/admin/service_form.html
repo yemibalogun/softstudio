@@ -1,0 +1,58 @@
+{% extends "admin/_admin_base.html" %}
+{% from "components/admin_form_field.html" import afield %}
+
+{% block title %}{{ "Edit" if service else "New" }} Service — Admin{% endblock %}
+
+{% block admin_content %}
+
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-3xl font-bold">
+      {{ "Edit Service" if service else "New Service" }}
+    </h1>
+    <p class="mt-1 text-base-content/60">
+      {{ "Update the service details and information." if service else "Add a new service to your website." }}
+    </p>
+  </div>
+
+  <a
+    href="{{ url_for('admin.services_list') }}"
+    class="btn btn-ghost btn-sm"
+  >
+    ← Back to Services
+  </a>
+</div>
+
+<form method="POST" class="card border border-base-300 bg-base-200 shadow-sm">
+  {{ form.hidden_tag() }}
+
+  <div class="card-body">
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {{ afield(form.title) }}
+      {{ afield(form.slug) }}
+    </div>
+
+    {{ afield(form.summary) }}
+    {{ afield(form.description) }}
+
+    {{ afield(form.problems_solved) }}
+    {{ afield(form.process_steps) }}
+    {{ afield(form.technologies) }}
+    {{ afield(form.expected_outcomes) }}
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {{ afield(form.display_order) }}
+      {{ afield(form.published) }}
+    </div>
+
+    <div class="mt-4">
+      <button type="submit" class="btn btn-primary btn-lg">
+        {{ "Save Changes" if service else "Create Service" }}
+      </button>
+    </div>
+
+  </div>
+</form>
+
+{% endblock %}

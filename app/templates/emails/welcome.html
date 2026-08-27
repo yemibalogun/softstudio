@@ -1,0 +1,14 @@
+{% extends "emails/_base.html" %}
+{% from "emails/_button.html" import email_button %}
+{% block subject %}Welcome to {{ site_name }}{% endblock %}
+{% block body %}
+<h1 style="font-size:22px; margin:0 0 16px; color:#F5F7FA;">Welcome, {{ user.full_name.split(' ')[0] }}.</h1>
+<p style="font-size:15px; line-height:1.6; color:#9CA3AF; margin:0 0 16px;">
+  Your account at {{ site_name }} is ready. From here you can browse applications,
+  explore courses, or get in touch about a custom project.
+</p>
+{{ email_button(site_url + "/courses", "Explore Courses") }}
+<p style="font-size:13px; line-height:1.6; color:#6B7280; margin:24px 0 0;">
+  If you didn't create this account, you can safely ignore this email.
+</p>
+{% endblock %}

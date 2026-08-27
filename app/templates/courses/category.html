@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }} Courses — {{ site_name }}{% endblock %}
+
+{% block meta_description %}
+{{ category.description or (category.name ~ ' courses.') }}
+{% endblock %}
+
+{% block content %}
+
+<section class="py-16 sm:py-20 lg:py-24">
+  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+
+    {% set crumbs = [
+      ("Courses", url_for('courses.index')),
+      (category.name, None)
+    ] %}
+
+    {% include "components/breadcrumbs.html" %}
+
+
+    <!-- ========================================================
+         CATEGORY HEADER
+         ======================================================== -->
+    <header class="mt-8 mb-12 max-w-3xl">
+
+      <span
+        class="text-xs font-semibold uppercase tracking-[0.18em] text-primary"
+      >
+        Course Category
+      </span>
+
+      <h1
+        class="mt-3 text-3xl font-bold tracking-tight text-base-content sm:text-4xl lg:text-5xl"
+      >
+        {{ category.name }} Courses
+      </h1>
+
+      {% if category.description %}
+        <p class="mt-4 text-base leading-7 text-base-content/60 sm:text-lg">
+          {{ category.description }}
+        </p>
+      {% endif %}
+
+    </header>
+
+
+    <!-- ========================================================
+         COURSES
+         ======================================================== -->
+    {% if courses %}
+
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+
+        {% for course in courses %}
+          {% include "components/course_card.html" %}
+        {% endfor %}
+
+      </div>
+
+    {% else %}
+
+      {% include "components/empty_state.html" %}
+
+    {% endif %}
+
+  </div>
+</section>
+
+{% endblock %}

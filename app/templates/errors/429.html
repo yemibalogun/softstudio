@@ -1,0 +1,13 @@
+{% extends "errors/_error_base.html" %}
+
+{% block title %}429 — Too Many Requests{% endblock %}
+
+{% block error_code %}429{% endblock %}
+
+{% block error_title %}
+Slow down a little.
+{% endblock %}
+
+{% block error_message %}
+You've made too many requests in a short period. Please wait a moment and try again.
+{% endblock %}

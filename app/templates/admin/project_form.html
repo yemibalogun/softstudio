@@ -1,0 +1,219 @@
+{% extends "admin/_admin_base.html" %}
+{% from "components/admin_form_field.html" import afield %}
+
+{% block title %}{{ "Edit" if project else "New" }} Project — Admin{% endblock %}
+
+{% block admin_content %}
+
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-3xl font-bold">
+      {{ "Edit Project" if project else "New Project" }}
+    </h1>
+    <p class="mt-1 text-base-content/60">
+      {{ "Update the project details and presentation." if project else "Add a new project to your portfolio." }}
+    </p>
+  </div>
+
+  <a
+    href="{{ url_for('admin.projects_list') }}"
+    class="btn btn-ghost btn-sm"
+  >
+    ← Back to Projects
+  </a>
+</div>
+
+<form method="POST" class="card border border-base-300 bg-base-200 shadow-sm">
+  {{ form.hidden_tag() }}
+
+  <div class="card-body">
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {{ afield(form.title) }}
+      {{ afield(form.slug) }}
+    </div>
+
+    {{ afield(form.short_description) }}
+    {{ afield(form.description) }}
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      {{ afield(form.problem) }}
+      {{ afield(form.solution) }}
+      {{ afield(form.results) }}
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {{ afield(form.category) }}
+      {{ afield(form.status) }}
+    </div>
+
+    <div class="flex flex-wrap gap-6">
+      {{ afield(form.featured) }}
+      {{ afield(form.published) }}
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {{ afield(form.thumbnail) }}
+      {{ afield(form.hero_image) }}
+    </div>
+
+    {{ afield(form.demo_video) }}
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      {{ afield(form.live_url) }}
+      {{ afield(form.github_url) }}
+      {{ afield(form.documentation_url) }}
+    </div>
+
+    {{ afield(form.technologies_csv) }}
+    {{ afield(form.display_order) }}
+
+    <div class="divider">SEO</div>
+
+    {{ afield(form.meta_title) }}
+    {{ afield(form.meta_description) }}
+    {{ afield(form.og_image) }}
+
+    <div class="mt-4">
+      <button type="submit" class="btn btn-primary btn-lg">
+        {{ "Save Changes" if project else "Create Project" }}
+      </button>
+    </div>
+
+  </div>
+</form>
+
+{% if project %}
+
+<div class="card mt-8 border border-base-300 bg-base-200 shadow-sm">
+
+  <div class="card-body">
+
+    <div class="mb-4">
+      <h2 class="card-title">Gallery Images</h2>
+      <p class="text-sm text-base-content/60">
+        Manage the images associated with this project.
+      </p>
+    </div>
+
+    {% if project.images %}
+
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+
+      {% for image in project.images %}
+
+      <div class="card overflow-hidden border border-base-300 bg-base-100">
+
+        <figure class="aspect-video">
+          <img
+            src="{{ image.image_url }}"
+            alt="{{ image.alt_text or '' }}"
+            class="h-full w-full object-cover"
+            loading="lazy"
+          >
+        </figure>
+
+        <div class="card-body p-4">
+
+          {% if image.alt_text %}
+          <p class="text-sm text-base-content/60">
+            {{ image.alt_text }}
+          </p>
+          {% endif %}
+
+          <form
+            method="POST"
+            action="{{ url_for('admin.project_image_delete', project_id=project.id, image_id=image.id) }}"
+          >
+            <input
+              type="hidden"
+              name="csrf_token"
+              value="{{ csrf_token() }}"
+            >
+
+            <button
+              type="submit"
+              class="btn btn-error btn-outline btn-sm w-full"
+              onclick="return confirm('Remove this gallery image?');"
+            >
+              Remove
+            </button>
+          </form>
+
+        </div>
+      </div>
+
+      {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="alert alert-info">
+      <span>No gallery images have been added to this project yet.</span>
+    </div>
+
+    {% endif %}
+
+    <div class="divider"></div>
+
+    <h3 class="text-lg font-semibold">Add Gallery Image</h3>
+
+    <form
+      method="POST"
+      action="{{ url_for('admin.project_image_add', project_id=project.id) }}"
+      class="mt-2"
+    >
+      <input
+        type="hidden"
+        name="csrf_token"
+        value="{{ csrf_token() }}"
+      >
+
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+
+        <div class="form-control">
+          <label class="label" for="image_url">
+            <span class="label-text font-medium">Image URL</span>
+          </label>
+
+          <input
+            type="url"
+            id="image_url"
+            name="image_url"
+            class="input input-bordered w-full"
+            placeholder="https://example.com/image.jpg"
+            required
+          >
+        </div>
+
+        <div class="form-control">
+          <label class="label" for="alt_text">
+            <span class="label-text font-medium">Alt text</span>
+          </label>
+
+          <input
+            type="text"
+            id="alt_text"
+            name="alt_text"
+            class="input input-bordered w-full"
+            placeholder="Describe the image"
+          >
+        </div>
+
+      </div>
+
+      <div class="mt-4">
+        <button type="submit" class="btn btn-secondary">
+          Add Image
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

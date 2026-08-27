@@ -1,0 +1,440 @@
+{% extends "admin/_admin_base.html" %}
+{% from "components/admin_form_field.html" import afield %}
+
+{% block title %}{{ "Edit" if course else "New" }} Course — Admin{% endblock %}
+
+{% block admin_content %}
+
+<!-- ============================================================
+     PAGE HEADER
+     ============================================================ -->
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight text-base-content sm:text-3xl">
+      {{ "Edit Course" if course else "New Course" }}
+    </h1>
+
+    <p class="mt-1 text-sm text-base-content/60">
+      {{ "Update the course information and curriculum."
+         if course
+         else "Create a new course for your training platform." }}
+    </p>
+  </div>
+
+  <a
+    href="{{ url_for('admin.courses_list') }}"
+    class="btn btn-ghost btn-sm"
+  >
+    ← Back to Courses
+  </a>
+
+</div>
+
+
+<!-- ============================================================
+     COURSE INFORMATION FORM
+     ============================================================ -->
+<form
+  method="POST"
+  class="card mb-8 border border-base-300 bg-base-100 shadow-sm"
+>
+  {{ form.hidden_tag() }}
+
+  <div class="card-body gap-6">
+
+    <!-- Basic information -->
+    <div>
+      <h2 class="card-title text-lg">
+        Course Information
+      </h2>
+
+      <p class="mt-1 text-sm text-base-content/60">
+        Configure the course title, description, pricing, and visibility.
+      </p>
+    </div>
+
+
+    <div class="grid gap-6 md:grid-cols-2">
+      {{ afield(form.title) }}
+      {{ afield(form.slug) }}
+    </div>
+
+
+    {{ afield(form.short_description) }}
+
+    {{ afield(form.description) }}
+
+
+    <!-- Media -->
+    <div class="grid gap-6 md:grid-cols-2">
+      {{ afield(form.thumbnail) }}
+      {{ afield(form.promo_video_url) }}
+    </div>
+
+
+    <!-- Pricing -->
+    <div>
+      <h3 class="mb-4 text-base font-semibold text-base-content">
+        Pricing
+      </h3>
+
+      <div class="grid gap-6 md:grid-cols-3">
+        {{ afield(form.price) }}
+        {{ afield(form.discount_price) }}
+        {{ afield(form.currency) }}
+      </div>
+    </div>
+
+
+    <!-- Classification -->
+    <div class="grid gap-6 md:grid-cols-2">
+      {{ afield(form.difficulty) }}
+      {{ afield(form.category_id) }}
+    </div>
+
+
+    <!-- Visibility -->
+    <div class="rounded-box border border-base-300 bg-base-200/40 p-4">
+      <div class="flex flex-wrap gap-6">
+        {{ afield(form.featured) }}
+        {{ afield(form.published) }}
+      </div>
+    </div>
+
+
+    <!-- Learning information -->
+    <div>
+      <h3 class="mb-4 text-base font-semibold text-base-content">
+        Learning Information
+      </h3>
+
+      <div class="space-y-6">
+        {{ afield(form.learning_objectives) }}
+        {{ afield(form.requirements) }}
+        {{ afield(form.target_audience) }}
+      </div>
+    </div>
+
+
+    <!-- ========================================================
+         SEO
+         ======================================================== -->
+    <div class="divider">
+      SEO Settings
+    </div>
+
+    <div>
+      <h2 class="text-lg font-semibold text-base-content">
+        Search Engine Optimization
+      </h2>
+
+      <p class="mt-1 text-sm text-base-content/60">
+        Configure how this course appears in search engines and
+        when shared on social platforms.
+      </p>
+    </div>
+
+    {{ afield(form.meta_title) }}
+    {{ afield(form.meta_description) }}
+    {{ afield(form.og_image) }}
+
+
+    <!-- Form actions -->
+    <div class="card-actions mt-2 justify-end">
+
+      <a
+        href="{{ url_for('admin.courses_list') }}"
+        class="btn btn-ghost"
+      >
+        Cancel
+      </a>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+      >
+        {{ "Save Changes" if course else "Create Course" }}
+      </button>
+
+    </div>
+
+  </div>
+</form>
+
+
+{% if course %}
+
+<!-- ============================================================
+     CURRICULUM MANAGEMENT
+     ============================================================ -->
+<div class="card border border-base-300 bg-base-100 shadow-sm">
+
+  <div class="card-body">
+
+    <div>
+      <h2 class="card-title text-xl">
+        Curriculum
+      </h2>
+
+      <p class="mt-1 text-sm text-base-content/60">
+        Manage course sections and lessons.
+      </p>
+    </div>
+
+
+    <!-- ========================================================
+         EXISTING SECTIONS
+         ======================================================== -->
+    <div class="mt-2 space-y-4">
+
+      {% for section in course.sections %}
+
+        <div class="rounded-box border border-base-300 bg-base-200/40">
+
+          <!-- Section header -->
+          <div class="flex flex-col gap-3 border-b border-base-300 p-4 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+              <h3 class="font-semibold text-base-content">
+                {{ section.title }}
+              </h3>
+
+              <p class="mt-1 text-xs text-base-content/50">
+                {{ section.lessons|length }} lesson{{ 's' if section.lessons|length != 1 else '' }}
+              </p>
+            </div>
+
+
+            <!-- Delete section -->
+            <form
+              method="POST"
+              action="{{ url_for('admin.section_delete', course_id=course.id, section_id=section.id) }}"
+              onsubmit="return confirm('Delete this section and all its lessons?');"
+            >
+
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              >
+
+              <button
+                type="submit"
+                class="btn btn-ghost btn-sm text-error"
+              >
+                Delete Section
+              </button>
+
+            </form>
+
+          </div>
+
+
+          <!-- ==================================================
+               LESSON LIST
+               ================================================== -->
+          {% if section.lessons %}
+
+            <ul class="divide-y divide-base-300">
+
+              {% for lesson in section.lessons %}
+
+                <li class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+
+                  <div class="min-w-0">
+
+                    <div class="flex flex-wrap items-center gap-2">
+
+                      <span class="font-medium text-base-content">
+                        {{ lesson.title }}
+                      </span>
+
+                      {% if lesson.is_free_preview %}
+                        <span class="badge badge-success badge-sm">
+                          Free Preview
+                        </span>
+                      {% endif %}
+
+                      {% if not lesson.published %}
+                        <span class="badge badge-warning badge-sm">
+                          Draft
+                        </span>
+                      {% endif %}
+
+                    </div>
+
+                  </div>
+
+
+                  <!-- Delete lesson -->
+                  <form
+                    method="POST"
+                    action="{{ url_for('admin.lesson_delete', course_id=course.id, lesson_id=lesson.id) }}"
+                    onsubmit="return confirm('Delete this lesson?');"
+                    class="shrink-0"
+                  >
+
+                    <input
+                      type="hidden"
+                      name="csrf_token"
+                      value="{{ csrf_token() }}"
+                    >
+
+                    <button
+                      type="submit"
+                      class="btn btn-ghost btn-sm text-error"
+                    >
+                      Remove
+                    </button>
+
+                  </form>
+
+                </li>
+
+              {% endfor %}
+
+            </ul>
+
+          {% else %}
+
+            <div class="p-6 text-center text-sm text-base-content/50">
+              No lessons have been added to this section yet.
+            </div>
+
+          {% endif %}
+
+
+          <!-- ==================================================
+               ADD LESSON
+               ================================================== -->
+          <div class="border-t border-base-300 p-4">
+
+            <details class="group">
+
+              <summary class="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-primary">
+
+                <span class="transition-transform group-open:rotate-45">
+                  +
+                </span>
+
+                Add Lesson
+
+              </summary>
+
+
+              <form
+                method="POST"
+                action="{{ url_for('admin.lesson_add', course_id=course.id, section_id=section.id) }}"
+                class="mt-6 space-y-6"
+              >
+
+                {{ lesson_form.hidden_tag() }}
+
+
+                <div class="grid gap-6 md:grid-cols-2">
+                  {{ afield(lesson_form.title) }}
+                  {{ afield(lesson_form.slug) }}
+                </div>
+
+
+                {{ afield(lesson_form.description) }}
+
+                {{ afield(lesson_form.video_url) }}
+
+
+                <div class="grid gap-6 md:grid-cols-2">
+                  {{ afield(lesson_form.duration_seconds) }}
+                  {{ afield(lesson_form.display_order) }}
+                </div>
+
+
+                <div class="rounded-box border border-base-300 bg-base-200/40 p-4">
+
+                  <div class="flex flex-wrap gap-6">
+                    {{ afield(lesson_form.is_free_preview) }}
+                    {{ afield(lesson_form.published) }}
+                  </div>
+
+                </div>
+
+
+                <button
+                  type="submit"
+                  class="btn btn-secondary btn-sm"
+                >
+                  Add Lesson
+                </button>
+
+              </form>
+
+            </details>
+
+          </div>
+
+        </div>
+
+      {% endfor %}
+
+    </div>
+
+
+    <!-- ========================================================
+         ADD SECTION
+         ======================================================== -->
+    <div class="divider">
+      Add Section
+    </div>
+
+    <details class="group">
+
+      <summary class="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-primary">
+
+        <span class="transition-transform group-open:rotate-45">
+          +
+        </span>
+
+        Add Section
+
+      </summary>
+
+
+      <form
+        method="POST"
+        action="{{ url_for('admin.section_add', course_id=course.id) }}"
+        class="mt-6"
+      >
+
+        {{ section_form.hidden_tag() }}
+
+
+        <div class="flex flex-col gap-4 md:flex-row md:items-end">
+
+          <div class="flex-1">
+            {{ afield(section_form.title) }}
+          </div>
+
+          <div class="w-full md:w-48">
+            {{ afield(section_form.display_order) }}
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+          >
+            Add Section
+          </button>
+
+        </div>
+
+      </form>
+
+    </details>
+
+  </div>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

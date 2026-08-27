@@ -1,0 +1,11 @@
+You're enrolled
+
+Hi {{ user.full_name.split(' ')[0] }}, you now have full access to
+{{ course.title }} — {{ course.lesson_count }} lessons across
+{{ course.sections|length }} sections.
+
+Start course: {{ course_url }}
+
+—
+{{ site_name }}
+{{ site_url }}

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — {{ site_name }}{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+
+<section class="py-16 sm:py-20 lg:py-24">
+
+  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+
+    <!-- ========================================================
+         PAGE HEADER
+         ======================================================== -->
+    <header class="mb-10">
+      <span
+        class="text-xs font-semibold uppercase tracking-[0.18em] text-primary"
+      >
+        Learning Dashboard
+      </span>
+
+      <h1
+        class="mt-3 text-3xl font-bold tracking-tight text-base-content sm:text-4xl"
+      >
+        Welcome back, {{ current_user.full_name.split(' ')[0] }}.
+      </h1>
+
+      <p class="mt-3 max-w-2xl text-base leading-7 text-base-content/60">
+        Pick up where you left off and continue building your skills.
+      </p>
+    </header>
+
+
+    <!-- ========================================================
+         COURSE PROGRESS
+         ======================================================== -->
+    {% if course_progress %}
+
+      <div class="mb-8">
+        <h2 class="text-2xl font-bold tracking-tight text-base-content">
+          Continue Learning
+        </h2>
+
+        <p class="mt-2 text-base text-base-content/60">
+          Your enrolled courses and current progress.
+        </p>
+      </div>
+
+
+      <div class="grid gap-6 md:grid-cols-2">
+
+        {% for entry in course_progress %}
+
+          <article
+            class="card border border-base-300 bg-base-100 shadow-sm transition-shadow duration-300 hover:shadow-lg"
+          >
+
+            <div class="card-body">
+
+              <!-- Course title -->
+              <h3 class="card-title text-xl">
+                {{ entry.course.title }}
+              </h3>
+
+
+              <!-- ==================================================
+                   PROGRESS BAR
+
+                   The percentage comes from the existing backend.
+                   Clamp it visually to 0–100 so malformed values
+                   cannot create an oversized progress indicator.
+                   ================================================== -->
+              <div class="mt-5">
+
+                <div class="mb-2 flex items-center justify-between gap-4">
+
+                  <span class="text-sm font-medium text-base-content/70">
+                    Course progress
+                  </span>
+
+                  <span class="text-sm font-semibold text-primary">
+                    {{ entry.percent }}%
+                  </span>
+
+                </div>
+
+                <progress
+                  class="progress progress-primary h-3 w-full"
+                  value="{{ [[entry.percent, 0]|max, 100]|min }}"
+                  max="100"
+                  aria-label="{{ entry.percent }}% complete"
+                ></progress>
+
+              </div>
+
+
+              <!-- Completion statistics -->
+              <p class="mt-3 text-sm text-base-content/55">
+                {{ entry.completed }} / {{ entry.total }} lessons complete
+              </p>
+
+
+              <!-- Continue button -->
+              <div class="mt-5">
+
+                <a
+                  href="{{ url_for('learning.course_overview', course_slug=entry.course.slug) }}"
+                  class="btn btn-secondary btn-sm"
+                >
+                  Continue Course
+                  <span aria-hidden="true">→</span>
+                </a>
+
+              </div>
+
+            </div>
+
+          </article>
+
+        {% endfor %}
+
+      </div>
+
+    {% else %}
+
+      <!-- No enrolled courses -->
+      {% include "components/empty_state.html" %}
+
+    {% endif %}
+
+  </div>
+
+</section>
+
+{% endblock %}

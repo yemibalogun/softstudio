@@ -1,0 +1,14 @@
+{# Analytics scripts are never loaded on initial render. They load only
+   after the visitor grants analytics consent via the cookie banner,
+   per the site's cookie-consent policy. #}
+<script>
+  document.addEventListener("consent:analytics-granted", function () {
+    if (window.__analyticsLoaded) return;
+    window.__analyticsLoaded = true;
+    // Example integration point:
+    // var s = document.createElement('script');
+    // s.src = 'https://plausible.io/js/script.js';
+    // s.defer = true;
+    // document.head.appendChild(s);
+  }, { once: true });
+</script>

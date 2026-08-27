@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="flex min-h-[60vh] items-center py-20 sm:py-24">
+
+  <div class="mx-auto w-full max-w-2xl px-4 text-center sm:px-6 lg:px-8">
+
+    <!-- ========================================================
+         ERROR CODE
+         ======================================================== -->
+    <div
+      class="text-8xl font-black leading-none tracking-tight text-secondary sm:text-9xl"
+      aria-hidden="true"
+    >
+      {% block error_code %}{% endblock %}
+    </div>
+
+
+    <!-- ========================================================
+         ERROR TITLE
+         ======================================================== -->
+    <h1
+      class="mt-6 text-3xl font-bold tracking-tight text-base-content sm:text-4xl"
+    >
+      {% block error_title %}{% endblock %}
+    </h1>
+
+
+    <!-- ========================================================
+         ERROR MESSAGE
+         ======================================================== -->
+    <p
+      class="mx-auto mt-4 max-w-xl text-base leading-7 text-base-content/60 sm:text-lg"
+    >
+      {% block error_message %}{% endblock %}
+    </p>
+
+
+    <!-- ========================================================
+         RETURN HOME
+         ======================================================== -->
+    <div class="mt-8">
+      <a
+        href="{{ url_for('main.index') }}"
+        class="btn btn-secondary"
+      >
+        Back Home
+      </a>
+    </div>
+
+  </div>
+
+</section>
+
+{% endblock %}

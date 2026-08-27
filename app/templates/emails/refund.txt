@@ -1,0 +1,14 @@
+Refund processed
+
+Hi {{ user.full_name.split(' ')[0] }}, your refund for {{ course.title }}
+has been processed.
+
+Amount refunded: {{ payment.currency }} {{ "%.2f"|format(payment.amount) }}
+Reference: {{ payment.provider_reference }}
+
+Your access to this course has been revoked in line with our Refund Policy:
+{{ site_url }}/refunds
+
+—
+{{ site_name }}
+{{ site_url }}

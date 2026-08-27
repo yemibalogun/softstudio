@@ -1,0 +1,225 @@
+<footer class="border-t border-base-300 bg-base-200/50">
+  <div class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+
+      <!-- Brand -->
+      <div class="sm:col-span-2 lg:col-span-1">
+
+        <a
+          href="{{ url_for('main.index') }}"
+          class="group inline-flex items-center gap-3"
+          aria-label="{{ site_name }} home"
+        >
+          <img
+            src="{{ url_for('static', filename='images/brand/jaybalo_logo.png') }}"
+            alt="{{ site_name }} logo"
+            class="h-9 w-auto transition-transform duration-200 group-hover:scale-105"
+          >
+
+          <span class="text-lg font-bold tracking-tight">
+            {{ site_name }}
+          </span>
+        </a>
+
+        <p class="mt-5 max-w-sm text-sm leading-6 text-base-content/65">
+          Custom software, business automation, and practical developer
+          training — built and taught by someone who ships production code.
+        </p>
+
+      </div>
+
+      <!-- Explore -->
+      <div>
+        <h3 class="text-sm font-semibold uppercase tracking-wider text-base-content">
+          Explore
+        </h3>
+
+        <ul class="mt-5 space-y-3">
+
+          <li>
+            <a
+              href="{{ url_for('projects.index') }}"
+              class="text-sm text-base-content/65 transition-colors hover:text-primary"
+            >
+              Applications
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="{{ url_for('courses.index') }}"
+              class="text-sm text-base-content/65 transition-colors hover:text-primary"
+            >
+              Courses
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="{{ url_for('services.index') }}"
+              class="text-sm text-base-content/65 transition-colors hover:text-primary"
+            >
+              Services
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="{{ url_for('blog.index') }}"
+              class="text-sm text-base-content/65 transition-colors hover:text-primary"
+            >
+              Blog
+            </a>
+          </li>
+
+        </ul>
+      </div>
+
+      <!-- Company -->
+      <div>
+        <h3 class="text-sm font-semibold uppercase tracking-wider text-base-content">
+          Company
+        </h3>
+
+        <ul class="mt-5 space-y-3">
+
+          <li>
+            <a
+              href="{{ url_for('main.about') }}"
+              class="text-sm text-base-content/65 transition-colors hover:text-primary"
+            >
+              About
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="{{ url_for('contact.index') }}"
+              class="text-sm text-base-content/65 transition-colors hover:text-primary"
+            >
+              Contact
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="{{ url_for('contact.index') }}"
+              class="text-sm text-base-content/65 transition-colors hover:text-primary"
+            >
+              Start a Project
+            </a>
+          </li>
+
+        </ul>
+      </div>
+
+      <!-- Legal -->
+      <div>
+        <h3 class="text-sm font-semibold uppercase tracking-wider text-base-content">
+          Legal
+        </h3>
+
+        <ul class="mt-5 space-y-3">
+
+          <li>
+            <a
+              href="{{ url_for('legal.privacy') }}"
+              class="text-sm text-base-content/65 transition-colors hover:text-primary"
+            >
+              Privacy Policy
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="{{ url_for('legal.cookies') }}"
+              class="text-sm text-base-content/65 transition-colors hover:text-primary"
+            >
+              Cookie Policy
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="{{ url_for('legal.terms') }}"
+              class="text-sm text-base-content/65 transition-colors hover:text-primary"
+            >
+              Terms
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="{{ url_for('legal.refunds') }}"
+              class="text-sm text-base-content/65 transition-colors hover:text-primary"
+            >
+              Refund Policy
+            </a>
+          </li>
+
+          <!--
+            This data attribute is required by initCookieConsent()
+            in main.js. Do not remove it during the UI migration.
+          -->
+          <li>
+            <a
+              href="#"
+              data-open-cookie-settings
+              class="text-sm text-base-content/65 transition-colors hover:text-primary"
+            >
+              Cookie Settings
+            </a>
+          </li>
+
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Footer bottom -->
+    <div class="mt-12 flex flex-col gap-5 border-t border-base-300 pt-6 sm:flex-row sm:items-center sm:justify-between">
+
+      <span class="text-xs text-base-content/50">
+        &copy; {{ now_year|default(2026) }} {{ site_name }}. All rights reserved.
+      </span>
+
+      <!-- Social links -->
+      <div class="flex items-center gap-5">
+
+        <a
+          href="https://github.com/yemibalogun"
+          aria-label="GitHub"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-xs font-medium text-base-content/60 transition-colors hover:text-primary"
+        >
+          GitHub
+        </a>
+
+        <a
+          href="https://www.linkedin.com/in/olayemi-balogun-a07a12176/"
+          aria-label="LinkedIn"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-xs font-medium text-base-content/60 transition-colors hover:text-primary"
+        >
+          LinkedIn
+        </a>
+
+        <a
+          href="https://youtube.com/"
+          aria-label="YouTube"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-xs font-medium text-base-content/60 transition-colors hover:text-primary"
+        >
+          YouTube
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+</footer>

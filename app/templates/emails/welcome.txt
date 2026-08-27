@@ -1,0 +1,12 @@
+Welcome, {{ user.full_name.split(' ')[0] }}.
+
+Your account at {{ site_name }} is ready. From here you can browse
+applications, explore courses, or get in touch about a custom project.
+
+Explore courses: {{ site_url }}/courses
+
+If you didn't create this account, you can safely ignore this email.
+
+—
+{{ site_name }}
+{{ site_url }}

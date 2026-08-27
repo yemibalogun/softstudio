@@ -1,0 +1,81 @@
+<article
+  class="card h-full overflow-hidden border border-base-300 bg-base-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-secondary/40 hover:shadow-xl"
+>
+  <!-- Course thumbnail -->
+  {% if course.thumbnail %}
+    <figure class="aspect-video overflow-hidden bg-base-200">
+      <img
+        src="{{ course.thumbnail }}"
+        alt="{{ course.title }} thumbnail"
+        loading="lazy"
+        class="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+      >
+    </figure>
+  {% else %}
+    <!-- Fallback keeps all course cards the same height when no image exists. -->
+    <div class="flex aspect-video items-center justify-center bg-base-200">
+      <span class="text-sm font-medium text-base-content/30">
+        {{ course.title }}
+      </span>
+    </div>
+  {% endif %}
+
+  <div class="card-body">
+
+    <!-- Course metadata -->
+    <p class="text-xs font-semibold uppercase tracking-[0.12em] text-primary">
+      {{ course.difficulty|title }}
+      <span class="mx-1 text-base-content/30">·</span>
+      {{ course.lesson_count }} lessons
+    </p>
+
+    <!-- Course title -->
+    <h3 class="card-title mt-1 text-xl">
+      {{ course.title }}
+    </h3>
+
+    <!-- Course description -->
+    <p class="text-sm leading-6 text-base-content/60">
+      {{ course.short_description }}
+    </p>
+
+    <!-- Price and action -->
+    <div class="mt-auto flex items-center justify-between gap-4 pt-5">
+
+      <!--
+        Keep the existing pricing logic exactly as supplied by Flask.
+        We only change the presentation classes.
+      -->
+      <div class="font-semibold text-base-content">
+
+        {% if course.discount_price %}
+
+          <span class="mr-1 text-sm font-normal text-base-content/40 line-through">
+            {{ course.currency }} {{ "%.0f"|format(course.price) }}
+          </span>
+
+          <span class="text-secondary">
+            {{ course.currency }} {{ "%.0f"|format(course.discount_price) }}
+          </span>
+
+        {% else %}
+
+          <span>
+            {{ course.currency }} {{ "%.0f"|format(course.price) }}
+          </span>
+
+        {% endif %}
+
+      </div>
+
+      <a
+        href="{{ url_for('courses.detail', slug=course.slug) }}"
+        class="btn btn-secondary btn-sm shrink-0"
+      >
+        View Course
+      </a>
+
+    </div>
+
+  </div>
+</article>

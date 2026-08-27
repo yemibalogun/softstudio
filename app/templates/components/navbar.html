@@ -1,0 +1,257 @@
+<header class="sticky top-0 z-50 border-b border-base-300/60 bg-base-100/90 backdrop-blur-xl">
+  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex min-h-16 items-center justify-between gap-4">
+
+      <!-- Brand -->
+      <a
+        href="{{ url_for('main.index') }}"
+        class="group flex shrink-0 items-center gap-3"
+        aria-label="{{ site_name }} home"
+      >
+        <img
+          src="{{ url_for('static', filename='images/brand/jaybalo_logo.png') }}"
+          alt="{{ site_name }} logo"
+          class="h-9 w-auto transition-transform duration-200 group-hover:scale-105"
+        >
+
+        <span class="hidden text-lg font-bold tracking-tight sm:inline">
+          {{ site_name }}
+        </span>
+      </a>
+
+      <!--
+        Desktop navigation.
+
+        The existing Jinja current_path checks are preserved so the
+        server still determines which page is currently active.
+      -->
+      <nav
+        class="hidden lg:block"
+        aria-label="Primary"
+      >
+        <ul class="flex items-center gap-1">
+
+          <li>
+            <a
+              href="{{ url_for('projects.index') }}"
+              class="rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 hover:bg-base-200 hover:text-primary {% if current_path.startswith('/projects') %}bg-base-200 text-primary{% else %}text-base-content/80{% endif %}"
+              {% if current_path.startswith('/projects') %}aria-current="page"{% endif %}
+            >
+              Applications
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="{{ url_for('courses.index') }}"
+              class="rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 hover:bg-base-200 hover:text-primary {% if current_path.startswith('/courses') %}bg-base-200 text-primary{% else %}text-base-content/80{% endif %}"
+              {% if current_path.startswith('/courses') %}aria-current="page"{% endif %}
+            >
+              Courses
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="{{ url_for('services.index') }}"
+              class="rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 hover:bg-base-200 hover:text-primary {% if current_path.startswith('/services') %}bg-base-200 text-primary{% else %}text-base-content/80{% endif %}"
+              {% if current_path.startswith('/services') %}aria-current="page"{% endif %}
+            >
+              Services
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="{{ url_for('blog.index') }}"
+              class="rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 hover:bg-base-200 hover:text-primary {% if current_path.startswith('/blog') %}bg-base-200 text-primary{% else %}text-base-content/80{% endif %}"
+              {% if current_path.startswith('/blog') %}aria-current="page"{% endif %}
+            >
+              Blog
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="{{ url_for('main.about') }}"
+              class="rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 hover:bg-base-200 hover:text-primary {% if current_path == '/about' %}bg-base-200 text-primary{% else %}text-base-content/80{% endif %}"
+              {% if current_path == '/about' %}aria-current="page"{% endif %}
+            >
+              About
+            </a>
+          </li>
+
+        </ul>
+      </nav>
+
+      <!-- Desktop actions + mobile menu button -->
+      <div class="flex items-center gap-2">
+
+        <!-- Authentication-dependent action -->
+        {% if current_user.is_authenticated %}
+
+          <a
+            href="{{ url_for('learning.dashboard') }}"
+            class="btn btn-sm btn-secondary hidden sm:inline-flex"
+          >
+            Dashboard
+          </a>
+
+        {% else %}
+
+          <a
+            href="{{ url_for('auth.login') }}"
+            class="btn btn-sm btn-secondary hidden sm:inline-flex"
+          >
+            Login
+          </a>
+
+        {% endif %}
+
+        <!-- Primary CTA -->
+        <a
+          href="{{ url_for('contact.index') }}"
+          class="btn btn-sm btn-primary hidden sm:inline-flex"
+        >
+          Start a Project
+        </a>
+
+        <!--
+          Mobile navigation toggle.
+
+          IMPORTANT:
+          data-nav-toggle, aria-expanded and aria-controls are retained
+          because your existing JavaScript uses these attributes.
+        -->
+        <button
+          type="button"
+          class="btn btn-square btn-ghost lg:hidden"
+          data-nav-toggle
+          aria-expanded="false"
+          aria-controls="mobile-nav-panel"
+          aria-label="Open menu"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <line x1="4" y1="7" x2="20" y2="7"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="17" x2="20" y2="17"></line>
+          </svg>
+        </button>
+
+      </div>
+    </div>
+  </div>
+</header>
+
+<!--
+  Mobile navigation panel.
+
+  The data-nav-panel attribute is intentionally preserved because
+  the existing navigation.js/main.js logic can continue controlling
+  this panel without any backend changes.
+-->
+<div
+  id="mobile-nav-panel"
+  data-nav-panel
+  class="border-b border-base-300 bg-base-100 shadow-lg lg:hidden"
+>
+  <div class="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6">
+
+    <nav aria-label="Mobile navigation">
+      <ul class="flex flex-col gap-1">
+
+        <li>
+          <a
+            href="{{ url_for('projects.index') }}"
+            class="block rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-base-200 hover:text-primary {% if current_path.startswith('/projects') %}bg-base-200 text-primary{% else %}text-base-content/80{% endif %}"
+            {% if current_path.startswith('/projects') %}aria-current="page"{% endif %}
+          >
+            Applications
+          </a>
+        </li>
+
+        <li>
+          <a
+            href="{{ url_for('courses.index') }}"
+            class="block rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-base-200 hover:text-primary {% if current_path.startswith('/courses') %}bg-base-200 text-primary{% else %}text-base-content/80{% endif %}"
+            {% if current_path.startswith('/courses') %}aria-current="page"{% endif %}
+          >
+            Courses
+          </a>
+        </li>
+
+        <li>
+          <a
+            href="{{ url_for('services.index') }}"
+            class="block rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-base-200 hover:text-primary {% if current_path.startswith('/services') %}bg-base-200 text-primary{% else %}text-base-content/80{% endif %}"
+            {% if current_path.startswith('/services') %}aria-current="page"{% endif %}
+          >
+            Services
+          </a>
+        </li>
+
+        <li>
+          <a
+            href="{{ url_for('blog.index') }}"
+            class="block rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-base-200 hover:text-primary {% if current_path.startswith('/blog') %}bg-base-200 text-primary{% else %}text-base-content/80{% endif %}"
+            {% if current_path.startswith('/blog') %}aria-current="page"{% endif %}
+          >
+            Blog
+          </a>
+        </li>
+
+        <li>
+          <a
+            href="{{ url_for('main.about') }}"
+            class="block rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-base-200 hover:text-primary {% if current_path == '/about' %}bg-base-200 text-primary{% else %}text-base-content/80{% endif %}"
+            {% if current_path == '/about' %}aria-current="page"{% endif %}
+          >
+            About
+          </a>
+        </li>
+
+      </ul>
+    </nav>
+
+    <!-- Mobile actions -->
+    <div class="mt-5 grid gap-3 border-t border-base-300 pt-5 sm:grid-cols-2">
+
+      {% if current_user.is_authenticated %}
+
+        <a
+          href="{{ url_for('learning.dashboard') }}"
+          class="btn btn-secondary w-full"
+        >
+          Dashboard
+        </a>
+
+      {% else %}
+
+        <a
+          href="{{ url_for('auth.login') }}"
+          class="btn btn-secondary w-full"
+        >
+          Login
+        </a>
+
+      {% endif %}
+
+      <a
+        href="{{ url_for('contact.index') }}"
+        class="btn btn-primary w-full"
+      >
+        Start a Project
+      </a>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,12 @@
+Payment confirmed
+
+Hi {{ user.full_name.split(' ')[0] }}, we've confirmed your payment for {{ course.title }}.
+
+Amount: {{ payment.currency }} {{ "%.2f"|format(payment.amount) }}
+Reference: {{ payment.provider_reference }}
+
+Start learning: {{ site_url }}/dashboard/courses/{{ course.slug }}
+
+—
+{{ site_name }}
+{{ site_url }}

@@ -1,0 +1,173 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}Projects — Admin{% endblock %}
+
+{% block admin_content %}
+
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-3xl font-bold">Projects</h1>
+    <p class="mt-1 text-base-content/60">
+      Manage the projects displayed in your portfolio.
+    </p>
+  </div>
+
+  <a
+    href="{{ url_for('admin.project_create') }}"
+    class="btn btn-primary btn-sm"
+  >
+    + New Project
+  </a>
+</div>
+
+{% if projects %}
+
+<div class="card border border-base-300 bg-base-200 shadow-sm">
+  <div class="card-body p-0">
+
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Published</th>
+            <th>Featured</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for project in projects %}
+          <tr>
+
+            <td>
+              <div class="font-semibold">
+                {{ project.title }}
+              </div>
+            </td>
+
+            <td>
+              {% if project.status == 'live' %}
+                <span class="badge badge-success">
+                  {{ project.status }}
+                </span>
+              {% else %}
+                <span class="badge badge-info">
+                  {{ project.status }}
+                </span>
+              {% endif %}
+            </td>
+
+            <td>
+              <form
+                method="POST"
+                action="{{ url_for('admin.project_toggle_published', project_id=project.id) }}"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                >
+
+                {% if project.published %}
+                  <button
+                    type="submit"
+                    class="badge badge-success gap-1 cursor-pointer"
+                    title="Click to unpublish"
+                  >
+                    ✓ Yes
+                  </button>
+                {% else %}
+                  <button
+                    type="submit"
+                    class="badge badge-ghost gap-1 cursor-pointer"
+                    title="Click to publish"
+                  >
+                    No
+                  </button>
+                {% endif %}
+              </form>
+            </td>
+
+            <td>
+              <form
+                method="POST"
+                action="{{ url_for('admin.project_toggle_featured', project_id=project.id) }}"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                >
+
+                {% if project.featured %}
+                  <button
+                    type="submit"
+                    class="badge badge-warning gap-1 cursor-pointer"
+                    title="Click to remove from featured projects"
+                  >
+                    ★ Yes
+                  </button>
+                {% else %}
+                  <button
+                    type="submit"
+                    class="badge badge-ghost gap-1 cursor-pointer"
+                    title="Click to feature this project"
+                  >
+                    No
+                  </button>
+                {% endif %}
+              </form>
+            </td>
+
+            <td>
+              <div class="flex flex-wrap gap-2">
+
+                <a
+                  href="{{ url_for('admin.project_edit', project_id=project.id) }}"
+                  class="btn btn-secondary btn-sm"
+                >
+                  Edit
+                </a>
+
+                <form
+                  method="POST"
+                  action="{{ url_for('admin.project_delete', project_id=project.id) }}"
+                  onsubmit="return confirm('Delete this project? This cannot be undone.');"
+                >
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  >
+
+                  <button
+                    type="submit"
+                    class="btn btn-error btn-outline btn-sm"
+                  >
+                    Delete
+                  </button>
+                </form>
+
+              </div>
+            </td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+
+  </div>
+</div>
+
+{% else %}
+
+  {% include "components/empty_state.html" with context %}
+
+{% endif %}
+
+{% endblock %}

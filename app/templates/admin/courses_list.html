@@ -1,0 +1,170 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}Courses — Admin{% endblock %}
+
+{% block admin_content %}
+
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+  <div>
+    <h1 class="text-3xl font-bold">
+      Courses
+    </h1>
+
+    <p class="mt-1 text-base-content/60">
+      Manage your courses, curriculum, pricing, and publication status.
+    </p>
+  </div>
+
+  <a
+    href="{{ url_for('admin.course_create') }}"
+    class="btn btn-primary"
+  >
+    + New Course
+  </a>
+
+</div>
+
+{% if courses %}
+
+<div class="card border border-base-300 bg-base-200 shadow-sm">
+
+  <div class="card-body p-0">
+
+    <div class="overflow-x-auto">
+
+      <table class="table table-zebra">
+
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Price</th>
+            <th>Lessons</th>
+            <th>Published</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for course in courses %}
+
+          <tr>
+
+            <td>
+              <div class="font-medium">
+                {{ course.title }}
+              </div>
+
+              {% if course.slug %}
+                <div class="font-mono text-xs text-base-content/50">
+                  /{{ course.slug }}
+                </div>
+              {% endif %}
+            </td>
+
+            <td class="whitespace-nowrap font-medium">
+              {{ course.currency }}
+              {{ "%.0f"|format(course.effective_price) }}
+            </td>
+
+            <td>
+              <span class="badge badge-neutral">
+                {{ course.lesson_count }}
+              </span>
+            </td>
+
+            <td>
+
+              <form
+                method="POST"
+                action="{{ url_for('admin.course_toggle_published', course_id=course.id) }}"
+              >
+
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                >
+
+                {% if course.published %}
+
+                  <button
+                    type="submit"
+                    class="badge badge-success cursor-pointer"
+                  >
+                    ✓ Published
+                  </button>
+
+                {% else %}
+
+                  <button
+                    type="submit"
+                    class="badge badge-warning cursor-pointer"
+                  >
+                    Draft
+                  </button>
+
+                {% endif %}
+
+              </form>
+
+            </td>
+
+            <td>
+
+              <div class="flex justify-end gap-2">
+
+                <a
+                  href="{{ url_for('admin.course_edit', course_id=course.id) }}"
+                  class="btn btn-outline btn-sm"
+                >
+                  Edit
+                </a>
+
+                <form
+                  method="POST"
+                  action="{{ url_for('admin.course_delete', course_id=course.id) }}"
+                  onsubmit="return confirm('Delete this course and all its sections/lessons?');"
+                >
+
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  >
+
+                  <button
+                    type="submit"
+                    class="btn btn-error btn-outline btn-sm"
+                  >
+                    Delete
+                  </button>
+
+                </form>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% else %}
+
+  {% include "components/empty_state.html" %}
+
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "legal/_legal_base.html" %}
+{% block title %}Terms of Service — {{ site_name }}{% endblock %}
+{% block legal_title %}Terms of Service{% endblock %}
+{% block legal_body %}
+<p>
+  These Terms of Service govern your use of {{ site_name }}. By using this
+  site, you agree to these terms. This is a general template and should
+  be reviewed by a qualified legal professional before being relied upon.
+</p>
+
+<h2>Acceptable Use</h2>
+<p>You agree not to misuse the platform, attempt unauthorized access, or interfere with its normal operation.</p>
+
+<h2>Accounts</h2>
+<p>You are responsible for maintaining the confidentiality of your account credentials and for all activity under your account.</p>
+
+<h2>Course Purchases</h2>
+<p>Purchasing a course grants you a personal, non-transferable license to access that course's content. Payment is processed securely and verified server-side before access is granted.</p>
+
+<h2>Intellectual Property</h2>
+<p>All software, course content, video, and written material on this platform is owned by {{ site_name }} or its licensors and may not be redistributed without permission.</p>
+
+<h2>User-Generated Content</h2>
+<p>If you submit reviews, comments, or other content, you grant us a license to display that content on the platform.</p>
+
+<h2>Refunds</h2>
+<p>Refunds are handled according to our <a href="{{ url_for('legal.refunds') }}">Refund Policy</a>.</p>
+
+<h2>Prohibited Activity</h2>
+<p>Scraping, reverse engineering, reselling course content, or circumventing access controls is prohibited.</p>
+
+<h2>Service Availability</h2>
+<p>We aim for high availability but do not guarantee uninterrupted access to the platform.</p>
+
+<h2>Limitation of Liability</h2>
+<p>To the maximum extent permitted by law, {{ site_name }} is not liable for indirect or consequential damages arising from use of the platform.</p>
+
+<h2>Termination</h2>
+<p>We may suspend or terminate accounts that violate these terms.</p>
+
+<h2>Changes to These Terms</h2>
+<p>We may update these terms from time to time; continued use of the platform constitutes acceptance of the updated terms.</p>
+
+<h2>Governing Law</h2>
+<p>[Governing law jurisdiction to be specified.]</p>
+
+<h2>Contact</h2>
+<p>Questions about these terms can be sent to {{ config.ADMIN_EMAIL }}.</p>
+{% endblock %}

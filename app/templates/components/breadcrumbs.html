@@ -1,0 +1,55 @@
+<nav
+  aria-label="Breadcrumb"
+  class="mb-6"
+>
+  <ol class="flex flex-wrap items-center gap-2 text-sm text-base-content/50">
+
+    <!-- Home is always the first breadcrumb. -->
+    <li>
+      <a
+        href="{{ url_for('main.index') }}"
+        class="transition-colors hover:text-base-content"
+      >
+        Home
+      </a>
+    </li>
+
+    {% for label, crumb_url in crumbs|default([]) %}
+
+      <li
+        aria-hidden="true"
+        class="select-none text-base-content/30"
+      >
+        /
+      </li>
+
+      {% if crumb_url %}
+
+        <li>
+          <a
+            href="{{ crumb_url }}"
+            class="transition-colors hover:text-base-content"
+          >
+            {{ label }}
+          </a>
+        </li>
+
+      {% else %}
+
+        <!--
+          The final breadcrumb represents the current page and therefore
+          should not be rendered as a link.
+        -->
+        <li
+          aria-current="page"
+          class="font-medium text-base-content/70"
+        >
+          {{ label }}
+        </li>
+
+      {% endif %}
+
+    {% endfor %}
+
+  </ol>
+</nav>

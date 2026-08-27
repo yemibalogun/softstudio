@@ -1,0 +1,21 @@
+﻿<figure
+  class="card h-full border border-base-300 bg-base-100 shadow-sm"
+>
+  <div class="card-body">
+
+    <!--
+      The quote is supplied by the existing Flask/Jinja context.
+      No backend or model changes are required.
+    -->
+    <blockquote class="text-lg leading-8 text-base-content">
+      <span
+        class="mb-3 block text-4xl leading-none text-secondary/70"
+        aria-hidden="true"
+      >“</span>
+
+      {{ testimonial.quote }}
+
+    </blockquote>
+
+  </div>
+</figure>

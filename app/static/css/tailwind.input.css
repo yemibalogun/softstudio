@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+/*
+ * Scan Flask/Jinja templates for Tailwind/DaisyUI classes.
+ *
+ * tailwind.input.css is located at:
+ * app/static/css/
+ *
+ * ../../templates resolves to:
+ * app/templates/
+ */
+@source "../../templates";
+@plugin "daisyui";
+
+@layer base {
+  html {
+    font-family: "Inter", system-ui, sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply text-base-content;
+    font-size: 1rem;
+    line-height: 1.7;
+    letter-spacing: -0.01em;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+  }
+
+  h1 {
+    font-size: clamp(2.25rem, 5vw, 4rem);
+  }
+
+  h2 {
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+  }
+
+  h3 {
+    font-size: 1.5rem;
+  }
+
+  h4 {
+    font-size: 1.25rem;
+  }
+
+  p {
+    max-width: 70ch;
+  }
+
+  code,
+  pre,
+  kbd {
+    font-family: "JetBrains Mono", monospace;
+  }
+}
+
+/*
+ * Custom site theme.
+ *
+ * This maps your existing brand tokens into daisyUI's semantic color
+ * system so daisyUI components inherit your existing visual identity
+ * instead of looking like an unrelated component library.
+ */
+@plugin "daisyui/theme" {
+    name: "yemi-dark";
+    default: true;
+    prefersdark: true;
+    color-scheme: dark;
+
+    --color-base-100: #080B12;
+    --color-base-200: #111722;
+    --color-base-300: #18202C;
+    --color-base-content: #F5F7FA;
+
+    --color-primary: #2563EB;
+    --color-primary-content: #F5F7FA;
+
+    --color-secondary: #F5B800;
+    --color-secondary-content: #14110A;
+
+    --color-accent: #3B82F6;
+    --color-accent-content: #F5F7FA;
+
+    --color-neutral: #273244;
+    --color-neutral-content: #F5F7FA;
+
+    --color-info: #3B82F6;
+    --color-info-content: #F5F7FA;
+
+    --color-success: #22C55E;
+    --color-success-content: #07130B;
+
+    --color-warning: #F59E0B;
+    --color-warning-content: #171004;
+
+    --color-error: #EF4444;
+    --color-error-content: #FFFFFF;
+
+    --radius-selector: 0.625rem;
+    --radius-field: 0.625rem;
+    --radius-box: 1rem;
+
+    --border: 1px;
+
+    --depth: 1;
+    --noise: 0;
+}

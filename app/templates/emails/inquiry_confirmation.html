@@ -1,0 +1,19 @@
+{% extends "emails/_base.html" %}
+{% block subject %}We've received your project inquiry{% endblock %}
+{% block body %}
+<h1 style="font-size:22px; margin:0 0 16px; color:#F5F7FA;">Thanks, {{ inquiry.name.split(' ')[0] }}.</h1>
+<p style="font-size:15px; line-height:1.6; color:#9CA3AF; margin:0 0 16px;">
+  Your project inquiry has been received. Here's a copy of what you submitted:
+</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#18202C; border:1px solid #273244; border-radius:10px; margin: 0 0 16px;">
+  <tr>
+    <td style="padding: 16px 20px; font-size:14px; color:#F5F7FA;">
+      <p style="margin:0 0 8px;"><strong>Project type:</strong> {{ inquiry.project_type }}</p>
+      <p style="margin:0; color:#9CA3AF; white-space:pre-line;">{{ inquiry.project_description }}</p>
+    </td>
+  </tr>
+</table>
+<p style="font-size:15px; line-height:1.6; color:#9CA3AF; margin:0;">
+  I'll review the details and get back to you shortly.
+</p>
+{% endblock %}

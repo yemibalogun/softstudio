@@ -1,0 +1,179 @@
+{% extends "legal/_legal_base.html" %}
+
+{% block title %}Privacy Policy — {{ site_name }}{% endblock %}
+
+{% block legal_title %}Privacy Policy{% endblock %}
+
+{% block legal_body %}
+
+<p>
+  This Privacy Policy explains what information {{ site_name }}
+  ("we", "us") collects, why we collect it, and how it is used. It is
+  written to be clear and practical; it does not constitute legal advice,
+  and you should have it reviewed by a qualified legal professional
+  before relying on it for compliance purposes.
+</p>
+
+
+<!-- ============================================================
+     INFORMATION WE COLLECT
+     ============================================================ -->
+<h2>Information We Collect</h2>
+
+<h3>Account information</h3>
+
+<p>
+  When you create an account, we collect your name, email address, and a
+  securely hashed password (or an OAuth identity if you sign up with
+  Google or GitHub).
+</p>
+
+
+<h3>Payment information</h3>
+
+<p>
+  When you purchase a course, payment is processed by our payment provider.
+  We store the transaction reference, amount, currency, and status — we do
+  not store your card details.
+</p>
+
+
+<h3>Contact information</h3>
+
+<p>
+  If you submit a project inquiry, we collect the details you provide,
+  such as your name, email, company, and project description.
+</p>
+
+
+<h3>Course progress</h3>
+
+<p>
+  If you enroll in a course, we track your lesson completion and progress
+  so you can resume where you left off.
+</p>
+
+
+<h3>OAuth information</h3>
+
+<p>
+  If you sign in with Google or GitHub, we receive your name, email, and
+  profile photo from that provider, as permitted by their APIs.
+</p>
+
+
+<h3>Cookies and analytics</h3>
+
+<p>
+  We use cookies as described in our
+  <a href="{{ url_for('legal.cookies') }}">
+    Cookie Policy
+  </a>.
+  Analytics cookies are only active if you opt in.
+</p>
+
+
+<!-- ============================================================
+     HOW WE USE INFORMATION
+     ============================================================ -->
+<h2>How We Use Information</h2>
+
+<p>
+  We use collected information to operate your account, deliver purchased
+  courses, respond to inquiries, secure the platform, and — only with
+  consent — understand site usage through analytics.
+</p>
+
+
+<!-- ============================================================
+     SERVICE PROVIDERS
+     ============================================================ -->
+<h2>Service Providers</h2>
+
+<p>
+  We share data with service providers strictly as needed to operate the
+  platform: our payment processor, our email delivery provider, and our
+  hosting provider.
+</p>
+
+
+<!-- ============================================================
+     DATA RETENTION
+     ============================================================ -->
+<h2>Data Retention</h2>
+
+<p>
+  We retain account and purchase data for as long as your account is active,
+  and as needed to comply with legal and tax obligations.
+</p>
+
+
+<!-- ============================================================
+     SECURITY
+     ============================================================ -->
+<h2>Security</h2>
+
+<p>
+  We use industry-standard practices including password hashing, encrypted
+  connections, and server-side authorization checks to protect your data.
+</p>
+
+
+<!-- ============================================================
+     YOUR RIGHTS
+     ============================================================ -->
+<h2>Your Rights</h2>
+
+<p>
+  You may request access to, correction of, or deletion of your personal
+  data by contacting us at the address below. We will respond within a
+  reasonable timeframe.
+</p>
+
+
+<!-- ============================================================
+     INTERNATIONAL TRANSFERS
+     ============================================================ -->
+<h2>International Transfers</h2>
+
+<p>
+  Where applicable, data may be processed in a country other than your own
+  by our infrastructure or service providers.
+</p>
+
+
+<!-- ============================================================
+     CHILDREN'S PRIVACY
+     ============================================================ -->
+<h2>Children's Privacy</h2>
+
+<p>
+  This platform is not directed at children under 13, and we do not
+  knowingly collect personal information from children.
+</p>
+
+
+<!-- ============================================================
+     CHANGES TO THIS POLICY
+     ============================================================ -->
+<h2>Changes to This Policy</h2>
+
+<p>
+  We may update this policy from time to time. Material changes will be
+  reflected by updating the effective date above.
+</p>
+
+
+<!-- ============================================================
+     CONTACT
+     ============================================================ -->
+<h2>Contact</h2>
+
+<p>
+  Questions about this policy can be sent to
+  <a href="mailto:{{ config.ADMIN_EMAIL }}">
+    {{ config.ADMIN_EMAIL }}
+  </a>.
+</p>
+
+{% endblock %}

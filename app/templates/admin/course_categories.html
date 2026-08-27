@@ -1,0 +1,133 @@
+{% extends "admin/_admin_base.html" %}
+{% from "components/admin_form_field.html" import afield %}
+
+{% block title %}Course Categories — Admin{% endblock %}
+
+{% block admin_content %}
+
+<!-- ============================================================
+     PAGE HEADER
+     ============================================================ -->
+<div class="mb-6">
+  <h1 class="text-2xl font-bold tracking-tight text-base-content sm:text-3xl">
+    Course Categories
+  </h1>
+
+  <p class="mt-1 text-sm text-base-content/60">
+    Organize your courses into categories for easier discovery.
+  </p>
+</div>
+
+
+<!-- ============================================================
+     CREATE CATEGORY
+     ============================================================ -->
+<form
+  method="POST"
+  class="card mb-8 border border-base-300 bg-base-100 shadow-sm"
+>
+  {{ form.hidden_tag() }}
+
+  <div class="card-body">
+
+    <div>
+      <h2 class="card-title text-lg">
+        Add Course Category
+      </h2>
+
+      <p class="mt-1 text-sm text-base-content/60">
+        Create a category that can be assigned to your courses.
+      </p>
+    </div>
+
+
+    <div class="grid gap-6 md:grid-cols-2">
+
+      {{ afield(form.name) }}
+
+      {{ afield(form.slug) }}
+
+    </div>
+
+
+    {{ afield(form.description) }}
+
+
+    <div class="card-actions mt-2 justify-end">
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+      >
+        Add Category
+      </button>
+
+    </div>
+
+  </div>
+
+</form>
+
+
+<!-- ============================================================
+     CATEGORY LIST
+     ============================================================ -->
+{% if categories %}
+
+  <div class="card border border-base-300 bg-base-100 shadow-sm">
+
+    <div class="overflow-x-auto">
+
+      <table class="table table-zebra">
+
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Slug</th>
+            <th>Courses</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for category in categories %}
+
+            <tr>
+
+              <td>
+                <span class="font-semibold text-base-content">
+                  {{ category.name }}
+                </span>
+              </td>
+
+              <td>
+                <code class="text-sm text-base-content/60">
+                  {{ category.slug }}
+                </code>
+              </td>
+
+              <td>
+                <span class="badge badge-outline">
+                  {{ category.courses|length }}
+                </span>
+              </td>
+
+            </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+{% else %}
+
+  {% include "components/empty_state.html" %}
+
+{% endif %}
+
+{% endblock %}

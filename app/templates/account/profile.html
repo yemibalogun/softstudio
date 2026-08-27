@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Profile — {{ site_name }}{% endblock %}
+
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+
+<section class="py-16 sm:py-20 lg:py-24">
+
+  <div class="mx-auto w-full max-w-2xl px-4 sm:px-6 lg:px-8">
+
+    <!-- ==========================================================
+         PAGE HEADER
+         ========================================================== -->
+    <header class="mb-8">
+
+      <span
+        class="text-xs font-semibold uppercase tracking-[0.18em] text-primary"
+      >
+        Account
+      </span>
+
+      <h1 class="mt-3 text-3xl font-bold tracking-tight text-base-content sm:text-4xl">
+        Your Profile
+      </h1>
+
+      <p class="mt-3 text-base leading-7 text-base-content/60">
+        View your account information and manage your security settings.
+      </p>
+
+    </header>
+
+
+    <!-- ==========================================================
+         PROFILE CARD
+         ========================================================== -->
+    <div class="card border border-base-300 bg-base-100 shadow-sm">
+
+      <div class="card-body p-6 sm:p-8">
+
+        <!-- Full name -->
+        <div class="border-b border-base-300 pb-5">
+
+          <span class="text-sm font-medium text-base-content/50">
+            Full name
+          </span>
+
+          <p class="mt-1 text-base font-medium text-base-content">
+            {{ current_user.full_name }}
+          </p>
+
+        </div>
+
+
+        <!-- Email -->
+        <div class="pt-5">
+
+          <span class="text-sm font-medium text-base-content/50">
+            Email
+          </span>
+
+          <div class="mt-1 flex flex-wrap items-center gap-2">
+
+            <span class="text-base font-medium text-base-content">
+              {{ current_user.email }}
+            </span>
+
+            {% if current_user.email_verified %}
+
+              <span class="badge badge-success">
+                Verified
+              </span>
+
+            {% else %}
+
+              <span class="badge badge-warning">
+                Unverified
+              </span>
+
+            {% endif %}
+
+          </div>
+
+        </div>
+
+
+        <!-- ======================================================
+             ACCOUNT ACTIONS
+             ====================================================== -->
+        <div class="mt-8 border-t border-base-300 pt-6">
+
+          <a
+            href="{{ url_for('account.security') }}"
+            class="btn btn-primary"
+          >
+            Security Settings
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+{% endblock %}

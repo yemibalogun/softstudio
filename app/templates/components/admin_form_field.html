@@ -1,0 +1,32 @@
+{% macro afield(f) %}
+<div class="form-control w-full">
+
+  {% if f.type == "BooleanField" %}
+
+    <label class="label cursor-pointer justify-start gap-3">
+      {{ f(class="checkbox checkbox-primary" + (" checkbox-error" if f.errors else "")) }}
+      <span class="label-text font-medium">{{ f.label.text }}</span>
+    </label>
+
+  {% else %}
+
+    <label class="label" for="{{ f.id }}">
+      <span class="label-text font-medium">{{ f.label.text }}</span>
+    </label>
+
+    {{ f(
+      class="input input-bordered w-full" + (" input-error" if f.errors else "")
+    ) }}
+
+  {% endif %}
+
+  {% if f.errors %}
+    {% for error in f.errors %}
+      <div class="label">
+        <span class="label-text-alt text-error">{{ error }}</span>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+</div>
+{% endmacro %}

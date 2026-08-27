@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}{{ service.meta_title or service.title }} — {{ site_name }}{% endblock %}
+
+{% block meta_description %}
+{{ service.meta_description or service.summary }}
+{% endblock %}
+
+{% block content %}
+
+<section class="py-16 sm:py-20 lg:py-24">
+  <div class="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8">
+
+    {% set crumbs = [
+      ("Services", url_for('services.index')),
+      (service.title, None)
+    ] %}
+
+    {% include "components/breadcrumbs.html" %}
+
+    <!-- Service introduction -->
+    <header class="mt-8 max-w-3xl">
+      <span
+        class="text-xs font-semibold uppercase tracking-[0.18em] text-primary"
+      >
+        Service
+      </span>
+
+      <h1
+        class="mt-3 text-4xl font-bold tracking-tight text-base-content sm:text-5xl lg:text-6xl"
+      >
+        {{ service.title }}
+      </h1>
+
+      <p class="mt-6 text-lg leading-8 text-base-content/65 sm:text-xl">
+        {{ service.summary }}
+      </p>
+
+      {% if service.description %}
+        <p class="mt-5 text-base leading-8 text-base-content/60">
+          {{ service.description }}
+        </p>
+      {% endif %}
+    </header>
+
+
+    <!-- ========================================================
+         PROBLEMS THIS SOLVES
+         ======================================================== -->
+    {% if service.problems_solved %}
+
+      <section class="mt-16 border-t border-base-300 pt-12">
+        <span
+          class="text-xs font-semibold uppercase tracking-[0.15em] text-secondary"
+        >
+          Business Problems
+        </span>
+
+        <h2 class="mt-3 text-2xl font-bold text-base-content sm:text-3xl">
+          Problems This Solves
+        </h2>
+
+        <ul class="mt-6 space-y-3">
+          {% for line in service.problems_solved.split('\n') if line.strip() %}
+            <li class="flex gap-3 text-base leading-7 text-base-content/70">
+
+              <span
+                class="mt-2 h-2 w-2 shrink-0 rounded-full bg-secondary"
+                aria-hidden="true"
+              ></span>
+
+              <span>{{ line }}</span>
+
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+
+    {% endif %}
+
+
+    <!-- ========================================================
+         PROCESS
+         ======================================================== -->
+    {% if service.process %}
+
+      <section class="mt-16 border-t border-base-300 pt-12">
+        <span
+          class="text-xs font-semibold uppercase tracking-[0.15em] text-primary"
+        >
+          How It Works
+        </span>
+
+        <h2 class="mt-3 text-2xl font-bold text-base-content sm:text-3xl">
+          Process
+        </h2>
+
+        <ol class="mt-8 space-y-5">
+
+          {% for line in service.process.split('\n') if line.strip() %}
+
+            <!--
+              The loop index provides a visual step number without
+              requiring any change to the existing database model.
+            -->
+            <li class="flex gap-4">
+
+              <span
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-content"
+              >
+                {{ loop.index }}
+              </span>
+
+              <span class="pt-1 text-base leading-7 text-base-content/70">
+                {{ line }}
+              </span>
+
+            </li>
+
+          {% endfor %}
+
+        </ol>
+      </section>
+
+    {% endif %}
+
+
+    <!-- ========================================================
+         TECHNOLOGIES
+         ======================================================== -->
+    {% if service.technologies %}
+
+      <section class="mt-16 border-t border-base-300 pt-12">
+        <span
+          class="text-xs font-semibold uppercase tracking-[0.15em] text-primary"
+        >
+          Technology
+        </span>
+
+        <h2 class="mt-3 text-2xl font-bold text-base-content sm:text-3xl">
+          Technologies
+        </h2>
+
+        <ul class="mt-6 flex flex-wrap gap-2">
+
+          {% for line in service.technologies.split('\n') if line.strip() %}
+            <li>
+              <span class="badge badge-outline badge-secondary px-4 py-3">
+                {{ line }}
+              </span>
+            </li>
+          {% endfor %}
+
+        </ul>
+      </section>
+
+    {% endif %}
+
+
+    <!-- ========================================================
+         EXPECTED OUTCOMES
+         ======================================================== -->
+    {% if service.expected_outcomes %}
+
+      <section class="mt-16 border-t border-base-300 pt-12">
+        <span
+          class="text-xs font-semibold uppercase tracking-[0.15em] text-success"
+        >
+          The Outcome
+        </span>
+
+        <h2 class="mt-3 text-2xl font-bold text-base-content sm:text-3xl">
+          Expected Outcomes
+        </h2>
+
+        <ul class="mt-6 space-y-3">
+
+          {% for line in service.expected_outcomes.split('\n') if line.strip() %}
+
+            <li class="flex gap-3 text-base leading-7 text-base-content/70">
+
+              <span
+                class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success/15 text-success"
+                aria-hidden="true"
+              >
+                ✓
+              </span>
+
+              <span>{{ line }}</span>
+
+            </li>
+
+          {% endfor %}
+
+        </ul>
+      </section>
+
+    {% endif %}
+
+
+    <!-- ========================================================
+         CALL TO ACTION
+         ======================================================== -->
+    <div class="mt-16 rounded-2xl border border-base-300 bg-base-200/50 p-8 text-center sm:p-10">
+
+      <h2 class="text-2xl font-bold text-base-content sm:text-3xl">
+        Ready to solve this problem?
+      </h2>
+
+      <p class="mx-auto mt-3 max-w-xl text-base leading-7 text-base-content/60">
+        Let's discuss your requirements and determine the right solution
+        for your business.
+      </p>
+
+      <a
+        href="{{ url_for('contact.index') }}"
+        class="btn btn-secondary btn-lg mt-7"
+      >
+        Start a Project
+      </a>
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

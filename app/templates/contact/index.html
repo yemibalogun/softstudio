@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% from "components/form_field.html" import field %}
+
+{% block title %}Start a Project — {{ site_name }}{% endblock %}
+{% block meta_description %}Tell us about your project and we'll get back to you.{% endblock %}
+
+{% block content %}
+
+<section class="py-20 sm:py-24 lg:py-28">
+  <div class="mx-auto w-full max-w-4xl px-4 sm:px-6">
+
+    <!-- Page heading -->
+    <div class="mb-10 text-center sm:mb-12">
+      <span class="badge badge-secondary mb-4">
+        Start a Project
+      </span>
+
+      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">
+        Tell me about what you're building.
+      </h1>
+
+      <p class="mx-auto mt-4 max-w-2xl text-base-content/70 sm:text-lg">
+        The more detail you share, the faster I can give you a useful response.
+      </p>
+    </div>
+
+    <!--
+      The form itself remains a normal Flask-WTF POST form.
+      CSRF, validation, field names and the existing Flask route
+      are therefore completely unaffected by the UI migration.
+    -->
+    <form
+      method="POST"
+      novalidate
+      class="card border border-base-300 bg-base-100/80 shadow-xl backdrop-blur"
+    >
+      <div class="card-body gap-6 sm:p-8 lg:p-10">
+
+        {{ form.hidden_tag() }}
+
+        <!-- Name / Email -->
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+          {{ field(form.name, autocomplete="name") }}
+          {{ field(form.email, autocomplete="email") }}
+        </div>
+
+        <!-- Company / Phone -->
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+          {{ field(form.company) }}
+          {{ field(form.phone, autocomplete="tel") }}
+        </div>
+
+        <!-- Project information -->
+        {{ field(form.project_type) }}
+
+        {{ field(form.project_description) }}
+
+        {{ field(form.current_process) }}
+
+        {{ field(form.desired_outcome) }}
+
+        <!-- Budget / Timeline -->
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+          {{ field(form.budget_range) }}
+          {{ field(form.timeline) }}
+        </div>
+
+        {{ field(form.referral_source) }}
+
+        <!--
+          Honeypot field.
+
+          This remains in the HTML because the Flask backend expects
+          the field to exist. It is visually hidden from genuine users
+          but remains available to automated spam submissions.
+        -->
+        <div
+          class="hidden"
+          aria-hidden="true"
+        >
+          {{ form.website.label }}
+          {{ form.website(
+              tabindex="-1",
+              autocomplete="off"
+          ) }}
+        </div>
+
+        <!-- Submit -->
+        <div class="mt-2">
+          <button
+            type="submit"
+            class="btn btn-secondary btn-lg w-full"
+          >
+            Submit Inquiry
+          </button>
+        </div>
+
+      </div>
+    </form>
+
+  </div>
+</section>
+
+{% endblock %}

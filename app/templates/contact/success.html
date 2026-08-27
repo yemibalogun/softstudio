@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Inquiry Received — {{ site_name }}{% endblock %}
+
+{% block content %}
+
+<section class="flex min-h-[60vh] items-center py-20">
+  <div class="mx-auto w-full max-w-xl px-4 text-center sm:px-6">
+
+    <!-- Success indicator -->
+    <div class="mb-6 flex justify-center">
+      <div class="flex h-16 w-16 items-center justify-center rounded-full bg-success/15 text-success">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-8 w-8"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 6 9 17l-5-5"></path>
+        </svg>
+      </div>
+    </div>
+
+    <span class="badge badge-success mb-5">
+      Received
+    </span>
+
+    <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">
+      Thanks — your inquiry is in.
+    </h1>
+
+    <p class="mx-auto mt-5 max-w-lg text-base-content/70 sm:text-lg">
+      I'll review the details and get back to you shortly.
+      In the meantime, feel free to look through some of the
+      applications I've built.
+    </p>
+
+    <div class="mt-8">
+      <a
+        href="{{ url_for('projects.index') }}"
+        class="btn btn-secondary btn-lg"
+      >
+        Explore Applications
+      </a>
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

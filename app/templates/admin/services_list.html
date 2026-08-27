@@ -1,0 +1,114 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}Services — Admin{% endblock %}
+
+{% block admin_content %}
+
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-3xl font-bold">Services</h1>
+    <p class="mt-1 text-base-content/60">
+      Manage the services offered on your website.
+    </p>
+  </div>
+
+  <a
+    href="{{ url_for('admin.service_create') }}"
+    class="btn btn-primary btn-sm"
+  >
+    + New Service
+  </a>
+</div>
+
+{% if services %}
+
+<div class="card border border-base-300 bg-base-200 shadow-sm">
+  <div class="card-body p-0">
+
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Published</th>
+            <th>Order</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for service in services %}
+          <tr>
+
+            <td class="font-semibold">
+              {{ service.title }}
+            </td>
+
+            <td>
+              {% if service.published %}
+                <span class="badge badge-success">
+                  Published
+                </span>
+              {% else %}
+                <span class="badge badge-ghost">
+                  Draft
+                </span>
+              {% endif %}
+            </td>
+
+            <td>
+              <span class="badge badge-outline">
+                {{ service.display_order }}
+              </span>
+            </td>
+
+            <td>
+              <div class="flex flex-wrap gap-2">
+
+                <a
+                  href="{{ url_for('admin.service_edit', service_id=service.id) }}"
+                  class="btn btn-secondary btn-sm"
+                >
+                  Edit
+                </a>
+
+                <form
+                  method="POST"
+                  action="{{ url_for('admin.service_delete', service_id=service.id) }}"
+                  onsubmit="return confirm('Delete this service?');"
+                >
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  >
+
+                  <button
+                    type="submit"
+                    class="btn btn-error btn-outline btn-sm"
+                  >
+                    Delete
+                  </button>
+                </form>
+
+              </div>
+            </td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+
+  </div>
+</div>
+
+{% else %}
+
+  {% include "components/empty_state.html" %}
+
+{% endif %}
+
+{% endblock %}

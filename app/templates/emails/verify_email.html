@@ -1,0 +1,14 @@
+{% extends "emails/_base.html" %}
+{% from "emails/_button.html" import email_button %}
+{% block subject %}Verify your email address{% endblock %}
+{% block body %}
+<h1 style="font-size:22px; margin:0 0 16px; color:#F5F7FA;">Verify your email</h1>
+<p style="font-size:15px; line-height:1.6; color:#9CA3AF; margin:0 0 16px;">
+  Hi {{ user.full_name.split(' ')[0] }}, please confirm this is your email address
+  to finish setting up your {{ site_name }} account.
+</p>
+{{ email_button(verify_url, "Verify Email Address", color="#2563EB", text_color="#F5F7FA") }}
+<p style="font-size:13px; line-height:1.6; color:#6B7280; margin:24px 0 0;">
+  This link expires in 24 hours. If you didn't create this account, you can ignore this email.
+</p>
+{% endblock %}

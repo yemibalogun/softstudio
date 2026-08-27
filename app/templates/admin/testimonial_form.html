@@ -1,0 +1,58 @@
+{% extends "admin/_admin_base.html" %}
+{% from "components/admin_form_field.html" import afield %}
+
+{% block title %}{{ "Edit" if testimonial else "New" }} Testimonial — Admin{% endblock %}
+
+{% block admin_content %}
+
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-3xl font-bold">
+      {{ "Edit Testimonial" if testimonial else "New Testimonial" }}
+    </h1>
+    <p class="mt-1 text-base-content/60">
+      {{ "Update this testimonial and its visibility." if testimonial else "Add a customer testimonial to your website." }}
+    </p>
+  </div>
+
+  <a
+    href="{{ url_for('admin.testimonials_list') }}"
+    class="btn btn-ghost btn-sm"
+  >
+    ← Back to Testimonials
+  </a>
+</div>
+
+<form method="POST" class="card border border-base-300 bg-base-200 shadow-sm">
+  {{ form.hidden_tag() }}
+
+  <div class="card-body">
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {{ afield(form.author_name) }}
+      {{ afield(form.author_title) }}
+    </div>
+
+    {{ afield(form.author_avatar) }}
+
+    {{ afield(form.quote) }}
+
+    {{ afield(form.rating) }}
+
+    <div class="flex flex-wrap gap-6">
+      {{ afield(form.approved) }}
+      {{ afield(form.featured) }}
+    </div>
+
+    {{ afield(form.display_order) }}
+
+    <div class="mt-4">
+      <button type="submit" class="btn btn-primary btn-lg">
+        {{ "Save Changes" if testimonial else "Create Testimonial" }}
+      </button>
+    </div>
+
+  </div>
+</form>
+
+{% endblock %}

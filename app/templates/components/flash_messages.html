@@ -1,0 +1,116 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+      <div class="flex flex-col gap-3">
+
+        {% for category, message in messages %}
+
+          {# 
+            Map Flask flash categories to DaisyUI alert variants.
+
+            Flask commonly uses categories such as:
+            - success
+            - info
+            - warning
+            - error
+
+            DaisyUI provides matching alert variants.
+          #}
+          <div
+            role="status"
+            class="alert
+              {% if category == 'error' %}
+                alert-error
+              {% elif category == 'success' %}
+                alert-success
+              {% elif category == 'warning' %}
+                alert-warning
+              {% elif category == 'info' %}
+                alert-info
+              {% else %}
+                alert-neutral
+              {% endif %}
+            "
+          >
+            {% if category == 'error' %}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 9v2m0 4h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z"
+                />
+              </svg>
+
+            {% elif category == 'success' %}
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+
+            {% elif category == 'warning' %}
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 9v2m0 4h.01M10.3 3.3L2.8 17a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"
+                />
+              </svg>
+
+            {% else %}
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"
+                />
+              </svg>
+
+            {% endif %}
+
+            <span>{{ message }}</span>
+          </div>
+
+        {% endfor %}
+
+      </div>
+    </div>
+  {% endif %}
+{% endwith %}

@@ -1,0 +1,22 @@
+{
+  "name": "softstudio",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "dev:css": "tailwindcss -i ./app/static/css/tailwind.input.css -o ./app/static/css/tailwind.css --watch",
+    "build:css": "tailwindcss -i ./app/static/css/tailwind.input.css -o ./app/static/css/tailwind.css --minify"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "daisyui": "^5.7.22",
+    "tailwindcss": "^4.3.3"
+  }
+}

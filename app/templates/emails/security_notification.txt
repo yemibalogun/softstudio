@@ -1,0 +1,13 @@
+{{ event }}
+
+Hi {{ user.full_name.split(' ')[0] }}, this is a confirmation that the
+following security-related change happened on your {{ site_name }} account.
+{% if detail %}
+{{ detail }}
+{% endif %}
+If this wasn't you, please reset your password immediately and review
+your active sessions: {{ site_url }}/account/sessions
+
+—
+{{ site_name }}
+{{ site_url }}

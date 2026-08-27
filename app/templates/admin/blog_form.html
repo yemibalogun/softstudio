@@ -1,0 +1,148 @@
+{% extends "admin/_admin_base.html" %}
+{% from "components/admin_form_field.html" import afield %}
+
+{% block title %}{{ "Edit" if post else "New" }} Blog Post — Admin{% endblock %}
+
+{% block admin_content %}
+
+<!-- ============================================================
+     PAGE HEADER
+     ============================================================ -->
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight text-base-content sm:text-3xl">
+      {{ "Edit Post" if post else "New Post" }}
+    </h1>
+
+    <p class="mt-1 text-sm text-base-content/60">
+      {{ "Update the details and SEO settings for this article."
+         if post
+         else "Create and publish a new article for your blog." }}
+    </p>
+  </div>
+
+  <a
+    href="{{ url_for('admin.blog_list') }}"
+    class="btn btn-ghost btn-sm"
+  >
+    ← Back to Blog
+  </a>
+
+</div>
+
+
+<!-- ============================================================
+     BLOG POST FORM
+     ============================================================ -->
+<form
+  method="POST"
+  class="card border border-base-300 bg-base-100 shadow-sm"
+>
+  {{ form.hidden_tag() }}
+
+  <div class="card-body gap-6">
+
+    <!-- ========================================================
+         BASIC INFORMATION
+         ======================================================== -->
+    <div>
+      <h2 class="card-title text-lg">
+        Article Information
+      </h2>
+
+      <p class="mt-1 text-sm text-base-content/60">
+        Enter the main content and publishing information for this article.
+      </p>
+    </div>
+
+
+    <div class="grid gap-6 md:grid-cols-2">
+
+      {{ afield(form.title) }}
+
+      {{ afield(form.slug) }}
+
+    </div>
+
+
+    {{ afield(form.excerpt) }}
+
+    {{ afield(form.body) }}
+
+    {{ afield(form.featured_image) }}
+
+
+    <!-- ========================================================
+         CATEGORY & TAGS
+         ======================================================== -->
+    <div class="grid gap-6 md:grid-cols-2">
+
+      {{ afield(form.category_id) }}
+
+      {{ afield(form.tags_csv) }}
+
+    </div>
+
+
+    <!-- ========================================================
+         PUBLISHING
+         ======================================================== -->
+    <div class="rounded-box border border-base-300 bg-base-200/40 p-4">
+
+      {{ afield(form.published) }}
+
+    </div>
+
+
+    <!-- ========================================================
+         SEO SETTINGS
+         ======================================================== -->
+    <div class="divider">
+      SEO Settings
+    </div>
+
+    <div>
+      <h2 class="text-lg font-semibold text-base-content">
+        Search Engine Optimization
+      </h2>
+
+      <p class="mt-1 text-sm text-base-content/60">
+        These fields control how the article appears in search engines
+        and when it is shared on social platforms.
+      </p>
+    </div>
+
+    {{ afield(form.meta_title) }}
+
+    {{ afield(form.meta_description) }}
+
+    {{ afield(form.og_image) }}
+
+
+    <!-- ========================================================
+         FORM ACTION
+         ======================================================== -->
+    <div class="card-actions mt-2 justify-end">
+
+      <a
+        href="{{ url_for('admin.blog_list') }}"
+        class="btn btn-ghost"
+      >
+        Cancel
+      </a>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+      >
+        {{ "Save Changes" if post else "Publish Post" }}
+      </button>
+
+    </div>
+
+  </div>
+
+</form>
+
+{% endblock %}

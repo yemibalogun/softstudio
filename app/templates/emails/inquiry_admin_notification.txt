@@ -1,0 +1,15 @@
+New project inquiry
+
+Name: {{ inquiry.name }}
+Email: {{ inquiry.email }}
+{% if inquiry.company %}Company: {{ inquiry.company }}
+{% endif %}{% if inquiry.phone %}Phone: {{ inquiry.phone }}
+{% endif %}Project type: {{ inquiry.project_type }}
+{% if inquiry.budget_range %}Budget: {{ inquiry.budget_range }}
+{% endif %}{% if inquiry.timeline %}Timeline: {{ inquiry.timeline }}
+{% endif %}
+{{ inquiry.project_description }}
+{% if inquiry.desired_outcome %}
+Desired outcome: {{ inquiry.desired_outcome }}
+{% endif %}
+Submitted from {{ inquiry.ip_address or "unknown IP" }}

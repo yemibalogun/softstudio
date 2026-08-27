@@ -1,0 +1,13 @@
+Verify your email
+
+Hi {{ user.full_name.split(' ')[0] }}, please confirm this is your email
+address to finish setting up your {{ site_name }} account.
+
+Verify here: {{ verify_url }}
+
+This link expires in 24 hours. If you didn't create this account, you
+can ignore this email.
+
+—
+{{ site_name }}
+{{ site_url }}

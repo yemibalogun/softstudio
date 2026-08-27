@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+
+<section class="py-8 sm:py-10 lg:py-12">
+
+  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+
+    <div class="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start">
+
+      <!-- ======================================================
+           ADMIN SIDEBAR
+           ====================================================== -->
+      <aside class="lg:sticky lg:top-24">
+
+        <div class="card border border-base-300 bg-base-100 shadow-sm">
+
+          <div class="card-body p-4">
+
+            <!-- Sidebar heading -->
+            <div class="mb-3 px-3">
+              <p class="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                Administration
+              </p>
+              <h2 class="mt-1 text-lg font-bold text-base-content">
+                Control Panel
+              </h2>
+            </div>
+
+
+            <!-- Navigation -->
+            <ul class="menu w-full gap-1 p-0">
+
+              <li>
+                <a href="{{ url_for('admin.dashboard') }}">
+                  <span aria-hidden="true">▦</span>
+                  Overview
+                </a>
+              </li>
+
+              <li>
+                <a href="{{ url_for('admin.projects_list') }}">
+                  <span aria-hidden="true">◈</span>
+                  Projects
+                </a>
+              </li>
+
+              <li>
+                <a href="{{ url_for('admin.courses_list') }}">
+                  <span aria-hidden="true">▣</span>
+                  Courses
+                </a>
+              </li>
+
+              <li>
+                <a href="{{ url_for('admin.course_categories') }}">
+                  <span aria-hidden="true">⌑</span>
+                  Course Categories
+                </a>
+              </li>
+
+              <li>
+                <a href="{{ url_for('admin.services_list') }}">
+                  <span aria-hidden="true">◆</span>
+                  Services
+                </a>
+              </li>
+
+              <li>
+                <a href="{{ url_for('admin.blog_list') }}">
+                  <span aria-hidden="true">✎</span>
+                  Blog
+                </a>
+              </li>
+
+              <li>
+                <a href="{{ url_for('admin.blog_categories') }}">
+                  <span aria-hidden="true">⌑</span>
+                  Blog Categories
+                </a>
+              </li>
+
+              <li>
+                <a href="{{ url_for('admin.testimonials_list') }}">
+                  <span aria-hidden="true">★</span>
+                  Testimonials
+                </a>
+              </li>
+
+              <li>
+                <a href="{{ url_for('admin.inquiries') }}">
+                  <span aria-hidden="true">✉</span>
+                  Project Inquiries
+                </a>
+              </li>
+
+              <li>
+                <a href="{{ url_for('admin.payments') }}">
+                  <span aria-hidden="true">₦</span>
+                  Payments
+                </a>
+              </li>
+
+            </ul>
+
+          </div>
+
+        </div>
+
+      </aside>
+
+
+      <!-- ======================================================
+           ADMIN CONTENT
+           ====================================================== -->
+      <main class="min-w-0">
+
+        {% block admin_content %}{% endblock %}
+
+      </main>
+
+    </div>
+
+  </div>
+
+</section>
+
+{% endblock %}
