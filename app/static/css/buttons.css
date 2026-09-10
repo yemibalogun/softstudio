@@ -1,214 +1,132 @@
 /*
- * Branded button system
+ * Branded button system.
  *
- * daisyUI handles the basic button component.
- * These rules add our application's visual identity:
- * - subtle gradient
- * - neon glow
- * - animated highlight
- * - hover elevation
+ * daisyUI provides the base component; this layer sets the studio's
+ * identity: flat brand fills, one tinted shadow, a small physical press.
+ * No neon halos, no sweeping highlight - those read as "AI default".
  */
 
 .btn {
-    position: relative;
-    isolation: isolate;
-
-    /* Prevent the animated highlight from escaping the button. */
-    overflow: hidden;
-
-    border: 1px solid rgba(59, 130, 246, 0.35);
-
-    /*
-     * Slightly larger transition surface than the default daisyUI
-     * transition so the glow and movement feel smooth rather than abrupt.
-     */
-    transition:
-        transform 180ms ease,
-        box-shadow 180ms ease,
-        border-color 180ms ease,
-        filter 180ms ease;
+  --btn-lift: -1px;
+  position: relative;
+  /* Pill silhouette - softer, more physical than the boxed default, and in
+     step with the larger surface radii and the floating pill nav. daisyUI
+     already sets display/align/gap/padding; we only reshape the corners. */
+  border-radius: 9999px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    background-color 140ms ease,
+    border-color 140ms ease,
+    filter 140ms ease;
 }
 
-/*
- * The pseudo-element creates a moving light/reflection across
- * the button when the user hovers over it.
- */
-.btn::before {
-    content: "";
-
-    position: absolute;
-    inset: 0;
-
-    width: 45%;
-
-    background: linear-gradient(
-        110deg,
-        transparent,
-        rgba(255, 255, 255, 0.16),
-        transparent
-    );
-
-    transform: translateX(-180%) skewX(-18deg);
-
-    transition: transform 650ms ease;
-
-    pointer-events: none;
-
-    z-index: -1;
+/* Trailing arrow that nudges on hover. Add a <span aria-hidden="true">&rarr;</span>
+   as the last child of a .btn to opt in. */
+.btn > [aria-hidden="true"]:last-child {
+  transition: transform 140ms ease;
 }
 
-.btn:hover::before {
-    transform: translateX(380%) skewX(-18deg);
+.btn:hover > [aria-hidden="true"]:last-child {
+  transform: translateX(2px);
 }
 
-/* Small physical lift when hovering. */
 .btn:hover {
-    transform: translateY(-2px);
+  transform: translateY(var(--btn-lift));
 }
 
-/* Don't let keyboard focus depend on hover. */
+.btn:active {
+  transform: translateY(0) scale(0.985);
+}
+
 .btn:focus-visible {
-    outline: 2px solid rgba(59, 130, 246, 0.9);
-    outline-offset: 3px;
+  outline: 2px solid color-mix(in oklab, var(--color-primary) 80%, white);
+  outline-offset: 2px;
 }
 
-
-/* ============================================================
-   PRIMARY — blue technology button
-   ============================================================ */
+/* ------------------------------------------------------------------ */
+/* Primary - electric blue, solid                                     */
+/* ------------------------------------------------------------------ */
 
 .btn-primary {
-    background:
-        linear-gradient(
-            135deg,
-            #2563eb 0%,
-            #3b82f6 55%,
-            #60a5fa 100%
-        );
-
-    border-color: rgba(96, 165, 250, 0.65);
-
-    color: #ffffff;
-
-    box-shadow:
-        0 0 0 1px rgba(59, 130, 246, 0.15),
-        0 5px 20px rgba(37, 99, 235, 0.25);
+  background-color: var(--color-primary);
+  border-color: color-mix(in oklab, var(--color-primary) 70%, white 12%);
+  color: var(--color-primary-content);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .btn-primary:hover {
-    border-color: rgba(96, 165, 250, 0.95);
-
-    /*
-     * Multiple shadows create the neon halo.
-     * The outer shadow is deliberately soft so it doesn't look like
-     * a gaming button.
-     */
-    box-shadow:
-        0 0 0 1px rgba(59, 130, 246, 0.35),
-        0 0 12px rgba(59, 130, 246, 0.55),
-        0 0 32px rgba(37, 99, 235, 0.35),
-        0 8px 28px rgba(0, 0, 0, 0.35);
+  background-color: color-mix(in oklab, var(--color-primary) 88%, white);
+  box-shadow:
+    0 6px 18px color-mix(in oklab, var(--color-primary) 30%, transparent),
+    0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-
-/* ============================================================
-   SECONDARY — gold CTA
-   ============================================================ */
+/* ------------------------------------------------------------------ */
+/* Secondary - gold CTA, solid                                        */
+/* ------------------------------------------------------------------ */
 
 .btn-secondary {
-    background:
-        linear-gradient(
-            135deg,
-            #d99f00 0%,
-            #f5b800 50%,
-            #ffd45a 100%
-        );
-
-    border-color: rgba(255, 212, 90, 0.65);
-
-    color: #14110a;
-
-    box-shadow:
-        0 0 0 1px rgba(245, 184, 0, 0.12),
-        0 5px 20px rgba(245, 184, 0, 0.18);
+  background-color: var(--color-secondary);
+  border-color: color-mix(in oklab, var(--color-secondary) 72%, black 8%);
+  color: var(--color-secondary-content);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .btn-secondary:hover {
-    border-color: rgba(255, 220, 110, 1);
-
-    box-shadow:
-        0 0 0 1px rgba(245, 184, 0, 0.3),
-        0 0 12px rgba(245, 184, 0, 0.55),
-        0 0 32px rgba(245, 184, 0, 0.3),
-        0 8px 28px rgba(0, 0, 0, 0.35);
+  background-color: color-mix(in oklab, var(--color-secondary) 90%, white);
+  box-shadow:
+    0 6px 18px color-mix(in oklab, var(--color-secondary) 26%, transparent),
+    0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-
-/* ============================================================
-   OUTLINE
-   ============================================================ */
+/* ------------------------------------------------------------------ */
+/* Outline - hairline, fills softly on hover                          */
+/* ------------------------------------------------------------------ */
 
 .btn-outline {
-    background: rgba(17, 23, 34, 0.55);
-
-    border-color: rgba(59, 130, 246, 0.4);
-
-    color: #f5f7fa;
-
-    box-shadow:
-        0 0 0 1px rgba(59, 130, 246, 0.04);
+  background-color: transparent;
+  border-color: color-mix(in oklab, var(--color-base-content) 22%, transparent);
+  color: var(--color-base-content);
+  box-shadow: none;
 }
 
 .btn-outline:hover {
-    background: rgba(37, 99, 235, 0.12);
-
-    border-color: rgba(59, 130, 246, 0.8);
-
-    color: #ffffff;
-
-    box-shadow:
-        0 0 10px rgba(59, 130, 246, 0.4),
-        0 0 26px rgba(37, 99, 235, 0.18);
+  background-color: color-mix(in oklab, var(--color-base-content) 6%, transparent);
+  border-color: color-mix(in oklab, var(--color-base-content) 38%, transparent);
+  color: var(--color-base-content);
 }
 
-
-/* ============================================================
-   GHOST
-   ============================================================ */
+/* ------------------------------------------------------------------ */
+/* Ghost                                                              */
+/* ------------------------------------------------------------------ */
 
 .btn-ghost {
-    border-color: transparent;
-
-    background: transparent;
-
-    box-shadow: none;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .btn-ghost:hover {
-    background: rgba(59, 130, 246, 0.08);
-
-    border-color: rgba(59, 130, 246, 0.25);
-
-    box-shadow:
-        0 0 14px rgba(59, 130, 246, 0.15);
+  background-color: color-mix(in oklab, var(--color-base-content) 7%, transparent);
+  border-color: transparent;
 }
 
-
-/* ============================================================
-   REDUCED MOTION
-   ============================================================ */
+/* ------------------------------------------------------------------ */
+/* Reduced motion                                                     */
+/* ------------------------------------------------------------------ */
 
 @media (prefers-reduced-motion: reduce) {
-    .btn,
-    .btn::before {
-        transition: none;
-    }
-
-    .btn:hover {
-        transform: none;
-    }
-
-    .btn::before {
-        display: none;
-    }
+  .btn {
+    transition: none;
+  }
+  .btn:hover,
+  .btn:active {
+    transform: none;
+  }
 }

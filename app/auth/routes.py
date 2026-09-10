@@ -112,39 +112,64 @@ def verify_email(token):
 
 # --- OAuth -----------------------------------------------------------
 
+def _oauth_client_or_none(provider):
+    """
+    Return the configured authlib client for ``provider``, or ``None``.
+
+    The provider is only registered in the app factory when its
+    CLIENT_ID / CLIENT_SECRET are present in the environment, so
+    ``oauth.create_client`` returns ``None`` when the integration is
+    not configured. Callers must handle that instead of dereferencing
+    ``None`` (which previously surfaced as a 500 "NoneType" error).
+    """
+    if provider not in ("google", "github"):
+        return None
+    return oauth.create_client(provider)
+
+
 @bp.route("/oauth/<provider>")
 def oauth_login(provider):
-    if provider not in ("google", "github"):
+    client = _oauth_client_or_none(provider)
+    if client is None:
+        flash(
+            f"{provider.title()} sign-in is not available right now. "
+            "Please log in with your email and password.",
+            "error",
+        )
         return redirect(url_for("auth.login"))
     redirect_uri = url_for("auth.oauth_callback", provider=provider, _external=True)
-    client = oauth.create_client(provider)
     return client.authorize_redirect(redirect_uri)
 
 
 @bp.route("/oauth/<provider>/callback")
 def oauth_callback(provider):
-    if provider not in ("google", "github"):
+    client = _oauth_client_or_none(provider)
+    if client is None:
+        flash("That sign-in provider is not available.", "error")
         return redirect(url_for("auth.login"))
 
-    client = oauth.create_client(provider)
     token = client.authorize_access_token()  # authlib validates `state` internally
 
+    # Only pass an email downstream if the provider itself has verified the
+    # user controls it - resolve_oauth_login trusts that to decide whether an
+    # existing local account may be adopted/linked.
     if provider == "google":
         userinfo = token.get("userinfo") or client.userinfo()
         provider_user_id = userinfo["sub"]
-        email = userinfo.get("email")
         full_name = userinfo.get("name", "")
         avatar_url = userinfo.get("picture")
+        email = userinfo.get("email") if userinfo.get("email_verified") else None
     else:  # github
         profile = client.get("user").json()
         provider_user_id = str(profile["id"])
         full_name = profile.get("name") or profile.get("login", "")
         avatar_url = profile.get("avatar_url")
-        email = profile.get("email")
-        if not email:
-            emails = client.get("user/emails").json()
-            primary = next((e for e in emails if e.get("primary")), None)
-            email = primary["email"] if primary else None
+        # `emails` here would shadow the imported emails module - keep it local.
+        email_list = client.get("user/emails").json()
+        primary = next(
+            (e for e in email_list if e.get("primary") and e.get("verified")), None
+        )
+        email = primary["email"] if primary else None
 
     try:
         user = services.resolve_oauth_login(provider, provider_user_id, email, full_name, avatar_url)

@@ -130,7 +130,7 @@ class BlogPostForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired(), Length(max=200)])
     slug = StringField("Slug", validators=[Optional(), Length(max=220)])
     excerpt = StringField("Excerpt", validators=[Optional(), Length(max=400)])
-    body = TextAreaField("Body (HTML)", validators=[DataRequired()])
+    body = TextAreaField("Body (Markdown)", validators=[DataRequired()])
     featured_image = StringField("Featured image URL", validators=[Optional(), URL(), Length(max=512)])
     category_id = SelectField("Category", coerce=int, validators=[Optional()])
     tags_csv = StringField("Tags (comma-separated)", validators=[Optional(), Length(max=300)])

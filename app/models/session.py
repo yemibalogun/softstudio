@@ -16,7 +16,7 @@ class UserSession(db.Model, TimestampMixin):
     __tablename__ = "user_sessions"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
     session_token = db.Column(db.String(64), unique=True, nullable=False, default=gen_uuid, index=True)
 
@@ -24,7 +24,7 @@ class UserSession(db.Model, TimestampMixin):
     user_agent = db.Column(db.String(255))
 
     last_active_at = db.Column(db.DateTime(timezone=True))
-    revoked_at = db.Column(db.DateTime(timezone=True))
+    revoked_at = db.Column(db.DateTime(timezone=True), index=True)
 
     user = db.relationship("User", back_populates="sessions")
 

@@ -69,14 +69,20 @@ def resolve_oauth_login(
     """
     Resolve an OAuth callback into a local User.
 
+    `email` MUST be an address the provider has itself verified the user
+    controls (the caller is responsible for that — see oauth_callback).
+
     1. If this exact (provider, provider_user_id) is already linked, log
        that user in directly.
-    2. Else, if an existing *verified* local account shares this email,
-       do NOT silently link — raise AccountLinkingRequired so the caller
-       can force an explicit confirmation (e.g. re-auth with password
-       or a "link accounts" click-through) before attaching the
-       identity to somebody else's account.
-    3. Else, create a brand-new account + identity.
+    2. Else, if a *verified* local account shares this email, do NOT
+       silently link — raise AccountLinkingRequired so the caller can
+       force an explicit confirmation (re-auth with password) before
+       attaching the identity to somebody else's account.
+    3. Else, if an *unverified* local account shares this email, nobody
+       ever proved they own that inbox — the person completing this
+       OAuth flow just did, so adopt that account: link the identity,
+       mark it verified, and drop any password a pre-registration set.
+    4. Else, create a brand-new account + identity.
     """
     identity = OAuthIdentity.query.filter_by(
         provider=provider, provider_user_id=provider_user_id
@@ -88,8 +94,29 @@ def resolve_oauth_login(
 
     if email:
         existing = find_user_by_email(email)
-        if existing and existing.email_verified:
-            raise AccountLinkingRequired(existing)
+        if existing is not None:
+            if existing.email_verified:
+                raise AccountLinkingRequired(existing)
+
+            # Unverified local account — adopt it rather than colliding on
+            # the unique email index by trying to INSERT a duplicate.
+            existing.email_verified = True
+            existing.email_verified_at = datetime.now(timezone.utc)
+            existing.password_hash = None  # neutralise any pre-set password
+            if avatar_url and not existing.avatar_url:
+                existing.avatar_url = avatar_url
+            if full_name and not existing.full_name:
+                existing.full_name = full_name
+            db.session.add(
+                OAuthIdentity(
+                    user_id=existing.id,
+                    provider=provider,
+                    provider_user_id=provider_user_id,
+                    email=email,
+                )
+            )
+            db.session.commit()
+            return existing
 
     role = get_or_create_default_role("student")
     user = User(

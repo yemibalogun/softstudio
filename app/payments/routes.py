@@ -52,6 +52,7 @@ def verify(purchase_id):
 
 @bp.route("/webhook/<provider_name>", methods=["POST"])
 @csrf.exempt  # webhooks are authenticated via signature header, not CSRF token
+@limiter.exempt  # authenticated by signature, not IP; must not drop provider retries
 def webhook(provider_name):
     from app.models import Purchase
 

@@ -17,8 +17,8 @@ class Testimonial(db.Model, TimestampMixin):
     related_project_id = db.Column(db.Integer, db.ForeignKey("projects.id"))
     related_course_id = db.Column(db.Integer, db.ForeignKey("courses.id"))
 
-    approved = db.Column(db.Boolean, default=False, nullable=False)
-    featured = db.Column(db.Boolean, default=False, nullable=False)
+    approved = db.Column(db.Boolean, default=False, nullable=False, index=True)
+    featured = db.Column(db.Boolean, default=False, nullable=False, index=True)
     display_order = db.Column(db.Integer, default=0, nullable=False)
 
     related_project = db.relationship("Project")

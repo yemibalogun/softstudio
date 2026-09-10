@@ -20,7 +20,7 @@ class Service(db.Model, TimestampMixin):
 
     icon = db.Column(db.String(120))
     display_order = db.Column(db.Integer, default=0, nullable=False)
-    published = db.Column(db.Boolean, default=True, nullable=False)
+    published = db.Column(db.Boolean, default=True, nullable=False, index=True)
 
     meta_title = db.Column(db.String(180))
     meta_description = db.Column(db.String(300))

@@ -3,9 +3,10 @@ from typing import cast
 
 from flask import Blueprint, render_template, abort, redirect, url_for, flash
 from flask_login import login_required, current_user
+from sqlalchemy.orm import selectinload
 
 from app.extensions import db
-from app.models import Course, Lesson, Enrollment, LessonProgress
+from app.models import Course, CourseSection, Lesson, Enrollment, LessonProgress
 
 bp = Blueprint("learning", __name__)
 
@@ -35,22 +36,30 @@ def _user_can_access_lesson(user, lesson: Lesson) -> bool:
 def dashboard():
     enrollments = (
         Enrollment.query.filter_by(user_id=current_user.id, status="active")
+        .options(
+            selectinload(Enrollment.course)
+            .selectinload(Course.sections)
+            .selectinload(CourseSection.lessons)
+        )
         .order_by(Enrollment.enrolled_at.desc())
         .all()
     )
 
+    # All of this user's completed lesson ids, fetched once rather than
+    # re-querying (and, previously, mis-scoping) per enrollment below.
+    completed_lesson_ids = {
+        lesson_id
+        for (lesson_id,) in LessonProgress.query.filter_by(
+            user_id=current_user.id, completed=True
+        ).with_entities(LessonProgress.lesson_id)
+    }
+
     course_progress = []
     for enrollment in enrollments:
         course = enrollment.course
-        total = course.lesson_count
-        completed = (
-            LessonProgress.query.join(Lesson)
-            .filter(
-                LessonProgress.user_id == current_user.id,
-                LessonProgress.completed.is_(True),
-            )
-            .count()
-        )
+        lesson_ids = [lesson.id for section in course.sections for lesson in section.lessons]
+        total = len(lesson_ids)
+        completed = sum(1 for lesson_id in lesson_ids if lesson_id in completed_lesson_ids)
         percent = int((completed / total) * 100) if total else 0
         course_progress.append({"course": course, "percent": percent, "completed": completed, "total": total})
 

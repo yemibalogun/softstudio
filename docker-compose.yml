@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: softstudio
-      POSTGRES_PASSWORD: softstudio
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-softstudio}
       POSTGRES_DB: softstudio
     volumes:
       - postgres_data:/var/lib/postgresql/data

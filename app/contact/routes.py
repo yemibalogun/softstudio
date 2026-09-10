@@ -38,7 +38,9 @@ def index():
         inquiry.budget_range=_clean(form.budget_range.data)
         inquiry.timeline=_clean(form.timeline.data)
         inquiry.referral_source=_clean(form.referral_source.data)
-        inquiry.ip_address=request.headers.get("X-Forwarded-For", request.remote_addr)
+        # request.remote_addr is now the real client IP - ProxyFix (app/__init__.py)
+        # parses the trusted X-Forwarded-For hop instead of us reading the raw header.
+        inquiry.ip_address=request.remote_addr
         inquiry.user_agent=request.headers.get("User-Agent", "")[:255]
         
         db.session.add(inquiry)

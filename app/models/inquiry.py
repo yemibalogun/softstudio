@@ -25,7 +25,7 @@ class ProjectInquiry(db.Model, TimestampMixin):
     timeline = db.Column(db.String(60))
     referral_source = db.Column(db.String(120))
 
-    status = db.Column(db.String(20), default="new", nullable=False)
+    status = db.Column(db.String(20), default="new", nullable=False, index=True)
     admin_notes = db.Column(db.Text)
 
     ip_address = db.Column(db.String(64))

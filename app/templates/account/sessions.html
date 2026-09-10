@@ -81,7 +81,7 @@
                     <span>
                       Last active
                       {% if s.last_active_at %}
-                        {{ s.last_active_at.strftime('%b %-d, %Y %H:%M') }}
+                        {{ s.last_active_at | datefmt('datetime') }}
                       {% else %}
                         —
                       {% endif %}

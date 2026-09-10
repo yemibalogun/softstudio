@@ -42,13 +42,19 @@
     href="{{ url_for('static', filename='site.webmanifest') }}"
   >
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
+  <!-- Fonts: self-hosted (see @font-face in tailwind.input.css). Preload the
+       two latin faces used above the fold; the rest load from the stylesheet. -->
   <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="preload" as="font" type="font/woff2" crossorigin
+    href="{{ url_for('static', filename='fonts/inter-latin.woff2') }}"
+  >
+  <link
+    rel="preload" as="font" type="font/woff2" crossorigin
+    href="{{ url_for('static', filename='fonts/space-grotesk-latin.woff2') }}"
+  >
+  <link
+    rel="preload" as="font" type="font/woff2" crossorigin
+    href="{{ url_for('static', filename='fonts/fraunces-latin.woff2') }}"
   >
 
   <!--
@@ -74,7 +80,13 @@
 
   <link
     rel="stylesheet"
-    href="{{ url_for('static', filename='css/partiicles.css') }}"
+    href="{{ url_for('static', filename='css/particles.css') }}"
+  >
+
+  <!-- Pygments token palette for fenced code blocks in blog posts. -->
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/pygments.css') }}"
   >
 
   {% block extra_css %}{% endblock %}
@@ -124,11 +136,6 @@
   <script
     src="{{ url_for('static', filename='js/main.js') }}"
     defer
-  ></script>
-
-  <!-- Particle animation -->
-  <script
-    src="{{ url_for('static', filename='js/particles.js') }}"
   ></script>
 
   {% block extra_js %}{% endblock %}

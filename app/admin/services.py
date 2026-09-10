@@ -1,5 +1,30 @@
+import bleach
+
 from app.extensions import db
 from app.admin.forms import slugify
+
+# NOTE: blog post bodies moved to Markdown - they are rendered and
+# sanitized at display time by app/blog/render.py, not here. This
+# allowlist / sanitize_html() is kept for any other admin-authored HTML
+# field that may need it.
+ALLOWED_HTML_TAGS = [
+    "p", "h1", "h2", "h3", "h4", "h5", "h6",
+    "ul", "ol", "li", "blockquote", "pre", "code",
+    "strong", "em", "a", "img", "br", "hr",
+]
+ALLOWED_HTML_ATTRS = {
+    "a": ["href", "title", "rel", "target"],
+    "img": ["src", "alt", "title"],
+}
+
+
+def sanitize_html(value: str) -> str:
+    """Strip any tag/attribute not in the allowlist from admin-authored HTML."""
+    if not value:
+        return value
+    return bleach.clean(
+        value, tags=ALLOWED_HTML_TAGS, attributes=ALLOWED_HTML_ATTRS, strip=True
+    )
 
 
 def unique_slug(model, base_value: str, current_id: int | None = None) -> str:

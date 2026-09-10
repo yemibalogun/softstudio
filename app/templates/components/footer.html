@@ -1,5 +1,5 @@
 <footer class="border-t border-base-300 bg-base-200/50">
-  <div class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+  <div class="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
 
     <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
 
@@ -17,73 +17,50 @@
             class="h-9 w-auto transition-transform duration-200 group-hover:scale-105"
           >
 
-          <span class="text-lg font-bold tracking-tight">
+          <span class="font-display text-lg font-semibold tracking-tight">
             {{ site_name }}
           </span>
         </a>
 
         <p class="mt-5 max-w-sm text-sm leading-6 text-base-content/65">
           Custom software, business automation, and practical developer
-          training — built and taught by someone who ships production code.
+          training, built and taught by someone who ships production code.
         </p>
 
       </div>
 
       <!-- Explore -->
       <div>
-        <h3 class="text-sm font-semibold uppercase tracking-wider text-base-content">
+        <h3 class="font-mono text-xs font-medium uppercase tracking-widest text-base-content/50">
           Explore
         </h3>
 
         <ul class="mt-5 space-y-3">
-
-          <li>
-            <a
-              href="{{ url_for('projects.index') }}"
-              class="text-sm text-base-content/65 transition-colors hover:text-primary"
-            >
-              Applications
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="{{ url_for('courses.index') }}"
-              class="text-sm text-base-content/65 transition-colors hover:text-primary"
-            >
-              Courses
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="{{ url_for('services.index') }}"
-              class="text-sm text-base-content/65 transition-colors hover:text-primary"
-            >
-              Services
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="{{ url_for('blog.index') }}"
-              class="text-sm text-base-content/65 transition-colors hover:text-primary"
-            >
-              Blog
-            </a>
-          </li>
-
+          {% for endpoint, label in [
+            ('projects.index', 'Applications'),
+            ('courses.index', 'Courses'),
+            ('services.index', 'Services'),
+            ('blog.index', 'Blog'),
+          ] %}
+            <li>
+              <a
+                href="{{ url_for(endpoint) }}"
+                class="text-sm text-base-content/65 transition-colors hover:text-primary"
+              >
+                {{ label }}
+              </a>
+            </li>
+          {% endfor %}
         </ul>
       </div>
 
       <!-- Company -->
       <div>
-        <h3 class="text-sm font-semibold uppercase tracking-wider text-base-content">
+        <h3 class="font-mono text-xs font-medium uppercase tracking-widest text-base-content/50">
           Company
         </h3>
 
         <ul class="mt-5 space-y-3">
-
           <li>
             <a
               href="{{ url_for('main.about') }}"
@@ -92,7 +69,6 @@
               About
             </a>
           </li>
-
           <li>
             <a
               href="{{ url_for('contact.index') }}"
@@ -101,27 +77,16 @@
               Contact
             </a>
           </li>
-
-          <li>
-            <a
-              href="{{ url_for('contact.index') }}"
-              class="text-sm text-base-content/65 transition-colors hover:text-primary"
-            >
-              Start a Project
-            </a>
-          </li>
-
         </ul>
       </div>
 
       <!-- Legal -->
       <div>
-        <h3 class="text-sm font-semibold uppercase tracking-wider text-base-content">
+        <h3 class="font-mono text-xs font-medium uppercase tracking-widest text-base-content/50">
           Legal
         </h3>
 
         <ul class="mt-5 space-y-3">
-
           <li>
             <a
               href="{{ url_for('legal.privacy') }}"
@@ -130,7 +95,6 @@
               Privacy Policy
             </a>
           </li>
-
           <li>
             <a
               href="{{ url_for('legal.cookies') }}"
@@ -139,7 +103,6 @@
               Cookie Policy
             </a>
           </li>
-
           <li>
             <a
               href="{{ url_for('legal.terms') }}"
@@ -148,7 +111,6 @@
               Terms
             </a>
           </li>
-
           <li>
             <a
               href="{{ url_for('legal.refunds') }}"
@@ -171,7 +133,6 @@
               Cookie Settings
             </a>
           </li>
-
         </ul>
       </div>
 
@@ -186,7 +147,6 @@
 
       <!-- Social links -->
       <div class="flex items-center gap-5">
-
         <a
           href="https://github.com/yemibalogun"
           aria-label="GitHub"
@@ -196,7 +156,6 @@
         >
           GitHub
         </a>
-
         <a
           href="https://www.linkedin.com/in/olayemi-balogun-a07a12176/"
           aria-label="LinkedIn"
@@ -206,7 +165,6 @@
         >
           LinkedIn
         </a>
-
         <a
           href="https://youtube.com/"
           aria-label="YouTube"
@@ -216,7 +174,6 @@
         >
           YouTube
         </a>
-
       </div>
 
     </div>

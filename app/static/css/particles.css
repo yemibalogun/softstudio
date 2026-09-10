@@ -1,12 +1,128 @@
+/*
+ * Ambient background layers.
+ *
+ * Replaces the old glowing particle-network canvas. Pure CSS, animates
+ * only transform / opacity, no JS. Tuned to be felt, not noticed:
+ * slow drift, low opacity, on-brand blue + gold.
+ */
+
 #particle-background {
   position: fixed;
   inset: 0;
   pointer-events: none;
   overflow: hidden;
+  background-color: var(--color-base-100, #080b12);
 }
 
-#particle-canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
+/* ----------------------------------------------------------------------
+   Layer 1 - drifting colour fields
+   ---------------------------------------------------------------------- */
+
+.ambient-field {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+.ambient-field--primary {
+  top: -18vmax;
+  left: -12vmax;
+  width: 55vmax;
+  height: 55vmax;
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in oklab, var(--color-primary) 55%, transparent),
+    transparent 68%
+  );
+  animation: ambient-drift-a 34s ease-in-out infinite alternate;
+}
+
+.ambient-field--secondary {
+  right: -20vmax;
+  bottom: -22vmax;
+  width: 48vmax;
+  height: 48vmax;
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in oklab, var(--color-secondary) 42%, transparent),
+    transparent 70%
+  );
+  opacity: 0.32;
+  animation: ambient-drift-b 46s ease-in-out infinite alternate;
+}
+
+@keyframes ambient-drift-a {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(8vmax, 6vmax, 0) scale(1.12);
+  }
+}
+
+@keyframes ambient-drift-b {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+  100% {
+    transform: translate3d(-7vmax, -5vmax, 0) scale(1);
+  }
+}
+
+/* ----------------------------------------------------------------------
+   Layer 2 - dot grid
+   ---------------------------------------------------------------------- */
+
+.ambient-grid {
+  position: absolute;
+  inset: -1px;
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--color-base-content) 6%, transparent) 1px,
+    transparent 1.4px
+  );
+  background-size: 34px 34px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 120% 90% at 50% 0%,
+    #000 15%,
+    transparent 75%
+  );
+  mask-image: radial-gradient(
+    ellipse 120% 90% at 50% 0%,
+    #000 15%,
+    transparent 75%
+  );
+}
+
+/* ----------------------------------------------------------------------
+   Layer 3 - grain + vignette (static, hides gradient banding)
+   ---------------------------------------------------------------------- */
+
+.ambient-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.ambient-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 100% 100% at 50% 30%,
+    transparent 45%,
+    color-mix(in oklab, var(--color-base-100) 80%, black) 100%
+  );
+}
+
+/* ----------------------------------------------------------------------
+   Reduced motion - freeze the drift, keep the composition
+   ---------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-field {
+    animation: none;
+  }
 }

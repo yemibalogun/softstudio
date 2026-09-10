@@ -1,21 +1,35 @@
-﻿<figure
-  class="card h-full border border-base-300 bg-base-100 shadow-sm"
->
-  <div class="card-body">
+<figure class="card flex h-full flex-col justify-between rounded-box p-6">
 
-    <!--
-      The quote is supplied by the existing Flask/Jinja context.
-      No backend or model changes are required.
-    -->
-    <blockquote class="text-lg leading-8 text-base-content">
+  <blockquote class="text-base leading-7 text-base-content/85">
+    <span class="mb-2 block font-display text-3xl leading-none text-secondary/60" aria-hidden="true">&ldquo;</span>
+    <span class="line-clamp-4">{{ testimonial.quote }}</span>
+  </blockquote>
+
+  <figcaption class="mt-6 flex items-center gap-3 border-t border-base-300 pt-4">
+    {% if testimonial.author_avatar %}
+      <img
+        src="{{ testimonial.author_avatar }}"
+        alt="{{ testimonial.author_name }}"
+        class="h-9 w-9 shrink-0 rounded-full object-cover"
+        loading="lazy"
+      >
+    {% else %}
       <span
-        class="mb-3 block text-4xl leading-none text-secondary/70"
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-base-300 font-mono text-xs text-base-content/60"
         aria-hidden="true"
-      >“</span>
+      >{{ testimonial.author_name[:1]|upper }}</span>
+    {% endif %}
 
-      {{ testimonial.quote }}
+    <span class="min-w-0">
+      <span class="block truncate text-sm font-semibold text-base-content">
+        {{ testimonial.author_name }}
+      </span>
+      {% if testimonial.author_title %}
+        <span class="block truncate text-xs text-base-content/55">
+          {{ testimonial.author_title }}
+        </span>
+      {% endif %}
+    </span>
+  </figcaption>
 
-    </blockquote>
-
-  </div>
 </figure>

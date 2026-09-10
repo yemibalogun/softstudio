@@ -42,8 +42,8 @@ class Project(db.Model, TimestampMixin):
 
     category = db.Column(db.String(80), index=True)
     status = db.Column(db.String(20), default="live", nullable=False)
-    featured = db.Column(db.Boolean, default=False, nullable=False)
-    published = db.Column(db.Boolean, default=False, nullable=False)
+    featured = db.Column(db.Boolean, default=False, nullable=False, index=True)
+    published = db.Column(db.Boolean, default=False, nullable=False, index=True)
 
     thumbnail = db.Column(db.String(512))
     hero_image = db.Column(db.String(512))
@@ -76,7 +76,7 @@ class ProjectImage(db.Model, TimestampMixin):
     __tablename__ = "project_images"
 
     id = db.Column(db.Integer, primary_key=True)
-    project_id = db.Column(db.Integer, db.ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True)
 
     image_url = db.Column(db.String(512), nullable=False)
     alt_text = db.Column(db.String(255))

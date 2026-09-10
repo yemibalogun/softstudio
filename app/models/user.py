@@ -36,7 +36,7 @@ class User(db.Model, UserMixin, TimestampMixin):
     full_name = db.Column(db.String(120), nullable=False)
     avatar_url = db.Column(db.String(512))
 
-    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    is_active = db.Column(db.Boolean, default=True, nullable=False, index=True)
 
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
     role = db.relationship("Role", back_populates="users")

@@ -38,15 +38,15 @@ class Course(db.Model, TimestampMixin):
     difficulty = db.Column(db.String(20), default="beginner", nullable=False)
     duration_minutes = db.Column(db.Integer, default=0)  # denormalized total, kept in sync on lesson save
 
-    published = db.Column(db.Boolean, default=False, nullable=False)
-    featured = db.Column(db.Boolean, default=False, nullable=False)
+    published = db.Column(db.Boolean, default=False, nullable=False, index=True)
+    featured = db.Column(db.Boolean, default=False, nullable=False, index=True)
 
     # Stored as newline-delimited text; rendered as bullet lists.
     learning_objectives = db.Column(db.Text)
     requirements = db.Column(db.Text)
     target_audience = db.Column(db.Text)
 
-    category_id = db.Column(db.Integer, db.ForeignKey("course_categories.id"))
+    category_id = db.Column(db.Integer, db.ForeignKey("course_categories.id"), index=True)
     category = db.relationship("CourseCategory", back_populates="courses")
 
     meta_title = db.Column(db.String(180))
@@ -80,7 +80,7 @@ class CourseSection(db.Model, TimestampMixin):
     __tablename__ = "course_sections"
 
     id = db.Column(db.Integer, primary_key=True)
-    course_id = db.Column(db.Integer, db.ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey("courses.id", ondelete="CASCADE"), nullable=False, index=True)
 
     title = db.Column(db.String(180), nullable=False)
     display_order = db.Column(db.Integer, default=0, nullable=False)

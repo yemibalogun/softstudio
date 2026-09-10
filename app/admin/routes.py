@@ -519,6 +519,8 @@ def _apply_blog_form(post: BlogPost, form: BlogPostForm, is_new: bool) -> None:
     base_slug: str = form.slug.data or form.title.data or ""
     post.slug = unique_slug(BlogPost, base_slug, current_id=post.id if not is_new else None)
     post.excerpt = form.excerpt.data
+    # Stored as raw Markdown; rendered + sanitized at display time by the
+    # `markdown` Jinja filter (app/blog/render.py).
     post.body = form.body.data
     post.featured_image = form.featured_image.data
     post.category_id = form.category_id.data or None

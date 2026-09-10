@@ -1,154 +1,63 @@
+/*
+ * Card treatment.
+ *
+ * Was: animated rainbow neon border on hover. Now: a hairline that
+ * warms toward the brand on hover, a shadow tinted to the page (not
+ * pure black), and a small lift. Elevation communicates "this is
+ * interactive", nothing more.
+ */
+
 .card {
-    position: relative;
-    isolation: isolate;
-    z-index: 0;
-
-    border: 1px solid rgba(59, 130, 246, 0.18);
-
-    transition:
-        transform 220ms ease,
-        border-color 220ms ease,
-        box-shadow 220ms ease,
-        background-color 220ms ease;
+  position: relative;
+  border: 1px solid color-mix(in oklab, var(--color-base-content) 10%, transparent);
+  background-color: var(--color-base-200);
+  transition:
+    transform 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease;
 }
 
-
-/*
- * Thin neon glow layer.
- *
- * The previous 7px blur produced a large atmospheric glow.
- * 3px gives us a much tighter halo immediately around the edge.
- */
-.card::before {
-    content: "";
-
-    position: absolute;
-    inset: -1px;
-
-    border-radius: inherit;
-
-    background:
-        linear-gradient(
-            120deg,
-            rgba(37, 99, 235, 0),
-            rgba(59, 130, 246, 0.8),
-            rgba(245, 184, 0, 0.65),
-            rgba(59, 130, 246, 0.8),
-            rgba(37, 99, 235, 0)
-        );
-
-    background-size: 300% 300%;
-
-    opacity: 0;
-
-    /* Reduced from 7px for a much thinner glow. */
-    filter: blur(3px);
-
-    transition: opacity 250ms ease;
-
-    pointer-events: none;
-
-    z-index: -2;
-}
-
-
-/*
- * Keeps the card interior clean while the neon layer sits
- * underneath the actual content.
- */
-.card::after {
-    content: "";
-
-    position: absolute;
-    inset: 1px;
-
-    border-radius: inherit;
-
-    background: var(--color-surface, #111722);
-
-    pointer-events: none;
-
-    z-index: -1;
-}
-
-
-/*
- * Tight hover glow.
- *
- * Notice that the outer shadows are now much smaller than
- * the previous version.
- */
 .card:hover {
-    transform: translateY(-3px);
-
-    border-color: rgba(59, 130, 246, 0.7);
-
-    box-shadow:
-        0 0 0 1px rgba(59, 130, 246, 0.12),
-        0 0 7px rgba(59, 130, 246, 0.28),
-        0 8px 24px rgba(0, 0, 0, 0.30);
+  transform: translateY(-3px);
+  border-color: color-mix(in oklab, var(--color-primary) 45%, transparent);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 14px 32px color-mix(in oklab, var(--color-primary) 14%, transparent);
 }
 
-.card:hover::before {
-    opacity: 1;
-
-    animation: card-neon-border 3.5s linear infinite;
-}
-
-
-@keyframes card-neon-border {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-
-/*
- * Gold variant.
- */
+/* Gold accent variant (courses) */
 .card--gold:hover {
-    border-color: rgba(245, 184, 0, 0.75);
-
-    box-shadow:
-        0 0 0 1px rgba(245, 184, 0, 0.12),
-        0 0 7px rgba(245, 184, 0, 0.30),
-        0 8px 24px rgba(0, 0, 0, 0.30);
+  border-color: color-mix(in oklab, var(--color-secondary) 48%, transparent);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 14px 32px color-mix(in oklab, var(--color-secondary) 14%, transparent);
 }
 
-.card--gold::before {
-    background:
-        linear-gradient(
-            120deg,
-            rgba(245, 184, 0, 0),
-            rgba(255, 212, 90, 0.9),
-            rgba(245, 184, 0, 0.55),
-            rgba(255, 212, 90, 0.9),
-            rgba(245, 184, 0, 0)
-        );
-
-    background-size: 300% 300%;
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+  .card:hover {
+    transform: none;
+  }
 }
-
 
 /*
- * Respect users who have requested reduced motion.
+ * Closing CTA panel - faint dot field so the gradient block has texture
+ * without another glow.
  */
-@media (prefers-reduced-motion: reduce) {
-    .card,
-    .card::before {
-        transition: none;
-        animation: none !important;
-    }
-
-    .card:hover {
-        transform: none;
-    }
+.cta-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.5;
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--color-primary) 22%, transparent) 1px,
+    transparent 1.5px
+  );
+  background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000, transparent 78%);
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000, transparent 78%);
+  pointer-events: none;
 }

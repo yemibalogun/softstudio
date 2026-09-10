@@ -40,11 +40,11 @@ class BlogPost(db.Model, TimestampMixin):
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     author = db.relationship("User")
 
-    category_id = db.Column(db.Integer, db.ForeignKey("blog_categories.id"))
+    category_id = db.Column(db.Integer, db.ForeignKey("blog_categories.id"), index=True)
     category = db.relationship("BlogCategory", back_populates="posts")
     tags = db.relationship("BlogTag", secondary=blog_post_tags, backref="posts")
 
-    published = db.Column(db.Boolean, default=False, nullable=False)
+    published = db.Column(db.Boolean, default=False, nullable=False, index=True)
     published_at = db.Column(db.DateTime(timezone=True))
 
     meta_title = db.Column(db.String(180))

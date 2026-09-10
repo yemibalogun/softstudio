@@ -110,7 +110,7 @@
 
               <!-- Created date -->
               <td class="whitespace-nowrap text-sm text-base-content/60">
-                {{ post.created_at.strftime('%b %-d, %Y') }}
+                {{ post.created_at | datefmt }}
               </td>
 
 

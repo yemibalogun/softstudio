@@ -22,8 +22,8 @@ class OAuthIdentity(db.Model, TimestampMixin):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
-    provider = db.Column(db.String(32), nullable=False)  # 'google' | 'github'
-    provider_user_id = db.Column(db.String(255), nullable=False)
+    provider = db.Column(db.String(32), nullable=False, index=True)  # 'google' | 'github'
+    provider_user_id = db.Column(db.String(255), nullable=False, index=True)
     email = db.Column(db.String(255))
 
     user = db.relationship("User", back_populates="oauth_identities")

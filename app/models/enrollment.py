@@ -20,7 +20,7 @@ class Enrollment(db.Model, TimestampMixin):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     course_id = db.Column(db.Integer, db.ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
 
-    status = db.Column(db.String(20), default="active", nullable=False)
+    status = db.Column(db.String(20), default="active", nullable=False, index=True)
     source = db.Column(db.String(20), default="purchase", nullable=False)  # purchase | admin_grant | coupon
 
     purchase_id = db.Column(db.Integer, db.ForeignKey("purchases.id"))
@@ -45,9 +45,9 @@ class LessonProgress(db.Model, TimestampMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    lesson_id = db.Column(db.Integer, db.ForeignKey("lessons.id", ondelete="CASCADE"), nullable=False)
+    lesson_id = db.Column(db.Integer, db.ForeignKey("lessons.id", ondelete="CASCADE"), nullable=False, index=True)
 
-    completed = db.Column(db.Boolean, default=False, nullable=False)
+    completed = db.Column(db.Boolean, default=False, nullable=False, index=True)
     completed_at = db.Column(db.DateTime(timezone=True))
     last_position_seconds = db.Column(db.Integer, default=0)
 

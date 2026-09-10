@@ -67,7 +67,7 @@
               </td>
 
               <td class="whitespace-nowrap text-sm text-base-content/60">
-                {{ purchase.created_at.strftime('%b %-d, %Y') }}
+                {{ purchase.created_at | datefmt }}
               </td>
 
             </tr>

@@ -59,29 +59,35 @@
 
 
 <!-- ============================================================
-     SOCIAL REGISTRATION
+     SOCIAL REGISTRATION  -  only for providers configured in the env
      ============================================================ -->
+{% if oauth_providers %}
 <div class="divider my-7 text-xs uppercase tracking-wider text-base-content/40">
   Or continue with
 </div>
 
 <div class="space-y-3">
 
+  {% if "google" in oauth_providers %}
   <a
     href="{{ url_for('auth.oauth_login', provider='google') }}"
     class="btn btn-outline btn-block"
   >
     Continue with Google
   </a>
+  {% endif %}
 
+  {% if "github" in oauth_providers %}
   <a
     href="{{ url_for('auth.oauth_login', provider='github') }}"
     class="btn btn-outline btn-block"
   >
     Continue with GitHub
   </a>
+  {% endif %}
 
 </div>
+{% endif %}
 
 
 <!-- ============================================================

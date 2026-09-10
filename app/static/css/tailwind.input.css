@@ -10,13 +10,101 @@
  * app/templates/
  */
 @source "../../templates";
+@plugin "@tailwindcss/typography";
 @plugin "daisyui";
+
+/*
+ * Self-hosted webfonts - latin + latin-ext, variable woff2 (weight 400-700).
+ * Files live in app/static/fonts/. Regenerate: scratchpad/fetch_fonts.py
+ * Served locally so the app carries no third-party font dependency and needs
+ * no CSP exception for fonts.googleapis.com / fonts.gstatic.com.
+ */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../fonts/inter-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../fonts/inter-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../fonts/space-grotesk-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../fonts/space-grotesk-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../fonts/jetbrains-mono-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../fonts/jetbrains-mono-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* Fraunces - serif display face for the hero + section headings. Variable
+   (opsz 9-144, wght 400-600); headings set font-optical-sizing: auto. */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('../fonts/fraunces-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('../fonts/fraunces-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/*
+ * Font tokens. Defined in @theme so Tailwind also generates the matching
+ * utilities (font-sans / font-display / font-serif / font-mono). Body text
+ * stays on a neutral grotesque; big headings get an editorial serif voice;
+ * UI-scale headings (h3+) keep the grotesque for a technical register.
+ */
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --font-serif: "Fraunces", "Space Grotesk", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+}
 
 @layer base {
   html {
-    font-family: "Inter", system-ui, sans-serif;
+    font-family: var(--font-sans);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
   }
 
   body {
@@ -32,36 +120,123 @@
   h4,
   h5,
   h6 {
-    font-family: "Inter", system-ui, sans-serif;
-    font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.025em;
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  /* Hero + section headings: editorial serif. Optical sizing lets Fraunces
+     grow more expressive as the type scales up. Serifs carry their weight
+     visually, so we run them lighter and looser than the grotesque. */
+  h1,
+  h2 {
+    font-family: var(--font-serif);
+    font-optical-sizing: auto;
+    font-weight: 460;
   }
 
   h1 {
-    font-size: clamp(2.25rem, 5vw, 4rem);
+    font-size: clamp(2.75rem, 6vw, 4.5rem);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
   }
 
   h2 {
-    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-size: clamp(2rem, 3.5vw, 2.9rem);
+    line-height: 1.14;
+    letter-spacing: -0.018em;
   }
 
   h3 {
-    font-size: 1.5rem;
+    font-size: 1.375rem;
   }
 
   h4 {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
   }
 
   p {
-    max-width: 70ch;
+    max-width: 68ch;
   }
+
+  /* Long-form prose paragraphs can opt back in to a wider measure by
+     living outside a `.prose`-less container; default keeps line length
+     readable. */
 
   code,
   pre,
   kbd {
-    font-family: "JetBrains Mono", monospace;
+    font-family: var(--font-mono);
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-secondary) 30%, transparent);
+    color: var(--color-base-content);
+  }
+
+  /* Consistent, on-brand focus ring for keyboard users across every
+     interactive element (daisyUI's default is inconsistent per-component). */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-primary) 80%, white);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/*
+ * Small utility layer for the redesigned marketing surfaces.
+ * Kept here (not in templates) so the vocabulary is shared and single-source.
+ */
+@layer components {
+  /* Mono kicker / label above a headline. Used sparingly (<= 2 per page). */
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: color-mix(in oklab, var(--color-primary) 90%, white 10%);
+  }
+
+  /* Eyebrow chip - one per page, above the hero headline. A bordered pill
+     with a gold status dot; more physical than a bare kicker. */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.8rem 0.35rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--color-base-content) 14%, transparent);
+    background-color: color-mix(in oklab, var(--color-base-200) 70%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: color-mix(in oklab, var(--color-base-content) 72%, transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-secondary) 22%, transparent);
+  }
+
+  /* Hairline divider that matches the theme border treatment. */
+  .hairline {
+    border-color: color-mix(in oklab, var(--color-base-content) 12%, transparent);
+  }
+
+  /* Section rhythm: generous but not cavernous (VISUAL_DENSITY 4). */
+  .section-y {
+    padding-block: clamp(3.5rem, 7vw, 5.5rem);
   }
 }
 
@@ -108,11 +283,81 @@
     --color-error-content: #FFFFFF;
 
     --radius-selector: 0.625rem;
-    --radius-field: 0.625rem;
-    --radius-box: 1rem;
+    --radius-field: 0.75rem;
+    --radius-box: 1.375rem;
 
     --border: 1px;
 
     --depth: 1;
     --noise: 0;
+}
+/*
+ * Blog article typography.
+ *
+ * Base rhythm/spacing comes from @tailwindcss/typography (`prose prose-lg`)
+ * with daisyUI supplying the `--tw-prose-*` colours for the dark theme.
+ * Below: brand-link colour, and full ownership of the fenced-code-block
+ * look (Pygments wraps highlighted code as `<div class="highlight"><pre>`;
+ * token colours are in pygments.css).
+ *
+ * NOT in @layer - the typography plugin's own rules sit in a later layer,
+ * so layered overrides here lose the cascade regardless of specificity.
+ * Unlayered rules beat all layered ones.
+ */
+.prose {
+  --tw-prose-links: var(--color-primary);
+  --tw-prose-bold: var(--color-base-content);
+}
+
+.prose :where(a):not(:where([class~="not-prose"] *)) {
+  font-weight: 500;
+  text-decoration-line: none;
+}
+.prose :where(a):not(:where([class~="not-prose"] *)):hover {
+  text-decoration-line: underline;
+}
+
+/* Inline code - keep daisyUI's chip, just set the mono face + size. */
+.prose :where(code):not(pre > code) {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+/* Fenced / indented code block wrapper. */
+.prose :where(.highlight) {
+  margin-block: 1.7em;
+  border: 1px solid color-mix(in oklab, var(--color-base-content) 12%, transparent);
+  border-radius: var(--radius-box);
+  background-color: #282c34; /* matches pygments 'one-dark' ground */
+  overflow-x: auto;
+}
+
+.prose :where(.highlight) pre {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  background: transparent;
+  border-radius: 0;
+  color: #abb2bf;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  line-height: 1.7;
+  tab-size: 4;
+}
+
+.prose :where(.highlight) pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
+/* codehilite prepends an empty <span> and a trailing newline to every
+   block - collapse the phantom lines they create. */
+.prose :where(.highlight) pre > span:empty:first-child {
+  display: none;
+}
+.prose :where(.highlight) pre code {
+  display: block;
 }

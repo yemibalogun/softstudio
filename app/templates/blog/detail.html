@@ -66,7 +66,7 @@
       {% if post.published_at %}
 
         <time datetime="{{ post.published_at.isoformat() }}">
-          {{ post.published_at.strftime('%B %-d, %Y') }}
+          {{ post.published_at | datefmt('long') }}
         </time>
 
       {% endif %}
@@ -106,20 +106,14 @@
   <div class="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
 
     <!--
-      post.body is trusted HTML generated/stored by the application,
-      so the existing |safe behavior is intentionally preserved.
+      post.body is Markdown. The `markdown` filter renders it to HTML and
+      runs the result through a strict bleach allowlist (app/blog/render.py),
+      so the output is safe to emit here. Typography comes from the
+      @tailwindcss/typography `prose` classes; code-block styling and the
+      Pygments token palette live in tailwind.input.css.
     -->
-    <article
-      class="prose prose-lg max-w-none
-             prose-headings:font-bold
-             prose-headings:text-base-content
-             prose-p:text-base-content/70
-             prose-li:text-base-content/70
-             prose-a:text-primary
-             prose-a:no-underline
-             hover:prose-a:underline"
-    >
-      {{ post.body|safe }}
+    <article class="prose prose-lg max-w-none">
+      {{ post.body | markdown }}
     </article>
 
 

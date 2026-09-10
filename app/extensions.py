@@ -20,7 +20,13 @@ login_manager = LoginManager()
 csrf = CSRFProtect()
 mail = Mail()
 oauth = OAuth()
-limiter = Limiter(key_func=get_remote_address)
+
+# Per-route @limiter.limit(...) decorators (auth, contact, checkout) set the
+# tight limits that actually matter for those endpoints; this default is a
+# generous sitewide floor so a route nobody thought to decorate (admin CRUD,
+# OAuth start/callback, account settings, ...) isn't left completely
+# unprotected. It stacks with any per-route limit rather than replacing it.
+limiter = Limiter(key_func=get_remote_address, default_limits=["200 per hour"])
 
 login_manager.login_view = "auth.login"  # type: ignore[assignment]
 login_manager.login_message = "Please log in to access this page."  # type: ignore[assignment]

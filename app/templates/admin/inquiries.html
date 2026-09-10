@@ -63,7 +63,7 @@
               </td>
 
               <td class="whitespace-nowrap text-sm text-base-content/60">
-                {{ inquiry.created_at.strftime('%b %-d, %Y') }}
+                {{ inquiry.created_at | datefmt }}
               </td>
 
             </tr>

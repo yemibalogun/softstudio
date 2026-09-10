@@ -37,14 +37,14 @@ class Purchase(db.Model, TimestampMixin):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(36), unique=True, nullable=False, default=gen_uuid, index=True)
 
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     course_id = db.Column(db.Integer, db.ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
     coupon_id = db.Column(db.Integer, db.ForeignKey("coupons.id"))
 
     amount = db.Column(db.Numeric(10, 2), nullable=False)  # server-computed, authoritative
     currency = db.Column(db.String(8), nullable=False)
 
-    status = db.Column(db.String(20), default="pending", nullable=False)
+    status = db.Column(db.String(20), default="pending", nullable=False, index=True)
 
     user = db.relationship("User", back_populates="purchases")
     course = db.relationship("Course")
