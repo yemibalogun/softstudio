@@ -13,3 +13,7 @@ venv
 tests
 *.md
 .github
+node_modules
+.playwright-mcp
+certbot
+deploy
