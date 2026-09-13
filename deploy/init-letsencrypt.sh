@@ -34,6 +34,14 @@ done
 # Port 80 must be free for the standalone challenge.
 docker compose -f docker-compose.yml -f docker-compose.prod.yml stop nginx 2>/dev/null || true
 
+holders=$(docker ps --filter publish=80 --format '{{.Names}}  ({{.Image}})')
+if [ -n "$holders" ]; then
+  echo "Port 80 is still held by these containers:" >&2
+  echo "$holders" >&2
+  echo "Stop them (docker stop NAME) and re-run this script." >&2
+  exit 1
+fi
+
 domain_args=()
 for d in "${DOMAINS[@]}"; do domain_args+=(-d "$d"); done
 
