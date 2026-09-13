@@ -8,6 +8,11 @@ EMAIL=${1:?Usage: bash deploy/init-letsencrypt.sh you@example.com}
 DOMAINS=(jaybalostudio.com www.jaybalostudio.com)
 
 cd "$(dirname "$0")/.."
+if ! docker info >/dev/null 2>&1; then
+  echo "Cannot talk to Docker. If setup-server.sh just added you to the docker group," >&2
+  echo "log out and SSH back in (check with: groups | grep docker)." >&2
+  exit 1
+fi
 mkdir -p certbot/conf certbot/www
 
 # live/ is root-only on the host, so check from inside a container.

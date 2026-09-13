@@ -6,6 +6,11 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
 
+if ! docker info >/dev/null 2>&1; then
+  echo "Cannot talk to Docker. If setup-server.sh just added you to the docker group," >&2
+  echo "log out and SSH back in (check with: groups | grep docker)." >&2
+  exit 1
+fi
 if [ ! -f .env ]; then
   echo ".env is missing. Run: cp .env.example .env && nano .env" >&2
   exit 1
