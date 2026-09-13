@@ -1,6 +1,10 @@
-# Production on the shared VPS. shamsfoodstore.com's nginx (food_store-nginx-1)
-# owns ports 80/443 and forwards jaybalostudio.com to our nginx over the
-# food store's Docker network, so nothing here is published to the host.
+# Production: jaybalostudio.com with its own nginx and Let's Encrypt HTTPS.
+#
+# HTTP_BIND / HTTPS_BIND (set in .env) choose where nginx listens on the host.
+# Default "80" / "443" means every IP address. On a server where another site
+# already uses 80/443, bind to an IP of our own, e.g.
+#   HTTP_BIND=203.0.113.20:80
+#   HTTPS_BIND=203.0.113.20:443
 
 services:
   db:
@@ -18,17 +22,22 @@ services:
 
   nginx:
     restart: always
-    ports: !reset []
+    ports: !override
+      - "${HTTP_BIND:-80}:80"
+      - "${HTTPS_BIND:-443}:443"
     volumes:
       - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
       - ./app/static:/app/static:ro
-    networks:
-      default: {}
-      front:
-        aliases:
-          - jaybalostudio
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    # Reload every 6h so renewed certificates are picked up.
+    command: /bin/sh -c 'while :; do sleep 6h; nginx -s reload; done & exec nginx -g "daemon off;"'
 
-networks:
-  front:
-    external: true
-    name: ${FRONT_NETWORK:-food_store_default}
+  certbot:
+    image: ${CERTBOT_IMAGE:-certbot/certbot}
+    restart: always
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    # Renews only when a certificate is within 30 days of expiry.
+    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done'

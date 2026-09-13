@@ -56,5 +56,4 @@ echo
 echo "Done. Log out and back in so the docker group applies, then:"
 echo "  cd $APP_DIR"
 echo "  1. nano $APP_DIR/.env          # fill in SECRET_KEY, POSTGRES_PASSWORD, DATABASE_URL, ..."
-echo "  2. bash deploy/init-letsencrypt.sh you@example.com"
-echo "  3. bash deploy/deploy.sh"
+echo "  2. bash deploy/deploy.sh you@example.com   # first run gets the HTTPS certificate"
