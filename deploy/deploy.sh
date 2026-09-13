@@ -14,7 +14,8 @@ if ! grep -q '^DATABASE_URL=postgresql://' .env || grep -q 'REPLACE_WITH' .env; 
   echo ".env: DATABASE_URL is not filled in." >&2
   exit 1
 fi
-if [ ! -d certbot/conf/live/jaybalostudio.com ]; then
+# live/ is root-only on the host, so check from inside a container.
+if ! docker run --rm -v "$PWD/certbot/conf:/etc/letsencrypt" --entrypoint test certbot/certbot -d /etc/letsencrypt/live/jaybalostudio.com; then
   echo "No HTTPS certificate yet. Run: bash deploy/init-letsencrypt.sh you@example.com" >&2
   exit 1
 fi

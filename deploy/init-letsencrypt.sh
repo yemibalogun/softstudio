@@ -10,7 +10,8 @@ DOMAINS=(jaybalostudio.com www.jaybalostudio.com)
 cd "$(dirname "$0")/.."
 mkdir -p certbot/conf certbot/www
 
-if [ -d "certbot/conf/live/${DOMAINS[0]}" ]; then
+# live/ is root-only on the host, so check from inside a container.
+if docker run --rm -v "$PWD/certbot/conf:/etc/letsencrypt" --entrypoint test certbot/certbot -d "/etc/letsencrypt/live/${DOMAINS[0]}"; then
   echo "Certificate for ${DOMAINS[0]} already exists; nothing to do."
   exit 0
 fi
