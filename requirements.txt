@@ -6,6 +6,7 @@ Flask-WTF
 Flask-Limiter
 Flask-Mail
 Authlib
+requests
 psycopg2-binary
 python-dotenv
 gunicorn

@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Build and (re)start the production stack. Safe to run on every release:
+# Build and (re)start the softstudio stack. Safe to run on every release:
 #   bash deploy/deploy.sh
+# The first time, follow with: sudo bash deploy/front-proxy.sh you@example.com
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
+FRONT_NETWORK=${FRONT_NETWORK:-food_store_default}
 
 if ! docker info >/dev/null 2>&1; then
   echo "Cannot talk to Docker. If setup-server.sh just added you to the docker group," >&2
@@ -19,9 +21,8 @@ if ! grep -q '^DATABASE_URL=postgresql://' .env || grep -q 'REPLACE_WITH' .env; 
   echo ".env: DATABASE_URL is not filled in." >&2
   exit 1
 fi
-# live/ is root-only on the host, so check from inside a container.
-if ! docker run --rm -v "$PWD/certbot/conf:/etc/letsencrypt" --entrypoint test certbot/certbot -d /etc/letsencrypt/live/jaybalostudio.com; then
-  echo "No HTTPS certificate yet. Run: bash deploy/init-letsencrypt.sh you@example.com" >&2
+if ! docker network inspect "$FRONT_NETWORK" >/dev/null 2>&1; then
+  echo "Docker network $FRONT_NETWORK not found; is the food store stack running?" >&2
   exit 1
 fi
 
@@ -42,11 +43,16 @@ $COMPOSE up -d --remove-orphans
 
 echo "==> Waiting for the app"
 for i in $(seq 1 30); do
-  if curl -fsS -o /dev/null https://jaybalostudio.com/robots.txt; then
-    echo "Live: https://jaybalostudio.com"
+  if $COMPOSE exec -T nginx wget -q -O /dev/null http://127.0.0.1/robots.txt 2>/dev/null; then
+    echo "softstudio is running (internal)."
+    if curl -fsS -o /dev/null -m 10 https://jaybalostudio.com/robots.txt 2>/dev/null; then
+      echo "Live: https://jaybalostudio.com"
+    else
+      echo "Not public yet. First time? Run: sudo bash deploy/front-proxy.sh you@example.com"
+    fi
     exit 0
   fi
   sleep 2
 done
-echo "App did not respond over HTTPS. Check: $COMPOSE logs --tail=100 web nginx" >&2
+echo "App did not respond. Check: $COMPOSE logs --tail=100 web nginx" >&2
 exit 1
