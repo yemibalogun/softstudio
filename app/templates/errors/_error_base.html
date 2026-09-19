@@ -2,55 +2,28 @@
 
 {% block content %}
 
-<section class="flex min-h-[60vh] items-center py-20 sm:py-24">
+<section class="horizon flex min-h-[calc(100svh-4.5rem)] items-center">
+  <div class="shell pb-[clamp(12rem,24vw,18rem)] pt-[clamp(3rem,7vw,5rem)] text-center" data-reveal-group="130">
 
-  <div class="mx-auto w-full max-w-2xl px-4 text-center sm:px-6 lg:px-8">
-
-    <!-- ========================================================
-         ERROR CODE
-         ======================================================== -->
-    <div
-      class="text-8xl font-black leading-none tracking-tight text-secondary sm:text-9xl"
-      aria-hidden="true"
-    >
+    <p class="text-[clamp(5rem,14vw,9rem)] font-medium leading-none tracking-[-0.06em] text-transparent [-webkit-text-stroke:1px_rgba(124,203,255,0.45)]" aria-hidden="true" data-reveal>
       {% block error_code %}{% endblock %}
-    </div>
+    </p>
 
-
-    <!-- ========================================================
-         ERROR TITLE
-         ======================================================== -->
-    <h1
-      class="mt-6 text-3xl font-bold tracking-tight text-base-content sm:text-4xl"
-    >
+    <h1 class="mx-auto mt-8 max-w-2xl text-[clamp(2rem,4vw,3.2rem)] text-base-content" data-reveal>
       {% block error_title %}{% endblock %}
     </h1>
 
-
-    <!-- ========================================================
-         ERROR MESSAGE
-         ======================================================== -->
-    <p
-      class="mx-auto mt-4 max-w-xl text-base leading-7 text-base-content/60 sm:text-lg"
-    >
+    <p class="lede mx-auto mt-5 max-w-xl" data-reveal>
       {% block error_message %}{% endblock %}
     </p>
 
-
-    <!-- ========================================================
-         RETURN HOME
-         ======================================================== -->
-    <div class="mt-8">
-      <a
-        href="{{ url_for('main.index') }}"
-        class="btn btn-secondary"
-      >
-        Back Home
+    <div class="mt-10" data-reveal>
+      <a href="{{ url_for('main.index') }}" class="btn btn-primary h-12 px-8">
+        Back to home <span aria-hidden="true">&rarr;</span>
       </a>
     </div>
 
   </div>
-
 </section>
 
 {% endblock %}

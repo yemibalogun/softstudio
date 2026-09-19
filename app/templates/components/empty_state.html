@@ -1,18 +1,18 @@
-<div
-  class="flex min-h-52 flex-col items-center justify-center rounded-2xl border border-dashed border-base-300 bg-base-200/30 px-6 py-10 text-center"
->
-  <h3 class="text-lg font-semibold text-base-content">
+<div class="surface flex min-h-56 flex-col items-center justify-center px-6 py-14 text-center">
+  <span class="accent-rule accent-rule--center" aria-hidden="true"></span>
+
+  <h3 class="mt-7 text-xl font-medium tracking-[-0.02em] text-base-content">
     {{ title|default("Nothing here yet") }}
   </h3>
 
-  <p class="mt-2 max-w-md text-sm leading-6 text-base-content/60">
+  <p class="mt-3 max-w-md text-[0.95rem] leading-7 text-base-content/55">
     {{ description|default("Check back soon.") }}
   </p>
 
   {% if cta_url %}
     <a
       href="{{ cta_url }}"
-      class="btn btn-secondary btn-sm mt-5"
+      class="btn btn-outline btn-sm mt-7 px-5"
     >
       {{ cta_label|default("Go back") }}
     </a>

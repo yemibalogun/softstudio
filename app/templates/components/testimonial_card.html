@@ -1,31 +1,31 @@
-<figure class="card flex h-full flex-col justify-between rounded-box p-6">
+{# A quote set large and light, attribution beneath. No box. #}
+<figure class="flex h-full flex-col">
 
-  <blockquote class="text-base leading-7 text-base-content/85">
-    <span class="mb-2 block font-display text-3xl leading-none text-secondary/60" aria-hidden="true">&ldquo;</span>
-    <span class="line-clamp-4">{{ testimonial.quote }}</span>
+  <blockquote class="text-[clamp(1.35rem,2vw,1.7rem)] font-light leading-[1.45] tracking-[-0.022em] text-base-content/90">
+    <span class="text-secondary/70" aria-hidden="true">&ldquo;</span>{{ testimonial.quote }}<span class="text-secondary/70" aria-hidden="true">&rdquo;</span>
   </blockquote>
 
-  <figcaption class="mt-6 flex items-center gap-3 border-t border-base-300 pt-4">
+  <figcaption class="mt-8 flex items-center gap-4">
     {% if testimonial.author_avatar %}
       <img
         src="{{ testimonial.author_avatar }}"
         alt="{{ testimonial.author_name }}"
-        class="h-9 w-9 shrink-0 rounded-full object-cover"
+        class="h-10 w-10 shrink-0 rounded-xl object-cover"
         loading="lazy"
       >
     {% else %}
       <span
-        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-base-300 font-mono text-xs text-base-content/60"
+        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border hairline bg-base-200 text-sm text-secondary/80"
         aria-hidden="true"
       >{{ testimonial.author_name[:1]|upper }}</span>
     {% endif %}
 
     <span class="min-w-0">
-      <span class="block truncate text-sm font-semibold text-base-content">
+      <span class="block truncate text-sm font-medium text-base-content">
         {{ testimonial.author_name }}
       </span>
       {% if testimonial.author_title %}
-        <span class="block truncate text-xs text-base-content/55">
+        <span class="block truncate text-sm text-base-content/50">
           {{ testimonial.author_title }}
         </span>
       {% endif %}

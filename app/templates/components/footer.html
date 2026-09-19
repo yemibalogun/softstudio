@@ -1,11 +1,13 @@
-<footer class="border-t border-base-300 bg-base-200/50">
-  <div class="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
+{#
+  Footer: a short statement, the main paths, the legally required links.
+  data-open-cookie-settings is required by initCookieConsent() in main.js.
+#}
+<footer class="relative border-t hairline">
+  <div class="shell pb-10 pt-20 sm:pt-24">
 
-    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid gap-14 lg:grid-cols-12">
 
-      <!-- Brand -->
-      <div class="sm:col-span-2 lg:col-span-1">
-
+      <div class="lg:col-span-5">
         <a
           href="{{ url_for('main.index') }}"
           class="group inline-flex items-center gap-3"
@@ -13,169 +15,78 @@
         >
           <img
             src="{{ url_for('static', filename='images/brand/jaybalo_logo.png') }}"
-            alt="{{ site_name }} logo"
-            class="h-9 w-auto transition-transform duration-200 group-hover:scale-105"
+            alt=""
+            class="h-8 w-auto transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-[-8deg]"
           >
-
-          <span class="font-display text-lg font-semibold tracking-tight">
-            {{ site_name }}
-          </span>
+          <span class="text-[0.95rem] font-medium tracking-tight">{{ site_name }}</span>
         </a>
 
-        <p class="mt-5 max-w-sm text-sm leading-6 text-base-content/65">
-          Custom software, business automation, and practical developer
-          training, built and taught by someone who ships production code.
+        <p class="mt-7 max-w-sm text-[1.35rem] font-light leading-[1.4] tracking-[-0.02em] text-base-content/75">
+          Software that solves real problems, and the courses that teach how
+          it is built.
         </p>
-
       </div>
 
-      <!-- Explore -->
-      <div>
-        <h3 class="font-mono text-xs font-medium uppercase tracking-widest text-base-content/50">
-          Explore
-        </h3>
+      <nav class="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:col-span-6 lg:col-start-7" aria-label="Footer">
+        <div>
+          <h2 class="eyebrow text-[0.68rem]">Explore</h2>
+          <ul class="mt-6 space-y-3.5">
+            {% for endpoint, label in [
+              ('projects.index', 'Applications'),
+              ('courses.index', 'Courses'),
+              ('services.index', 'Services'),
+              ('blog.index', 'Blog'),
+            ] %}
+              <li>
+                <a href="{{ url_for(endpoint) }}" class="text-sm text-base-content/60 transition-colors duration-500 hover:text-base-content">{{ label }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
 
-        <ul class="mt-5 space-y-3">
-          {% for endpoint, label in [
-            ('projects.index', 'Applications'),
-            ('courses.index', 'Courses'),
-            ('services.index', 'Services'),
-            ('blog.index', 'Blog'),
-          ] %}
+        <div>
+          <h2 class="eyebrow text-[0.68rem]">Studio</h2>
+          <ul class="mt-6 space-y-3.5">
+            <li><a href="{{ url_for('main.about') }}" class="text-sm text-base-content/60 transition-colors duration-500 hover:text-base-content">About</a></li>
+            <li><a href="{{ url_for('contact.index') }}" class="text-sm text-base-content/60 transition-colors duration-500 hover:text-base-content">Contact</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="eyebrow text-[0.68rem]">Legal</h2>
+          <ul class="mt-6 space-y-3.5">
+            <li><a href="{{ url_for('legal.privacy') }}" class="text-sm text-base-content/60 transition-colors duration-500 hover:text-base-content">Privacy</a></li>
+            <li><a href="{{ url_for('legal.cookies') }}" class="text-sm text-base-content/60 transition-colors duration-500 hover:text-base-content">Cookies</a></li>
+            <li><a href="{{ url_for('legal.terms') }}" class="text-sm text-base-content/60 transition-colors duration-500 hover:text-base-content">Terms</a></li>
+            <li><a href="{{ url_for('legal.refunds') }}" class="text-sm text-base-content/60 transition-colors duration-500 hover:text-base-content">Refunds</a></li>
             <li>
-              <a
-                href="{{ url_for(endpoint) }}"
-                class="text-sm text-base-content/65 transition-colors hover:text-primary"
-              >
-                {{ label }}
-              </a>
+              <a href="#" data-open-cookie-settings class="text-sm text-base-content/60 transition-colors duration-500 hover:text-base-content">Cookie settings</a>
             </li>
-          {% endfor %}
-        </ul>
-      </div>
-
-      <!-- Company -->
-      <div>
-        <h3 class="font-mono text-xs font-medium uppercase tracking-widest text-base-content/50">
-          Company
-        </h3>
-
-        <ul class="mt-5 space-y-3">
-          <li>
-            <a
-              href="{{ url_for('main.about') }}"
-              class="text-sm text-base-content/65 transition-colors hover:text-primary"
-            >
-              About
-            </a>
-          </li>
-          <li>
-            <a
-              href="{{ url_for('contact.index') }}"
-              class="text-sm text-base-content/65 transition-colors hover:text-primary"
-            >
-              Contact
-            </a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Legal -->
-      <div>
-        <h3 class="font-mono text-xs font-medium uppercase tracking-widest text-base-content/50">
-          Legal
-        </h3>
-
-        <ul class="mt-5 space-y-3">
-          <li>
-            <a
-              href="{{ url_for('legal.privacy') }}"
-              class="text-sm text-base-content/65 transition-colors hover:text-primary"
-            >
-              Privacy Policy
-            </a>
-          </li>
-          <li>
-            <a
-              href="{{ url_for('legal.cookies') }}"
-              class="text-sm text-base-content/65 transition-colors hover:text-primary"
-            >
-              Cookie Policy
-            </a>
-          </li>
-          <li>
-            <a
-              href="{{ url_for('legal.terms') }}"
-              class="text-sm text-base-content/65 transition-colors hover:text-primary"
-            >
-              Terms
-            </a>
-          </li>
-          <li>
-            <a
-              href="{{ url_for('legal.refunds') }}"
-              class="text-sm text-base-content/65 transition-colors hover:text-primary"
-            >
-              Refund Policy
-            </a>
-          </li>
-
-          <!--
-            This data attribute is required by initCookieConsent()
-            in main.js. Do not remove it during the UI migration.
-          -->
-          <li>
-            <a
-              href="#"
-              data-open-cookie-settings
-              class="text-sm text-base-content/65 transition-colors hover:text-primary"
-            >
-              Cookie Settings
-            </a>
-          </li>
-        </ul>
-      </div>
+          </ul>
+        </div>
+      </nav>
 
     </div>
 
-    <!-- Footer bottom -->
-    <div class="mt-12 flex flex-col gap-5 border-t border-base-300 pt-6 sm:flex-row sm:items-center sm:justify-between">
-
-      <span class="text-xs text-base-content/50">
-        &copy; {{ now_year|default(2026) }} {{ site_name }}. All rights reserved.
+    <div class="mt-20 flex flex-col gap-5 border-t hairline pt-8 sm:flex-row sm:items-center sm:justify-between">
+      <span class="text-xs text-base-content/40">
+        &copy; {{ now_year|default(2026) }} {{ site_name }}
       </span>
 
-      <!-- Social links -->
-      <div class="flex items-center gap-5">
-        <a
-          href="https://github.com/yemibalogun"
-          aria-label="GitHub"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-xs font-medium text-base-content/60 transition-colors hover:text-primary"
-        >
-          GitHub
-        </a>
-        <a
-          href="https://www.linkedin.com/in/olayemi-balogun-a07a12176/"
-          aria-label="LinkedIn"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-xs font-medium text-base-content/60 transition-colors hover:text-primary"
-        >
-          LinkedIn
-        </a>
-        <a
-          href="https://youtube.com/"
-          aria-label="YouTube"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-xs font-medium text-base-content/60 transition-colors hover:text-primary"
-        >
-          YouTube
-        </a>
+      <div class="flex items-center gap-6">
+        {% for href, label in [
+          ('https://github.com/yemibalogun', 'GitHub'),
+          ('https://www.linkedin.com/in/olayemi-balogun-a07a12176/', 'LinkedIn'),
+          ('https://youtube.com/', 'YouTube'),
+        ] %}
+          <a
+            href="{{ href }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-xs text-base-content/50 transition-colors duration-500 hover:text-base-content"
+          >{{ label }}</a>
+        {% endfor %}
       </div>
-
     </div>
 
   </div>

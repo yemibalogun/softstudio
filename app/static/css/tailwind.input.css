@@ -2,54 +2,35 @@
 
 /*
  * Scan Flask/Jinja templates for Tailwind/DaisyUI classes.
- *
- * tailwind.input.css is located at:
- * app/static/css/
- *
- * ../../templates resolves to:
- * app/templates/
+ * ../../templates resolves to app/templates/.
  */
 @source "../../templates";
 @plugin "@tailwindcss/typography";
 @plugin "daisyui";
 
 /*
- * Self-hosted webfonts - latin + latin-ext, variable woff2 (weight 400-700).
- * Files live in app/static/fonts/. Regenerate: scratchpad/fetch_fonts.py
- * Served locally so the app carries no third-party font dependency and needs
- * no CSP exception for fonts.googleapis.com / fonts.gstatic.com.
+ * Self-hosted webfonts (latin + latin-ext woff2 in app/static/fonts/), so the
+ * app needs no CSP exception for Google Fonts.
+ *   Geist          - headlines, text and UI (variable, 300-700)
+ *   JetBrains Mono - code only
+ * Regenerate: request the css2 API for these families with a modern browser
+ * user agent, keep the latin / latin-ext blocks, download their woff2 files.
  */
 @font-face {
-  font-family: 'Inter';
+  font-family: 'Geist';
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 300 700;
   font-display: swap;
-  src: url('../fonts/inter-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('../fonts/inter-latin-ext.woff2') format('woff2');
+  src: url('../fonts/geist-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
-  font-family: 'Space Grotesk';
+  font-family: 'Geist';
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 300 700;
   font-display: swap;
-  src: url('../fonts/space-grotesk-latin.woff2') format('woff2');
+  src: url('../fonts/geist-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-@font-face {
-  font-family: 'Space Grotesk';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('../fonts/space-grotesk-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
   font-family: 'JetBrains Mono';
@@ -67,36 +48,68 @@
   src: url('../fonts/jetbrains-mono-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-/* Fraunces - serif display face for the hero + section headings. Variable
-   (opsz 9-144, wght 400-600); headings set font-optical-sizing: auto. */
-@font-face {
-  font-family: 'Fraunces';
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url('../fonts/fraunces-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-@font-face {
-  font-family: 'Fraunces';
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url('../fonts/fraunces-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+
+@theme {
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* Motion: long, decelerating curves. Things arrive and settle; nothing snaps. */
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /*
- * Font tokens. Defined in @theme so Tailwind also generates the matching
- * utilities (font-sans / font-display / font-serif / font-mono). Body text
- * stays on a neutral grotesque; big headings get an editorial serif voice;
- * UI-scale headings (h3+) keep the grotesque for a technical register.
+ * Palette - deep space navy with one electric blue.
+ *   base-100  page ground, blue-tinted near-black (never pure #000)
+ *   base-200  quiet surface
+ *   base-300  raised surface / strong hairline
+ *   primary   electric blue (#0057FF family, lifted for text contrast)
+ *   secondary pale cyan, the light of the blue: accent rules, highlights
+ *   accent    the raw #0057FF, used for glows
  */
-@theme {
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
-  --font-serif: "Fraunces", "Space Grotesk", Georgia, "Times New Roman", serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+@plugin "daisyui/theme" {
+  name: "yemi-dark";
+  default: true;
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: #05070D;
+  --color-base-200: #0A0F1B;
+  --color-base-300: #131B2D;
+  --color-base-content: #E8EDF6;
+
+  --color-primary: #3A78FF;
+  --color-primary-content: #FFFFFF;
+
+  --color-secondary: #7CCBFF;
+  --color-secondary-content: #04101C;
+
+  --color-accent: #0057FF;
+  --color-accent-content: #FFFFFF;
+
+  --color-neutral: #1A2336;
+  --color-neutral-content: #E8EDF6;
+
+  --color-info: #7CCBFF;
+  --color-info-content: #04101C;
+
+  --color-success: #4FD8A8;
+  --color-success-content: #03140D;
+
+  --color-warning: #F2BD5B;
+  --color-warning-content: #1A1204;
+
+  --color-error: #F46B74;
+  --color-error-content: #1A0406;
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1.25rem;
+
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
 }
 
 @layer base {
@@ -105,13 +118,25 @@
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--color-base-100);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
   }
 
   body {
     @apply text-base-content;
+    /* Decorative glows may bleed past the edge; never let them scroll the
+       page sideways. clip (not hidden) keeps position: sticky working. */
+    overflow-x: clip;
     font-size: 1rem;
     line-height: 1.7;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.006em;
+    font-weight: 400;
   }
 
   h1,
@@ -121,49 +146,49 @@
   h5,
   h6 {
     font-family: var(--font-display);
-    font-weight: 600;
-    line-height: 1.08;
+    font-weight: 500;
+    line-height: 1.15;
     letter-spacing: -0.02em;
     text-wrap: balance;
   }
 
-  /* Hero + section headings: editorial serif. Optical sizing lets Fraunces
-     grow more expressive as the type scales up. Serifs carry their weight
-     visually, so we run them lighter and looser than the grotesque. */
-  h1,
-  h2 {
-    font-family: var(--font-serif);
-    font-optical-sizing: auto;
-    font-weight: 460;
-  }
-
+  /* Display headlines: one sans family, set large, medium weight and
+     tightly tracked. Presence comes from size and space, not decoration. */
   h1 {
-    font-size: clamp(2.75rem, 6vw, 4.5rem);
-    line-height: 1.06;
-    letter-spacing: -0.02em;
+    font-size: clamp(2.8rem, 6vw, 5.4rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
   }
 
   h2 {
-    font-size: clamp(2rem, 3.5vw, 2.9rem);
-    line-height: 1.14;
-    letter-spacing: -0.018em;
+    font-size: clamp(2.1rem, 3.9vw, 3.4rem);
+    line-height: 1.06;
+    letter-spacing: -0.038em;
+  }
+
+  /* The one word a headline leans on: lit with the accent, not italicised. */
+  h1 em,
+  h2 em,
+  .lean {
+    font-style: normal;
+    background-image: linear-gradient(100deg, #bfe6ff 0%, var(--color-secondary) 38%, var(--color-primary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   h3 {
-    font-size: 1.375rem;
+    font-size: 1.3rem;
   }
 
   h4 {
-    font-size: 1.125rem;
+    font-size: 1.1rem;
   }
 
   p {
-    max-width: 68ch;
+    max-width: 66ch;
+    text-wrap: pretty;
   }
-
-  /* Long-form prose paragraphs can opt back in to a wider measure by
-     living outside a `.prose`-less container; default keeps line length
-     readable. */
 
   code,
   pre,
@@ -172,125 +197,160 @@
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--color-secondary) 30%, transparent);
-    color: var(--color-base-content);
+    background-color: color-mix(in oklab, var(--color-primary) 45%, transparent);
+    color: #fff;
   }
 
-  /* Consistent, on-brand focus ring for keyboard users across every
-     interactive element (daisyUI's default is inconsistent per-component). */
-  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-    outline: 2px solid color-mix(in oklab, var(--color-primary) 80%, white);
-    outline-offset: 2px;
-    border-radius: 4px;
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 3px;
+    border-radius: 6px;
   }
 }
 
-/*
- * Small utility layer for the redesigned marketing surfaces.
- * Kept here (not in templates) so the vocabulary is shared and single-source.
- */
 @layer components {
-  /* Mono kicker / label above a headline. Used sparingly (<= 2 per page). */
-  .kicker {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: color-mix(in oklab, var(--color-primary) 90%, white 10%);
+  /* Page shell: one measure for every section. */
+  .shell {
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 5vw, 3rem);
   }
 
-  /* Eyebrow chip - one per page, above the hero headline. A bordered pill
-     with a gold status dot; more physical than a bare kicker. */
-  .eyebrow {
+  /* Section rhythm: generous. Bottom slightly larger than top (optical). */
+  .section-y {
+    padding-top: clamp(5rem, 10vw, 8.5rem);
+    padding-bottom: clamp(5.5rem, 11vw, 9.5rem);
+  }
+
+  /* Small tracked label above a headline. .kicker is the same voice tinted
+     toward the accent. */
+  .eyebrow,
+  .kicker {
+    display: inline-block;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: color-mix(in oklab, var(--color-base-content) 62%, transparent);
+  }
+
+  .kicker {
+    color: color-mix(in oklab, var(--color-secondary) 85%, var(--color-base-content));
+  }
+
+  /* Short accent line under a headline. */
+  .accent-rule {
+    display: block;
+    width: 2.75rem;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--color-secondary), color-mix(in oklab, var(--color-secondary) 30%, transparent));
+    transform-origin: left center;
+  }
+
+  .accent-rule--center {
+    margin-inline: auto;
+    transform-origin: center;
+  }
+
+  /* Lead paragraph. */
+  .lede {
+    font-size: clamp(1.05rem, 1.2vw, 1.2rem);
+    line-height: 1.75;
+    color: color-mix(in oklab, var(--color-base-content) 64%, transparent);
+  }
+
+  .hairline {
+    border-color: color-mix(in oklab, var(--color-base-content) 8%, transparent);
+  }
+
+  /* Quiet surface: faint top-lit gradient, hairline edge, inner highlight. */
+  .surface {
+    position: relative;
+    border: 1px solid color-mix(in oklab, var(--color-base-content) 7%, transparent);
+    background:
+      linear-gradient(180deg, color-mix(in oklab, var(--color-base-content) 3.5%, transparent), color-mix(in oklab, var(--color-base-content) 1%, transparent)),
+      color-mix(in oklab, var(--color-base-200) 70%, transparent);
+    box-shadow: inset 0 1px 0 color-mix(in oklab, var(--color-base-content) 5%, transparent);
+    border-radius: var(--radius-box);
+  }
+
+  /* Text link with an arrow that travels on hover. */
+  .link-arrow {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.8rem 0.35rem 0.65rem;
-    border-radius: 999px;
-    border: 1px solid color-mix(in oklab, var(--color-base-content) 14%, transparent);
-    background-color: color-mix(in oklab, var(--color-base-200) 70%, transparent);
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
+    gap: 0.55rem;
+    font-size: 0.9rem;
     font-weight: 500;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: color-mix(in oklab, var(--color-base-content) 72%, transparent);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+    color: var(--color-base-content);
+    transition: color 400ms var(--ease-out-soft);
   }
 
-  .eyebrow::before {
-    content: "";
-    width: 0.4rem;
-    height: 0.4rem;
-    border-radius: 999px;
-    background-color: var(--color-secondary);
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-secondary) 22%, transparent);
+  .link-arrow::after {
+    content: "\2192";
+    transition: transform 500ms var(--ease-out-soft);
   }
 
-  /* Hairline divider that matches the theme border treatment. */
-  .hairline {
-    border-color: color-mix(in oklab, var(--color-base-content) 12%, transparent);
+  .link-arrow:hover {
+    color: var(--color-secondary);
   }
 
-  /* Section rhythm: generous but not cavernous (VISUAL_DENSITY 4). */
-  .section-y {
-    padding-block: clamp(3.5rem, 7vw, 5.5rem);
+  .link-arrow:hover::after {
+    transform: translateX(4px);
   }
 }
 
 /*
- * Custom site theme.
+ * Reveal motion (driven by app/static/js/motion.js).
  *
- * This maps your existing brand tokens into daisyUI's semantic color
- * system so daisyUI components inherit your existing visual identity
- * instead of looking like an unrelated component library.
+ * Content arrives out of focus, slightly low and transparent, then settles
+ * sharp over about a second. The hidden state only applies under html.js
+ * (set by motion-init.js in <head>), so the page is fully readable without
+ * JavaScript. Unlayered so it wins over utility transforms.
  */
-@plugin "daisyui/theme" {
-    name: "yemi-dark";
-    default: true;
-    prefersdark: true;
-    color-scheme: dark;
-
-    --color-base-100: #080B12;
-    --color-base-200: #111722;
-    --color-base-300: #18202C;
-    --color-base-content: #F5F7FA;
-
-    --color-primary: #2563EB;
-    --color-primary-content: #F5F7FA;
-
-    --color-secondary: #F5B800;
-    --color-secondary-content: #14110A;
-
-    --color-accent: #3B82F6;
-    --color-accent-content: #F5F7FA;
-
-    --color-neutral: #273244;
-    --color-neutral-content: #F5F7FA;
-
-    --color-info: #3B82F6;
-    --color-info-content: #F5F7FA;
-
-    --color-success: #22C55E;
-    --color-success-content: #07130B;
-
-    --color-warning: #F59E0B;
-    --color-warning-content: #171004;
-
-    --color-error: #EF4444;
-    --color-error-content: #FFFFFF;
-
-    --radius-selector: 0.625rem;
-    --radius-field: 0.75rem;
-    --radius-box: 1.375rem;
-
-    --border: 1px;
-
-    --depth: 1;
-    --noise: 0;
+.js [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-y, 1.4rem), 0);
+  filter: blur(var(--reveal-blur, 10px));
+  transition:
+    opacity 1100ms var(--ease-out-soft),
+    transform 1400ms var(--ease-out-soft),
+    filter 1100ms var(--ease-out-soft);
+  transition-delay: var(--reveal-delay, 0ms);
 }
+
+.js [data-reveal="fade"] {
+  --reveal-y: 0px;
+}
+
+.js [data-reveal="rule"] {
+  transform: scaleX(0);
+  filter: none;
+  transition:
+    opacity 600ms var(--ease-out-soft),
+    transform 1400ms var(--ease-out-soft);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.js [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal],
+  .js [data-reveal="rule"] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
+
 /*
  * Blog article typography.
  *

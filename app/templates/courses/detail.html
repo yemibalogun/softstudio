@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ course.meta_title or course.title }} — {{ site_name }}{% endblock %}
+{% block title %}{{ course.meta_title or course.title }} · {{ site_name }}{% endblock %}
 
 {% block meta_description %}
 {{ course.meta_description or course.short_description }}
@@ -29,293 +29,163 @@
 
 {% block content %}
 
-<!-- ============================================================
-     COURSE HERO
-     ============================================================ -->
-<section class="py-16 sm:py-20 lg:py-24">
+{# ============================================================
+   HEADER + PURCHASE PANEL
+   ============================================================ #}
+<section class="pb-[clamp(4rem,8vw,6rem)] pt-[clamp(3rem,7vw,5rem)]">
+  <div class="shell">
 
-  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+    {% set crumbs = [
+      ("Courses", url_for('courses.index')),
+      (course.title, None)
+    ] %}
+    {% include "components/breadcrumbs.html" %}
 
-    <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+    <div class="mt-12 grid gap-14 lg:grid-cols-12 lg:items-start lg:gap-10">
 
-      <!-- ======================================================
-           COURSE INFORMATION
-           ====================================================== -->
-      <div>
-
-        {% set crumbs = [
-          ("Courses", url_for('courses.index')),
-          (course.title, None)
-        ] %}
-
-        {% include "components/breadcrumbs.html" %}
-
-
-        <!-- Difficulty -->
-        <span class="badge badge-secondary mt-6">
+      <div class="lg:col-span-7" data-reveal-group="120">
+        <span class="eyebrow" data-reveal>
           {{ course.difficulty|title }}
+          <span class="mx-2 text-base-content/25">/</span>
+          {{ course.lesson_count }} lessons
+          <span class="mx-2 text-base-content/25">/</span>
+          {{ course.sections|length }} sections
         </span>
 
+        <h1 class="mt-6 text-[clamp(2.5rem,5.2vw,4.4rem)] text-base-content" data-reveal>{{ course.title }}</h1>
+        <span class="accent-rule mt-8" data-reveal="rule"></span>
+        <p class="lede mt-7 max-w-2xl" data-reveal>{{ course.short_description }}</p>
 
-        <!-- Title -->
-        <h1 class="mt-5 text-4xl font-bold tracking-tight text-base-content sm:text-5xl lg:text-6xl">
-          {{ course.title }}
-        </h1>
-
-
-        <!-- Description -->
-        <p class="mt-6 max-w-3xl text-lg leading-8 text-base-content/65 sm:text-xl">
-          {{ course.short_description }}
-        </p>
-
-
-        <!-- Course statistics -->
-        <div
-          class="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-sm text-base-content/55"
-          aria-label="Course information"
-        >
-
-          <span>
-            {{ course.lesson_count }} lessons
-          </span>
-
-          <span aria-hidden="true">·</span>
-
-          <span>
-            {{ course.sections|length }} sections
-          </span>
-
-        </div>
-
-
-        <!-- ====================================================
-             LEARNING OBJECTIVES
-             ==================================================== -->
         {% if course.learning_objectives %}
-
-          <div class="mt-12">
-
-            <h2 class="text-2xl font-bold text-base-content">
-              What You'll Learn
-            </h2>
-
-            <ul class="mt-6 space-y-3">
-
+          <div class="mt-16" data-reveal>
+            <h2 class="text-[clamp(1.6rem,2.4vw,2.1rem)] text-base-content">What you will learn</h2>
+            <ul class="mt-8 grid gap-x-10 gap-y-5 sm:grid-cols-2">
               {% for line in course.learning_objectives.split('\n') if line.strip() %}
-
-                <li class="flex gap-3 text-base leading-7 text-base-content/70">
-
-                  <span
-                    class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success/15 text-success"
-                    aria-hidden="true"
-                  >
-                    ✓
-                  </span>
-
+                <li class="flex gap-3.5 text-[0.98rem] leading-7 text-base-content/70">
+                  <svg class="mt-1.5 shrink-0 text-secondary" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4" /></svg>
                   <span>{{ line }}</span>
-
                 </li>
-
               {% endfor %}
-
             </ul>
-
           </div>
-
         {% endif %}
-
       </div>
 
+      {#
+        Purchase panel. Three states, unchanged:
+          1. enrolled -> continue learning
+          2. signed in -> buy (POST with CSRF token)
+          3. guest -> log in first
+      #}
+      <aside class="lg:sticky lg:top-28 lg:col-span-4 lg:col-start-9" data-reveal data-reveal-delay="300">
+        <div class="surface overflow-hidden">
 
-      <!-- ======================================================
-           PURCHASE CARD
-           ====================================================== -->
-      <aside class="lg:sticky lg:top-24">
-
-        <div class="card overflow-hidden border border-base-300 bg-base-100 shadow-xl">
-
-          <!-- Course thumbnail -->
           {% if course.thumbnail %}
-            <figure class="aspect-video overflow-hidden bg-base-200">
-              <img
-                src="{{ course.thumbnail }}"
-                alt="{{ course.title }}"
-                class="h-full w-full object-cover"
-              >
+            <figure class="aspect-video overflow-hidden border-b hairline">
+              <img src="{{ course.thumbnail }}" alt="{{ course.title }}" class="h-full w-full object-cover">
             </figure>
           {% endif %}
 
-
-          <div class="card-body">
-
-            <!-- Price -->
-            <div class="mb-5">
-
+          <div class="p-8">
+            <p class="eyebrow text-[0.66rem]">Course fee</p>
+            <div class="mt-4 tabular-nums">
               {% if course.discount_price %}
-
-                <span class="text-lg text-base-content/40 line-through">
-                  {{ course.currency }} {{ "%.0f"|format(course.price) }}
+                <span class="text-base text-base-content/35 line-through">
+                  {{ course.currency }} {{ "{:,.0f}".format(course.price) }}
                 </span>
-
-                <div class="mt-1 text-3xl font-bold text-base-content">
-                  {{ course.currency }} {{ "%.0f"|format(course.effective_price) }}
-                </div>
-
-              {% else %}
-
-                <div class="text-3xl font-bold text-base-content">
-                  {{ course.currency }} {{ "%.0f"|format(course.effective_price) }}
-                </div>
-
               {% endif %}
-
+              <div class="text-[2.4rem] font-medium leading-none tracking-[-0.04em] text-base-content">
+                {{ course.currency }} {{ "{:,.0f}".format(course.effective_price) }}
+              </div>
             </div>
 
-
-            <!-- ==================================================
-                 PURCHASE / LEARNING STATE
-
-                 The three states below are deliberately preserved:
-
-                 1. Enrolled user → continue learning
-                 2. Authenticated user → purchase
-                 3. Guest → login before purchase
-                 ================================================== -->
-
-            {% if is_enrolled %}
-
-              <a
-                href="{{ url_for('learning.course_overview', course_slug=course.slug) }}"
-                class="btn btn-secondary btn-lg w-full"
-              >
-                Continue Learning
-              </a>
-
-            {% elif current_user.is_authenticated %}
-
-              <form
-                method="POST"
-                action="{{ url_for('payments.checkout', course_slug=course.slug) }}"
-              >
-
-                <!-- CSRF protection remains exactly as before. -->
-                <input
-                  type="hidden"
-                  name="csrf_token"
-                  value="{{ csrf_token() }}"
+            <div class="mt-8">
+              {% if is_enrolled %}
+                <a
+                  href="{{ url_for('learning.course_overview', course_slug=course.slug) }}"
+                  class="btn btn-primary h-12 w-full"
                 >
-
-                <button
-                  type="submit"
-                  class="btn btn-secondary btn-lg w-full"
+                  Continue learning <span aria-hidden="true">&rarr;</span>
+                </a>
+              {% elif current_user.is_authenticated %}
+                <form
+                  method="POST"
+                  action="{{ url_for('payments.checkout', course_slug=course.slug) }}"
                 >
-                  Buy Course
-                </button>
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-primary h-12 w-full">
+                    Buy course <span aria-hidden="true">&rarr;</span>
+                  </button>
+                </form>
+              {% else %}
+                <a
+                  href="{{ url_for('auth.login', next=request.path) }}"
+                  class="btn btn-primary h-12 w-full"
+                >
+                  Log in to purchase <span aria-hidden="true">&rarr;</span>
+                </a>
+              {% endif %}
+            </div>
 
-              </form>
-
-            {% else %}
-
-              <a
-                href="{{ url_for('auth.login', next=request.path) }}"
-                class="btn btn-secondary btn-lg w-full"
-              >
-                Log In to Purchase
-              </a>
-
-            {% endif %}
-
+            <ul class="mt-8 space-y-3 border-t hairline pt-7 text-sm text-base-content/60">
+              <li class="flex justify-between"><span>Lessons</span><span class="tabular-nums text-base-content/85">{{ course.lesson_count }}</span></li>
+              <li class="flex justify-between"><span>Sections</span><span class="tabular-nums text-base-content/85">{{ course.sections|length }}</span></li>
+              <li class="flex justify-between"><span>Level</span><span class="text-base-content/85">{{ course.difficulty|title }}</span></li>
+            </ul>
           </div>
 
         </div>
-
       </aside>
 
     </div>
 
   </div>
-
 </section>
 
 
-<!-- ============================================================
-     COURSE CONTENT
-     ============================================================ -->
-<section class="border-y border-base-300 bg-base-200/40 py-16 sm:py-20 lg:py-24">
+{# ============================================================
+   CURRICULUM
+   ============================================================ #}
+<section class="section-y">
+  <div class="shell grid gap-12 lg:grid-cols-12 lg:gap-10">
 
-  <div class="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8">
-
-    <div class="mb-10">
-
-      <span class="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-        Curriculum
-      </span>
-
-      <h2 class="mt-3 text-3xl font-bold tracking-tight text-base-content sm:text-4xl">
-        Course Content
-      </h2>
-
+    <div class="lg:col-span-4">
+      <div class="lg:sticky lg:top-28" data-reveal-group="120">
+        <span class="eyebrow" data-reveal>Curriculum</span>
+        <h2 class="mt-5 text-base-content" data-reveal>Course content</h2>
+      </div>
     </div>
 
+    <div class="lg:col-span-7 lg:col-start-6">
+      <ol class="space-y-5" data-reveal-group="100">
+        {% for section in course.sections %}
+          <li class="surface p-7 sm:p-8" data-reveal>
+            <div class="flex items-baseline gap-4">
+              <span class="text-xs tabular-nums text-secondary/80">{{ "%02d"|format(loop.index) }}</span>
+              <h3 class="text-lg font-medium text-base-content">{{ section.title }}</h3>
+            </div>
 
-    <div class="space-y-4">
-
-      {% for section in course.sections %}
-
-        <article class="card border border-base-300 bg-base-100 shadow-sm">
-
-          <div class="card-body">
-
-            <h3 class="card-title text-lg">
-              {{ section.title }}
-            </h3>
-
-
-            <ul class="mt-2 divide-y divide-base-300">
-
+            <ul class="mt-5 divide-y divide-base-content/[0.07]">
               {% for lesson in section.lessons %}
-
                 <li class="flex items-center justify-between gap-4 py-4">
-
-                  <span class="text-sm leading-6 text-base-content/70 sm:text-base">
-                    {{ lesson.title }}
-                  </span>
-
-
+                  <span class="text-[0.95rem] leading-6 text-base-content/70">{{ lesson.title }}</span>
                   {% if lesson.is_free_preview %}
-
-                    <span class="badge badge-success shrink-0">
-                      Free Preview
-                    </span>
-
+                    <span class="badge badge-success badge-sm shrink-0">Free preview</span>
                   {% else %}
-
-                    <span
-                      class="text-sm text-base-content/40"
-                      aria-label="Locked lesson"
-                      title="Available after purchase"
-                    >
-                      🔒
+                    <span class="shrink-0 text-base-content/30" title="Available after purchase">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+                      <span class="sr-only">Locked lesson</span>
                     </span>
-
                   {% endif %}
-
                 </li>
-
               {% endfor %}
-
             </ul>
-
-          </div>
-
-        </article>
-
-      {% endfor %}
-
+          </li>
+        {% endfor %}
+      </ol>
     </div>
 
   </div>
-
 </section>
 
 {% endblock %}

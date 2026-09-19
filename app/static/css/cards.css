@@ -1,63 +1,147 @@
 /*
- * Card treatment.
+ * Surfaces: cards, badges, form fields.
  *
- * Was: animated rainbow neon border on hover. Now: a hairline that
- * warms toward the brand on hover, a shadow tinted to the page (not
- * pure black), and a small lift. Elevation communicates "this is
- * interactive", nothing more.
+ * Cards are quiet glass: a faint top-lit gradient, a hairline edge and an
+ * inner highlight. They do not jump on hover; the edge warms toward the
+ * accent and a soft spotlight follows the pointer (motion.js sets --mx/--my).
  */
 
 .card {
   position: relative;
-  border: 1px solid color-mix(in oklab, var(--color-base-content) 10%, transparent);
-  background-color: var(--color-base-200);
+  isolation: isolate;
+  border: 1px solid rgba(232, 237, 246, 0.07);
+  background:
+    linear-gradient(180deg, rgba(232, 237, 246, 0.035), rgba(232, 237, 246, 0.008)),
+    rgba(10, 15, 27, 0.6);
+  box-shadow: inset 0 1px 0 rgba(232, 237, 246, 0.05);
   transition:
-    transform 200ms ease,
-    border-color 200ms ease,
-    box-shadow 200ms ease;
+    border-color 600ms var(--ease-out-soft),
+    box-shadow 600ms var(--ease-out-soft),
+    transform 700ms var(--ease-out-soft);
+}
+
+/* Pointer spotlight. Sits under content, fades in on hover. */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0;
+  background: radial-gradient(
+    28rem circle at var(--mx, 50%) var(--my, 0%),
+    rgba(0, 87, 255, 0.12),
+    transparent 60%
+  );
+  transition: opacity 600ms var(--ease-out-soft);
+  pointer-events: none;
 }
 
 .card:hover {
-  transform: translateY(-3px);
-  border-color: color-mix(in oklab, var(--color-primary) 45%, transparent);
+  border-color: rgba(124, 203, 255, 0.22);
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.3),
-    0 14px 32px color-mix(in oklab, var(--color-primary) 14%, transparent);
+    inset 0 1px 0 rgba(232, 237, 246, 0.07),
+    0 30px 60px -30px rgba(0, 40, 140, 0.55);
+  transform: translateY(-2px);
 }
 
-/* Gold accent variant (courses) */
-.card--gold:hover {
-  border-color: color-mix(in oklab, var(--color-secondary) 48%, transparent);
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.3),
-    0 14px 32px color-mix(in oklab, var(--color-secondary) 14%, transparent);
+.card:hover::before {
+  opacity: 1;
+}
+
+/* Kept for templates that still set it; no longer a separate colour. */
+.card--gold {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card {
-    transition: border-color 200ms ease, box-shadow 200ms ease;
+  .card,
+  .card::before {
+    transition: none;
   }
   .card:hover {
     transform: none;
   }
 }
 
-/*
- * Closing CTA panel - faint dot field so the gradient block has texture
- * without another glow.
- */
-.cta-panel::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  opacity: 0.5;
-  background-image: radial-gradient(
-    color-mix(in oklab, var(--color-primary) 22%, transparent) 1px,
-    transparent 1.5px
-  );
-  background-size: 26px 26px;
-  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000, transparent 78%);
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000, transparent 78%);
-  pointer-events: none;
+/* ------------------------------------------------------------------ */
+/* Badges - quiet hairline labels, not candy pills                     */
+/* ------------------------------------------------------------------ */
+
+.badge {
+  border-radius: 9999px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.badge-outline {
+  border-color: rgba(232, 237, 246, 0.14);
+  color: rgba(232, 237, 246, 0.72);
+  background: transparent;
+}
+
+.badge-primary,
+.badge-info {
+  background-color: rgba(58, 120, 255, 0.12);
+  border-color: rgba(58, 120, 255, 0.3);
+  color: #a9c6ff;
+}
+
+.badge-success {
+  background-color: rgba(79, 216, 168, 0.1);
+  border-color: rgba(79, 216, 168, 0.28);
+  color: #8fe8c7;
+}
+
+.badge-warning {
+  background-color: rgba(242, 189, 91, 0.1);
+  border-color: rgba(242, 189, 91, 0.28);
+  color: #f5d18e;
+}
+
+.badge-error {
+  background-color: rgba(244, 107, 116, 0.1);
+  border-color: rgba(244, 107, 116, 0.28);
+  color: #f8a4aa;
+}
+
+/* ------------------------------------------------------------------ */
+/* Form fields - dark glass wells with a cyan focus edge               */
+/* ------------------------------------------------------------------ */
+
+.input,
+.textarea,
+.select {
+  background-color: rgba(5, 7, 13, 0.55);
+  border-color: rgba(232, 237, 246, 0.1);
+  transition:
+    border-color 400ms var(--ease-out-soft),
+    box-shadow 400ms var(--ease-out-soft),
+    background-color 400ms var(--ease-out-soft);
+}
+
+.input:hover,
+.textarea:hover,
+.select:hover {
+  border-color: rgba(232, 237, 246, 0.18);
+}
+
+.input:focus,
+.input:focus-within,
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: rgba(124, 203, 255, 0.55);
+  background-color: rgba(5, 7, 13, 0.75);
+  box-shadow: 0 0 0 4px rgba(0, 87, 255, 0.14);
+}
+
+/* Browser autofill paints inputs a pale blue; keep them in the dark well. */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus,
+input:-webkit-autofill {
+  -webkit-text-fill-color: var(--color-base-content);
+  caret-color: var(--color-base-content);
+  box-shadow: 0 0 0 1000px #080c16 inset;
+  transition: background-color 9999s ease-out 0s;
 }

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
 
-{% block title %}Courses — {{ site_name }}{% endblock %}
+{% block title %}Courses · {{ site_name }}{% endblock %}
 
 {% block meta_description %}
 Practical programming, automation, and web development courses.
@@ -8,90 +9,38 @@ Practical programming, automation, and web development courses.
 
 {% block content %}
 
-<section class="py-20 sm:py-24 lg:py-28">
-  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+<section class="pb-[clamp(5rem,10vw,8rem)] pt-[clamp(4rem,9vw,7rem)]">
+  <div class="shell">
 
-    <!-- ========================================================
-         PAGE HEADER
-         ======================================================== -->
-    <header class="mb-10 max-w-3xl">
+    {{ page_header("Courses", "Learn to build", lean="production software.",
+                   lede="Practical courses drawn from real client and product work, not toy tutorials.") }}
 
-      <span
-        class="text-xs font-semibold uppercase tracking-[0.18em] text-primary"
-      >
-        Training Platform
-      </span>
-
-      <h1
-        class="mt-3 text-3xl font-bold tracking-tight text-base-content sm:text-4xl lg:text-5xl"
-      >
-        Learn to Build Production Software
-      </h1>
-
-      <p class="mt-4 max-w-2xl text-base leading-7 text-base-content/60 sm:text-lg">
-        Practical courses built from real client and product work —
-        not toy tutorials.
-      </p>
-
-    </header>
-
-
-    <!-- ========================================================
-         COURSE CATEGORIES
-         ======================================================== -->
     {% if categories %}
-
-      <nav
-        aria-label="Course categories"
-        class="mb-10"
-      >
-        <div class="flex flex-wrap gap-2">
-
-          <!--
-            "All Courses" returns to the main course catalogue.
-            It isn't dependent on a backend change.
-          -->
-          <a
-            href="{{ url_for('courses.index') }}"
-            class="badge badge-primary cursor-pointer px-4 py-3 transition hover:opacity-80"
-          >
-            All Courses
-          </a>
-
+      <nav aria-label="Course categories" class="mt-14" data-reveal>
+        <ul class="flex flex-wrap gap-2">
+          <li>
+            <a href="{{ url_for('courses.index') }}" class="btn btn-sm btn-primary px-4" aria-current="page">All courses</a>
+          </li>
           {% for category in categories %}
-
-            <a
-              href="{{ url_for('courses.category', slug=category.slug) }}"
-              class="badge badge-outline px-4 py-3 transition hover:border-primary hover:text-primary"
-            >
-              {{ category.name }}
-            </a>
-
+            <li>
+              <a href="{{ url_for('courses.category', slug=category.slug) }}" class="btn btn-sm btn-outline px-4 font-normal">{{ category.name }}</a>
+            </li>
           {% endfor %}
-
-        </div>
+        </ul>
       </nav>
-
     {% endif %}
 
-
-    <!-- ========================================================
-         COURSE GRID
-         ======================================================== -->
     {% if courses %}
-
-      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-
+      {% set wide = courses|length == 1 %}
+      <div class="mt-12 grid gap-6 {% if not wide %}md:grid-cols-2{% endif %}" data-reveal-group="110">
         {% for course in courses %}
-          {% include "components/course_card.html" %}
+          <div data-reveal>{% include "components/course_card.html" %}</div>
         {% endfor %}
-
       </div>
-
     {% else %}
-
-      {% include "components/empty_state.html" %}
-
+      <div class="mt-12">
+        {% include "components/empty_state.html" %}
+      </div>
     {% endif %}
 
   </div>

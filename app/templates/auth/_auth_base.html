@@ -2,30 +2,17 @@
 
 {% block content %}
 
-<section class="flex min-h-[70vh] items-center py-16 sm:py-20">
-
-  <div class="mx-auto w-full max-w-md px-4 sm:px-6">
-
-    <!--
-      Shared authentication card.
-
-      Every authentication page extends this template, so keeping the
-      spacing, border, background, and shadow here ensures login,
-      registration, password reset, and email verification pages remain
-      visually consistent without duplicating layout code.
-    -->
-    <div class="card border border-base-300 bg-base-100 shadow-xl">
-
-      <div class="card-body p-6 sm:p-8">
-
-        {% block auth_content %}{% endblock %}
-
-      </div>
-
+{#
+  Shared authentication layout: a single glass panel floating above a
+  planet horizon. Login, registration, password reset and email
+  verification all extend this, so spacing lives here once.
+#}
+<section class="horizon flex min-h-[calc(100svh-4.5rem)] items-center">
+  <div class="shell pb-[clamp(10rem,20vw,15rem)] pt-[clamp(3rem,7vw,5rem)]">
+    <div class="auth-panel surface mx-auto w-full max-w-[26rem] p-8 shadow-[0_40px_80px_-40px_rgba(0,40,140,0.6)] backdrop-blur-xl sm:p-10" data-reveal>
+      {% block auth_content %}{% endblock %}
     </div>
-
   </div>
-
 </section>
 
 {% endblock %}

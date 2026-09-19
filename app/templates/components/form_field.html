@@ -1,43 +1,37 @@
 {% macro field(f, autocomplete=None) %}
 <div class="form-control w-full">
-  <label class="label" for="{{ f.id }}">
-    <span class="label-text font-medium text-base-content">
-      {{ f.label.text }}
-    </span>
+  <label class="mb-2.5 block text-sm text-base-content/70" for="{{ f.id }}">
+    {{ f.label.text }}
   </label>
 
-  {# 
-    Flask-WTF fields are rendered dynamically here.
-    We deliberately keep the field object intact so all existing
-    validators, names, IDs, values, and submitted data continue to work.
-    
-    Textarea/select/input fields inherit their original widget type
-    from Flask-WTF; only the visual Tailwind/daisyUI classes change.
+  {#
+    Flask-WTF fields render through their own widgets, so validators, names,
+    IDs and submitted values keep working; only the classes are ours.
   #}
   {% if f.type == "TextAreaField" %}
     {{ f(
-        class="textarea textarea-bordered w-full min-h-32" +
+        class="textarea textarea-bordered w-full min-h-32 text-[0.95rem] leading-7" +
         (" textarea-error" if f.errors else ""),
         autocomplete=autocomplete
     ) }}
 
   {% elif f.type == "SelectField" %}
     {{ f(
-        class="select select-bordered w-full" +
+        class="select select-bordered w-full text-[0.95rem]" +
         (" select-error" if f.errors else ""),
         autocomplete=autocomplete
     ) }}
 
   {% else %}
     {{ f(
-        class="input input-bordered w-full" +
+        class="input input-bordered w-full text-[0.95rem]" +
         (" input-error" if f.errors else ""),
         autocomplete=autocomplete
     ) }}
   {% endif %}
 
   {% if f.errors %}
-    <div class="mt-1 space-y-1">
+    <div class="mt-2 space-y-1">
       {% for error in f.errors %}
         <p class="text-sm text-error" role="alert">
           {{ error }}

@@ -11,12 +11,12 @@
 <div class="mb-8 text-center">
 
   <span
-    class="text-xs font-semibold uppercase tracking-[0.18em] text-primary"
+    class="eyebrow"
   >
     Welcome Back
   </span>
 
-  <h1 class="mt-3 text-3xl font-bold tracking-tight text-base-content">
+  <h1 class="mt-3 text-[2.1rem] text-base-content">
     Log in to your account
   </h1>
 
@@ -63,7 +63,7 @@
 
     <a
       href="{{ url_for('auth.forgot_password') }}"
-      class="text-sm font-medium text-primary transition hover:opacity-80"
+      class="text-sm text-secondary transition-colors duration-500 hover:text-base-content"
     >
       Forgot password?
     </a>
@@ -76,7 +76,7 @@
        ========================================================== -->
   <button
     type="submit"
-    class="btn btn-primary btn-block"
+    class="btn btn-primary btn-block h-12"
   >
     Log In
   </button>
@@ -88,7 +88,7 @@
      OAUTH PROVIDERS  -  only rendered for providers configured in the env
      ============================================================ -->
 {% if oauth_providers %}
-<div class="divider my-7 text-xs uppercase tracking-wider text-base-content/40">
+<div class="divider my-8 text-[0.68rem] uppercase tracking-[0.22em] text-base-content/40 before:bg-base-content/10 after:bg-base-content/10">
   Or continue with
 </div>
 
@@ -97,7 +97,7 @@
   {% if "google" in oauth_providers %}
   <a
     href="{{ url_for('auth.oauth_login', provider='google') }}"
-    class="btn btn-outline btn-block"
+    class="btn btn-outline btn-block h-12 font-normal"
   >
     Continue with Google
   </a>
@@ -106,7 +106,7 @@
   {% if "github" in oauth_providers %}
   <a
     href="{{ url_for('auth.oauth_login', provider='github') }}"
-    class="btn btn-outline btn-block"
+    class="btn btn-outline btn-block h-12 font-normal"
   >
     Continue with GitHub
   </a>
@@ -125,7 +125,7 @@
 
   <a
     href="{{ url_for('auth.register') }}"
-    class="font-semibold text-primary transition hover:opacity-80"
+    class="font-medium text-secondary transition-colors duration-500 hover:text-base-content"
   >
     Sign up
   </a>

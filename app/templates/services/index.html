@@ -1,6 +1,7 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
 
-{% block title %}Services — {{ site_name }}{% endblock %}
+{% block title %}Services · {{ site_name }}{% endblock %}
 
 {% block meta_description %}
 Custom software development, business automation, integrations, AI applications, and consulting.
@@ -8,49 +9,22 @@ Custom software development, business automation, integrations, AI applications,
 
 {% block content %}
 
-<section class="py-20 sm:py-24 lg:py-28">
-  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+<section class="pb-[clamp(5rem,10vw,8rem)] pt-[clamp(4rem,9vw,7rem)]">
+  <div class="shell">
 
-    <!-- Page heading -->
-    <div class="mb-12 max-w-3xl">
-      <span
-        class="text-xs font-semibold uppercase tracking-[0.18em] text-primary"
-      >
-        Services
-      </span>
-
-      <h1
-        class="mt-3 text-3xl font-bold tracking-tight text-base-content sm:text-4xl lg:text-5xl"
-      >
-        How I Can Help Your Business
-      </h1>
-
-      <p class="mt-4 max-w-2xl text-base leading-7 text-base-content/60 sm:text-lg">
-        Practical software solutions designed around your business problems,
-        workflows, and growth.
-      </p>
-    </div>
+    {{ page_header("Services", "How I can help", lean="your business.",
+                   lede="Practical software designed around your problems, your workflows and where the business is heading.") }}
 
     {% if services %}
-
-      <!--
-        Responsive service grid.
-
-        The service objects continue to come directly from Flask.
-        Only the visual layout has been changed.
-      -->
-      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-
+      <div class="mt-16 grid gap-6 md:mt-20 md:grid-cols-2" data-reveal-group="110">
         {% for service in services %}
-          {% include "components/service_card.html" %}
+          <div data-reveal>{% include "components/service_card.html" %}</div>
         {% endfor %}
-
       </div>
-
     {% else %}
-
-      {% include "components/empty_state.html" %}
-
+      <div class="mt-16">
+        {% include "components/empty_state.html" %}
+      </div>
     {% endif %}
 
   </div>

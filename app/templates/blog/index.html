@@ -1,164 +1,56 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
 
-{% block title %}Blog — {{ site_name }}{% endblock %}
+{% block title %}Blog · {{ site_name }}{% endblock %}
 
 {% block meta_description %}
 Tutorials and articles on Flask, Python, automation, and software architecture.
 {% endblock %}
 
-
 {% block content %}
 
-<section class="py-20 sm:py-24 lg:py-28">
+<section class="pb-[clamp(5rem,10vw,8rem)] pt-[clamp(4rem,9vw,7rem)]">
+  <div class="shell">
 
-  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+    {{ page_header("Writing", "Notes from", lean="the build.",
+                   lede="Practical articles on Flask, Python, automation and software architecture.") }}
 
-    <!-- ========================================================
-         PAGE HEADER
-         ======================================================== -->
-    <header class="mb-12 max-w-3xl">
-
-      <span
-        class="text-xs font-semibold uppercase tracking-[0.18em] text-primary"
-      >
-        Knowledge Base
-      </span>
-
-      <h1
-        class="mt-3 text-3xl font-bold tracking-tight text-base-content sm:text-4xl lg:text-5xl"
-      >
-        Blog &amp; Tutorials
-      </h1>
-
-      <p class="mt-4 max-w-2xl text-base leading-7 text-base-content/60 sm:text-lg">
-        Practical articles, tutorials, and technical insights on Flask,
-        Python, automation, and software architecture.
-      </p>
-
-    </header>
-
-
-    <!-- ========================================================
-         BLOG POSTS
-         ======================================================== -->
     {% if posts %}
-
-      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-
+      <div class="row-list mt-16 md:mt-20" data-reveal-group="100">
         {% for post in posts %}
-
-          <article
-            class="card h-full overflow-hidden border border-base-300 bg-base-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-secondary/40 hover:shadow-xl"
+          <a
+            href="{{ url_for('blog.detail', slug=post.slug) }}"
+            class="row-link group"
+            data-reveal
           >
+            <span class="row-link__index">
+              {% if post.published_at %}{{ post.published_at.strftime('%b %y') }}{% else %}{{ "%02d"|format(loop.index) }}{% endif %}
+            </span>
 
-            <!-- ==================================================
-                 FEATURED IMAGE
-                 ================================================== -->
-            {% if post.featured_image %}
-
-              <figure class="aspect-video overflow-hidden bg-base-200">
-
-                <img
-                  src="{{ post.featured_image }}"
-                  alt="{{ post.title }}"
-                  loading="lazy"
-                  class="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                >
-
-              </figure>
-
-            {% else %}
-
-              <!--
-                Maintain a consistent card layout when an article
-                does not have a featured image.
-              -->
-              <div
-                class="flex aspect-video items-center justify-center bg-base-200"
-              >
-                <span class="px-6 text-center text-sm font-medium text-base-content/30">
-                  {{ post.title }}
-                </span>
-              </div>
-
-            {% endif %}
-
-
-            <!-- ==================================================
-                 POST CONTENT
-                 ================================================== -->
-            <div class="card-body">
-
-              <!-- Category -->
+            <span class="min-w-0">
+              <span class="row-link__title block">{{ post.title }}</span>
               {% if post.category %}
-
-                <p
-                  class="text-xs font-semibold uppercase tracking-[0.12em] text-primary"
-                >
-                  {{ post.category.name }}
-                </p>
-
+                <span class="mt-3 block text-xs uppercase tracking-[0.22em] text-base-content/45">{{ post.category.name }}</span>
               {% endif %}
+            </span>
 
+            <span class="min-w-0 text-[0.95rem] leading-7 text-base-content/55">{{ post.excerpt }}</span>
 
-              <!-- Title -->
-              <h2 class="card-title mt-1 text-xl leading-7">
-
-                <a
-                  href="{{ url_for('blog.detail', slug=post.slug) }}"
-                  class="transition-colors hover:text-secondary"
-                >
-                  {{ post.title }}
-                </a>
-
-              </h2>
-
-
-              <!-- Excerpt -->
-              <p class="text-sm leading-6 text-base-content/60">
-                {{ post.excerpt }}
-              </p>
-
-
-              <!-- Action -->
-              <div class="mt-auto pt-5">
-
-                <a
-                  href="{{ url_for('blog.detail', slug=post.slug) }}"
-                  class="btn btn-secondary btn-sm"
-                >
-                  Read Article
-                  <span aria-hidden="true">→</span>
-                </a>
-
-              </div>
-
-            </div>
-
-          </article>
-
+            <span class="row-link__arrow hidden md:inline-flex" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            </span>
+          </a>
         {% endfor %}
-
       </div>
 
-
-      <!-- ========================================================
-           PAGINATION
-
-           Existing pagination component is deliberately preserved.
-           It continues to receive the same Flask/Jinja context.
-           ======================================================== -->
       {% include "components/pagination.html" %}
-
-
     {% else %}
-
-      {% include "components/empty_state.html" %}
-
+      <div class="mt-16">
+        {% include "components/empty_state.html" %}
+      </div>
     {% endif %}
 
   </div>
-
 </section>
 
 {% endblock %}

@@ -1,0 +1,25 @@
+{#
+  Closing call to action, set above a glowing planet horizon.
+
+    {% from "components/closing_cta.html" import closing_cta %}
+    {{ closing_cta("Have a similar problem", lean="to solve?",
+                   lede="Tell me what you are trying to build.") }}
+#}
+{% macro closing_cta(title, lean=none, lede=none, eyebrow="Start a project", label="Start a project", href=none) -%}
+<section class="horizon">
+  <div class="shell pb-[clamp(13rem,28vw,20rem)] pt-[clamp(5rem,10vw,8.5rem)] text-center" data-reveal-group="140">
+    <span class="eyebrow" data-reveal>{{ eyebrow }}</span>
+    <h2 class="mx-auto mt-7 max-w-3xl text-[clamp(2.3rem,4.6vw,4rem)] text-base-content" data-reveal>
+      {{ title }}{% if lean %} <em>{{ lean }}</em>{% endif %}
+    </h2>
+    {% if lede %}
+      <p class="lede mx-auto mt-7 max-w-lg" data-reveal>{{ lede }}</p>
+    {% endif %}
+    <div class="mt-11" data-reveal>
+      <a href="{{ href or url_for('contact.index') }}" class="btn btn-primary h-12 px-8">
+        {{ label }} <span aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+  </div>
+</section>
+{%- endmacro %}

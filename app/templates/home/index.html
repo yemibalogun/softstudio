@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "components/closing_cta.html" import closing_cta %}
 
 {% block title %}{{ site_name }} · Software that solves real problems{% endblock %}
 
@@ -9,180 +10,119 @@ Custom applications, business automation, and practical developer training built
 {% block content %}
 
 {# ============================================================
-   HERO  -  asymmetric split: statement left, featured work right
+   HERO - centred statement above a rising planet.
+   motion.js: copy blurs away and the planet lifts on scroll.
    ============================================================ #}
-<section class="relative">
-  <div class="mx-auto grid w-full max-w-7xl gap-12 px-4 pb-14 pt-20 sm:px-6 lg:grid-cols-12 lg:items-center lg:gap-10 lg:px-8 lg:pb-20 lg:pt-24">
+<section class="hero" data-hero-scene>
 
-    <div class="lg:col-span-7">
-      <span class="eyebrow">Software studio &amp; training</span>
+  <div class="hero__content shell flex flex-1 flex-col items-center justify-center pb-[calc(var(--peek)+2rem)] pt-6 text-center" data-hero-copy>
+    <div class="flex flex-col items-center" data-reveal-group="140">
+      <span class="eyebrow" data-reveal>Software studio &amp; training</span>
 
-      <h1 class="mt-6 text-balance text-5xl text-base-content sm:text-6xl">
-        I build software that solves
-        <span class="text-secondary">real problems.</span>
+      <h1 class="mt-7 max-w-4xl text-[clamp(2.9rem,6vw,5.4rem)] text-base-content" data-reveal>
+        Software that solves <em>real</em> problems.
       </h1>
 
-      <p class="mt-6 max-w-xl text-lg leading-8 text-base-content/70">
+      <span class="accent-rule accent-rule--center mt-9" data-reveal="rule"></span>
+
+      <p class="lede mt-8 max-w-xl" data-reveal>
         Custom applications, business automation, and applied AI for teams
         that need working software. Plus courses that teach how it is
         actually built.
       </p>
 
-      <div class="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <a href="{{ url_for('projects.index') }}" class="btn btn-primary btn-md">
-          Explore my work <span aria-hidden="true">&rarr;</span>
+      <div class="mt-10 flex flex-col items-center gap-4 sm:flex-row" data-reveal>
+        <a href="{{ url_for('contact.index') }}" class="btn btn-primary h-12 px-7">
+          Start a project <span aria-hidden="true">&rarr;</span>
         </a>
-        <a href="{{ url_for('contact.index') }}" class="btn btn-outline btn-md">
-          Start a project
+        <a href="{{ url_for('projects.index') }}" class="btn btn-ghost h-12 px-6 font-normal text-base-content/75 hover:text-base-content">
+          See the work
         </a>
       </div>
     </div>
+  </div>
 
-    {# Featured work - framed as a product screen, angled for depth #}
-    <div class="relative lg:col-span-5">
-      {% set lead = projects[0] if projects else none %}
-
-      {# ghost panel behind, for layering #}
-      <div class="pointer-events-none absolute -right-3 -top-3 hidden h-full w-full rounded-box border border-base-300/50 bg-base-200/20 lg:block" aria-hidden="true"></div>
-
-      <div class="group relative -rotate-1 overflow-hidden rounded-box border border-base-300/80 bg-base-200 shadow-[0_30px_80px_-24px_rgba(0,0,0,0.65)] transition-transform duration-500 hover:rotate-0">
-
-        {# browser chrome #}
-        <div class="flex items-center gap-2 border-b border-base-300/70 bg-base-300/40 px-4 py-3">
-          <span class="h-2.5 w-2.5 rounded-full bg-base-content/20"></span>
-          <span class="h-2.5 w-2.5 rounded-full bg-base-content/20"></span>
-          <span class="h-2.5 w-2.5 rounded-full bg-base-content/20"></span>
-          <span class="ml-3 hidden h-5 flex-1 rounded-md bg-base-100/70 sm:block"></span>
-        </div>
-
-        {# screen: real thumbnail if one exists, else a brand-coloured faux dashboard #}
-        <div class="aspect-[4/3] w-full overflow-hidden">
-          {% if lead and lead.thumbnail %}
-            <img
-              src="{{ lead.thumbnail }}"
-              alt="{{ lead.title }}"
-              class="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]"
-            >
-          {% else %}
-            <div class="flex h-full flex-col gap-3.5 p-5">
-              <div class="flex items-center justify-between">
-                <div class="h-2.5 w-20 rounded-full bg-base-content/15"></div>
-                <div class="h-6 w-16 rounded-full bg-primary/80"></div>
-              </div>
-              <div class="grid grid-cols-3 gap-3">
-                <div class="h-14 rounded-lg bg-primary/15 ring-1 ring-inset ring-primary/20"></div>
-                <div class="h-14 rounded-lg bg-base-content/5 ring-1 ring-inset ring-base-content/10"></div>
-                <div class="h-14 rounded-lg bg-secondary/15 ring-1 ring-inset ring-secondary/25"></div>
-              </div>
-              <div class="flex flex-1 items-end gap-2 rounded-lg bg-base-content/5 p-4 ring-1 ring-inset ring-base-content/10">
-                <div class="h-[38%] w-full rounded-t bg-primary/40"></div>
-                <div class="h-[64%] w-full rounded-t bg-primary/60"></div>
-                <div class="h-[48%] w-full rounded-t bg-secondary/50"></div>
-                <div class="h-[82%] w-full rounded-t bg-primary/50"></div>
-                <div class="h-[34%] w-full rounded-t bg-primary/30"></div>
-                <div class="h-[92%] w-full rounded-t bg-primary/70"></div>
-              </div>
-            </div>
-          {% endif %}
-        </div>
+  <div class="hero__sky" aria-hidden="true">
+    <div class="planet-rig" data-hero-planet>
+      <div class="planet">
+        <div class="planet__body"></div>
+        <div class="planet__cells"></div>
+        <div class="planet__dust"></div>
+        <div class="planet__limb"></div>
       </div>
-
-      {% if lead %}
-        <a
-          href="{{ url_for('projects.detail', slug=lead.slug) }}"
-          class="mt-5 inline-flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-base-content/70 transition-colors hover:text-primary"
-        >
-          <span class="kicker text-[0.7rem]">{{ lead.category or "Featured build" }}</span>
-          <span class="text-base-content/30">/</span>
-          <span>{{ lead.title }}</span>
-          <span aria-hidden="true">&rarr;</span>
-        </a>
-      {% endif %}
-    </div>
-
-  </div>
-
-  {# Capability strip - qualitative, no invented metrics #}
-  <div class="border-y border-base-300/70 bg-base-200/40">
-    <div class="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-x-8 gap-y-2 px-4 py-4 font-mono text-xs uppercase tracking-widest text-base-content/50 sm:px-6 lg:px-8">
-      <span>Flask &amp; PostgreSQL</span>
-      <span class="hairline hidden h-3 border-l sm:inline-block"></span>
-      <span>Automation &amp; integrations</span>
-      <span class="hairline hidden h-3 border-l sm:inline-block"></span>
-      <span>Applied AI</span>
-      <span class="hairline hidden h-3 border-l sm:inline-block"></span>
-      <span>Developer training</span>
     </div>
   </div>
+
+  <a href="#work" class="btn-orbit hero__cue" aria-label="Scroll to selected work">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 5v14M6 13l6 6 6-6" />
+    </svg>
+  </a>
 </section>
 
 
 {# ============================================================
-   FEATURED WORK  -  asymmetric: wide lead panel + supporting grid
+   SELECTED WORK - numbered editorial rows
    ============================================================ #}
-<section class="section-y">
-  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+<section id="work" class="section-y scroll-mt-16">
+  <div class="shell">
 
-    <div class="flex flex-wrap items-end justify-between gap-4">
-      <h2 class="max-w-lg text-base-content">Real software, built for real businesses</h2>
-      <a
-        href="{{ url_for('projects.index') }}"
-        class="text-sm font-medium text-primary transition-colors hover:text-primary/80"
-      >
-        All projects
-      </a>
+    <div class="grid gap-10 md:grid-cols-12 md:items-end" data-reveal-group="120">
+      <div class="md:col-span-7">
+        <span class="eyebrow" data-reveal>Selected work</span>
+        <h2 class="mt-6 text-base-content" data-reveal>
+          Real software, built for <em>real</em> businesses.
+        </h2>
+      </div>
+      <div class="md:col-span-4 md:col-start-9" data-reveal>
+        <p class="text-[0.95rem] leading-7 text-base-content/55">
+          Operations tools, automation and applied AI, each one built around
+          a problem a business was paying for every week.
+        </p>
+      </div>
     </div>
 
     {% if projects %}
-      {% set rest = projects[1:] %}
+      <div class="row-list mt-16 md:mt-20" data-reveal-group="110">
+        {% for project in projects %}
+          <a
+            href="{{ url_for('projects.detail', slug=project.slug) }}"
+            class="row-link group"
+            data-reveal
+          >
+            <span class="row-link__index">{{ "%02d"|format(loop.index) }}</span>
 
-      {% if lead %}
-        <a
-          href="{{ url_for('projects.detail', slug=lead.slug) }}"
-          class="group mt-10 grid overflow-hidden rounded-box border border-base-300 bg-base-200 md:grid-cols-2"
-        >
-          <div class="aspect-video w-full overflow-hidden bg-base-300 md:aspect-auto">
-            {% if lead.thumbnail %}
-              <img
-                src="{{ lead.thumbnail }}"
-                alt="{{ lead.title }}"
-                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-              >
-            {% else %}
-              <div class="flex h-full min-h-56 w-full items-center justify-center text-sm text-base-content/40">
-                {{ lead.category or "Application" }}
-              </div>
-            {% endif %}
-          </div>
+            <span class="min-w-0">
+              <span class="row-link__title block">{{ project.title }}</span>
+              <span class="mt-3 block text-xs uppercase tracking-[0.22em] text-base-content/45">
+                {{ project.category or "Application" }}
+                {% if project.status and project.status != 'live' %}
+                  <span class="mx-2 text-base-content/25">/</span>{{ project.status.replace('_', ' ') }}
+                {% endif %}
+              </span>
+            </span>
 
-          <div class="flex flex-col justify-center gap-4 p-7 lg:p-10">
-            <p class="kicker text-[0.7rem]">{{ lead.category or "Featured build" }}</p>
-            <h3 class="text-2xl text-base-content">{{ lead.title }}</h3>
-            <p class="text-sm leading-6 text-base-content/65">{{ lead.short_description }}</p>
+            <span class="min-w-0">
+              <span class="block text-[0.95rem] leading-7 text-base-content/60">{{ project.short_description }}</span>
+              {% if project.technologies %}
+                <span class="mt-3 block text-xs text-base-content/40">
+                  {{ project.technologies[:4]|map(attribute='name')|join('  ·  ') }}
+                </span>
+              {% endif %}
+            </span>
 
-            {% if lead.technologies %}
-              <ul class="flex flex-wrap gap-2 pt-1">
-                {% for tech in lead.technologies[:5] %}
-                  <li><span class="badge badge-outline badge-sm">{{ tech.name }}</span></li>
-                {% endfor %}
-              </ul>
-            {% endif %}
+            <span class="row-link__arrow hidden md:inline-flex" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            </span>
+          </a>
+        {% endfor %}
+      </div>
 
-            <span class="pt-2 text-sm font-medium text-primary">View case study</span>
-          </div>
-        </a>
-      {% endif %}
-
-      {% if rest %}
-        <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {% for project in rest %}
-            {% include "components/project_card.html" %}
-          {% endfor %}
-        </div>
-      {% endif %}
-
+      <div class="mt-12" data-reveal>
+        <a href="{{ url_for('projects.index') }}" class="link-arrow">All applications</a>
+      </div>
     {% else %}
-      <div class="mt-10">
+      <div class="mt-16">
         {% include "components/empty_state.html" with context %}
       </div>
     {% endif %}
@@ -192,118 +132,82 @@ Custom applications, business automation, and practical developer training built
 
 
 {# ============================================================
-   SERVICES  -  numbered index, not a card grid
-   ============================================================ #}
-<section class="section-y border-y border-base-300 bg-base-200/40">
-  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-
-    <div class="max-w-2xl">
-      <p class="kicker">What I do</p>
-      <h2 class="mt-4 text-base-content">How I help teams ship</h2>
-    </div>
-
-    {% if services %}
-      <div class="mt-10 grid gap-x-10 gap-y-px border-t border-base-300 sm:grid-cols-2">
-        {% for service in services %}
-          <a
-            href="{{ url_for('services.detail', slug=service.slug) }}"
-            class="group flex gap-5 border-b border-base-300 py-6 transition-colors hover:bg-base-100/40"
-          >
-            <span class="mt-1 font-mono text-sm text-primary/70">
-              {{ "%02d"|format(loop.index) }}
-            </span>
-            <span class="min-w-0">
-              <span class="block text-lg font-semibold text-base-content group-hover:text-primary">
-                {{ service.title }}
-              </span>
-              <span class="mt-1 block text-sm leading-6 text-base-content/60">
-                {{ service.summary }}
-              </span>
-            </span>
-          </a>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="mt-10">
-        {% include "components/empty_state.html" %}
-      </div>
-    {% endif %}
-
-  </div>
-</section>
-
-
-{# ============================================================
-   COURSES  -  two-up cards, room to breathe
+   SERVICES - sticky heading beside a numbered index
    ============================================================ #}
 <section class="section-y">
-  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div class="shell grid gap-14 lg:grid-cols-12 lg:gap-10">
 
-    <div class="flex flex-wrap items-end justify-between gap-4">
-      <div class="max-w-lg">
-        <h2 class="text-base-content">Learn to build production software</h2>
-        <p class="mt-3 text-base leading-7 text-base-content/60">
-          Courses drawn from real client work, not toy examples.
+    <div class="lg:col-span-5">
+      <div class="lg:sticky lg:top-32" data-reveal-group="120">
+        <span class="eyebrow" data-reveal>What I do</span>
+        <h2 class="mt-6 text-base-content" data-reveal>How I help teams ship.</h2>
+        <span class="accent-rule mt-8" data-reveal="rule"></span>
+        <p class="lede mt-8 max-w-sm" data-reveal>
+          Every engagement starts with the problem. The software is how it
+          gets solved.
         </p>
+        <div class="mt-10" data-reveal>
+          <a href="{{ url_for('services.index') }}" class="link-arrow">All services</a>
+        </div>
       </div>
-      <a
-        href="{{ url_for('courses.index') }}"
-        class="text-sm font-medium text-primary transition-colors hover:text-primary/80"
-      >
-        All courses
-      </a>
     </div>
 
-    {% if courses %}
-      <div class="mt-10 grid gap-6 sm:grid-cols-2">
-        {% for course in courses %}
-          {% include "components/course_card.html" %}
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="mt-10">
+    <div class="lg:col-span-6 lg:col-start-7">
+      {% if services %}
+        <ol class="border-t hairline" data-reveal-group="100">
+          {% for service in services %}
+            <li data-reveal>
+              <a
+                href="{{ url_for('services.detail', slug=service.slug) }}"
+                class="group grid grid-cols-[2.5rem_1fr_auto] gap-x-4 border-b hairline py-8 sm:py-10"
+              >
+                <span class="pt-1.5 text-xs tabular-nums text-secondary/80">{{ "%02d"|format(loop.index) }}</span>
+                <span>
+                  <span class="block text-xl font-medium tracking-tight text-base-content transition-colors duration-500 group-hover:text-white">
+                    {{ service.title }}
+                  </span>
+                  <span class="mt-2.5 block max-w-md text-[0.95rem] leading-7 text-base-content/55">
+                    {{ service.summary }}
+                  </span>
+                </span>
+                <span class="pt-1 text-base-content/30 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1 group-hover:text-secondary" aria-hidden="true">&rarr;</span>
+              </a>
+            </li>
+          {% endfor %}
+        </ol>
+      {% else %}
         {% include "components/empty_state.html" %}
-      </div>
-    {% endif %}
+      {% endif %}
+    </div>
 
   </div>
 </section>
 
 
 {# ============================================================
-   WHY WORK WITH ME  -  statement + accent-rule list, no card boxes
+   APPROACH - one statement, three principles
    ============================================================ #}
-<section class="section-y border-y border-base-300 bg-base-200/40">
-  <div class="mx-auto grid w-full max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-20 lg:px-8">
+<section class="section-y">
+  <div class="shell">
 
-    <div>
-      <h2 class="text-base-content">Business-first, not just code-first</h2>
-      <p class="mt-5 max-w-xl text-base leading-8 text-base-content/65">
-        Every project starts with the problem, not the tech stack. I focus
-        on what actually moves your business forward, then build software
-        that gets you there reliably, securely, and maintainably.
+    <div class="mx-auto max-w-4xl text-center" data-reveal-group="140">
+      <span class="eyebrow" data-reveal>Approach</span>
+      <p class="mx-auto mt-8 max-w-none text-[clamp(1.9rem,3.8vw,3.2rem)] font-medium leading-[1.12] tracking-[-0.04em] text-base-content" data-reveal>
+        Every project starts with the problem, <span class="text-base-content/35">not the tech stack.</span>
       </p>
     </div>
 
-    <div class="grid gap-8">
-      <div class="border-l-2 border-primary/40 pl-5">
-        <h3 class="text-base font-semibold text-base-content">Production-grade engineering</h3>
-        <p class="mt-1.5 text-sm leading-6 text-base-content/60">
-          Secure, tested, and built to scale past the first version.
-        </p>
-      </div>
-      <div class="border-l-2 border-primary/40 pl-5">
-        <h3 class="text-base font-semibold text-base-content">Clear communication</h3>
-        <p class="mt-1.5 text-sm leading-6 text-base-content/60">
-          You always know what is being built and why.
-        </p>
-      </div>
-      <div class="border-l-2 border-primary/40 pl-5">
-        <h3 class="text-base font-semibold text-base-content">Teaching, not just building</h3>
-        <p class="mt-1.5 text-sm leading-6 text-base-content/60">
-          Courses built from real production experience, not theory.
-        </p>
-      </div>
+    <div class="mx-auto mt-20 grid max-w-5xl gap-12 sm:grid-cols-3 sm:gap-10" data-reveal-group="120">
+      {% for title, body in [
+        ("Production-grade engineering", "Secure, tested, and built to keep working long after the first version."),
+        ("Clear communication", "You always know what is being built, why, and what it will cost."),
+        ("Teaching, not just building", "Courses drawn from real client work, so the lessons hold up in production."),
+      ] %}
+        <div class="border-t hairline pt-6" data-reveal>
+          <h3 class="text-base font-medium text-base-content">{{ title }}</h3>
+          <p class="mt-3 text-[0.95rem] leading-7 text-base-content/55">{{ body }}</p>
+        </div>
+      {% endfor %}
     </div>
 
   </div>
@@ -311,17 +215,53 @@ Custom applications, business automation, and practical developer training built
 
 
 {# ============================================================
-   TESTIMONIALS
+   COURSES
+   ============================================================ #}
+<section class="section-y">
+  <div class="shell">
+
+    <div class="flex flex-wrap items-end justify-between gap-8" data-reveal-group="120">
+      <div class="max-w-2xl">
+        <span class="eyebrow" data-reveal>Courses</span>
+        <h2 class="mt-6 text-base-content" data-reveal>Learn to build production software.</h2>
+        <p class="lede mt-6" data-reveal>Courses drawn from real client work, not toy examples.</p>
+      </div>
+      <div data-reveal>
+        <a href="{{ url_for('courses.index') }}" class="link-arrow">All courses</a>
+      </div>
+    </div>
+
+    {% if courses %}
+      {% set wide = courses|length == 1 %}
+      <div class="mt-16 grid gap-6 {% if not wide %}md:grid-cols-2{% endif %}" data-reveal-group="120">
+        {% for course in courses %}
+          <div data-reveal>{% include "components/course_card.html" %}</div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="mt-16">
+        {% include "components/empty_state.html" %}
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+
+{# ============================================================
+   TESTIMONIALS - set as large quotes, no boxes
    ============================================================ #}
 {% if testimonials %}
 <section class="section-y">
-  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div class="shell">
 
-    <h2 class="max-w-xl text-base-content">What clients and students say</h2>
+    <span class="eyebrow" data-reveal>In their words</span>
 
-    <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div class="mt-14 columns-1 gap-16 md:columns-2" data-reveal-group="130">
       {% for testimonial in testimonials %}
-        {% include "components/testimonial_card.html" %}
+        <div class="mb-16 break-inside-avoid" data-reveal>
+          {% include "components/testimonial_card.html" %}
+        </div>
       {% endfor %}
     </div>
 
@@ -330,26 +270,7 @@ Custom applications, business automation, and practical developer training built
 {% endif %}
 
 
-{# ============================================================
-   FINAL CTA  -  the one accent-heavy moment
-   ============================================================ #}
-<section class="section-y">
-  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="cta-panel relative overflow-hidden rounded-box border border-primary/30 bg-linear-to-br from-primary/15 via-base-200 to-base-200 px-6 py-16 text-center sm:px-12 lg:py-20">
-
-      <h2 class="mx-auto max-w-2xl text-base-content">
-        Have a problem that software could solve?
-      </h2>
-      <p class="mx-auto mt-4 max-w-xl text-base leading-7 text-base-content/70">
-        Tell me what you are trying to build. I will tell you the honest way to get there.
-      </p>
-      <div class="mt-8">
-        <a href="{{ url_for('contact.index') }}" class="btn btn-primary btn-md">
-          Start a project <span aria-hidden="true">&rarr;</span>
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
+{{ closing_cta("Have a problem that software could", lean="solve?",
+               lede="Tell me what you are trying to build. I will tell you the honest way to get there.") }}
 
 {% endblock %}

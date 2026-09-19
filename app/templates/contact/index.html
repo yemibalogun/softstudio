@@ -1,102 +1,89 @@
 {% extends "base.html" %}
 {% from "components/form_field.html" import field %}
+{% from "components/page_header.html" import page_header %}
 
-{% block title %}Start a Project — {{ site_name }}{% endblock %}
+{% block title %}Start a project · {{ site_name }}{% endblock %}
 {% block meta_description %}Tell us about your project and we'll get back to you.{% endblock %}
 
 {% block content %}
 
-<section class="py-20 sm:py-24 lg:py-28">
-  <div class="mx-auto w-full max-w-4xl px-4 sm:px-6">
+<section class="pb-[clamp(5rem,10vw,8rem)] pt-[clamp(4rem,9vw,7rem)]">
+  <div class="shell grid gap-16 lg:grid-cols-12 lg:gap-10">
 
-    <!-- Page heading -->
-    <div class="mb-10 text-center sm:mb-12">
-      <span class="badge badge-secondary mb-4">
-        Start a Project
-      </span>
+    <div class="lg:col-span-5">
+      <div class="lg:sticky lg:top-28">
+        {{ page_header("Start a project", "Tell me what you are", lean="building.",
+                       lede="The more detail you share, the faster I can give you a useful answer.") }}
 
-      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">
-        Tell me about what you're building.
-      </h1>
-
-      <p class="mx-auto mt-4 max-w-2xl text-base-content/70 sm:text-lg">
-        The more detail you share, the faster I can give you a useful response.
-      </p>
+        <ol class="mt-14 border-t hairline" data-reveal-group="110">
+          {% for step, body in [
+            ("I read it properly", "Everything you send is read, and you get a reply with questions or a first view."),
+            ("A short call", "We talk through the problem, the constraints and what a good outcome looks like."),
+            ("A clear proposal", "Scope, timeline and cost, in writing, before any work starts."),
+          ] %}
+            <li class="grid grid-cols-[2.5rem_1fr] gap-3 border-b hairline py-6" data-reveal>
+              <span class="pt-0.5 text-xs tabular-nums text-secondary/80">{{ "%02d"|format(loop.index) }}</span>
+              <span>
+                <span class="block text-[0.95rem] font-medium text-base-content">{{ step }}</span>
+                <span class="mt-1.5 block text-sm leading-6 text-base-content/55">{{ body }}</span>
+              </span>
+            </li>
+          {% endfor %}
+        </ol>
+      </div>
     </div>
 
-    <!--
-      The form itself remains a normal Flask-WTF POST form.
-      CSRF, validation, field names and the existing Flask route
-      are therefore completely unaffected by the UI migration.
-    -->
-    <form
-      method="POST"
-      novalidate
-      class="card border border-base-300 bg-base-100/80 shadow-xl backdrop-blur"
-    >
-      <div class="card-body gap-6 sm:p-8 lg:p-10">
+    <div class="lg:col-span-6 lg:col-start-7" data-reveal data-reveal-delay="250">
+      {#
+        A normal Flask-WTF POST form: CSRF, validation, field names and the
+        route are unchanged.
+      #}
+      <form method="POST" novalidate class="surface p-7 sm:p-10">
 
         {{ form.hidden_tag() }}
 
-        <!-- Name / Email -->
-        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-          {{ field(form.name, autocomplete="name") }}
-          {{ field(form.email, autocomplete="email") }}
+        <div class="grid gap-6">
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {{ field(form.name, autocomplete="name") }}
+            {{ field(form.email, autocomplete="email") }}
+          </div>
+
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {{ field(form.company) }}
+            {{ field(form.phone, autocomplete="tel") }}
+          </div>
+
+          {{ field(form.project_type) }}
+          {{ field(form.project_description) }}
+          {{ field(form.current_process) }}
+          {{ field(form.desired_outcome) }}
+
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {{ field(form.budget_range) }}
+            {{ field(form.timeline) }}
+          </div>
+
+          {{ field(form.referral_source) }}
+
+          {# Honeypot: the backend expects this field; hidden from people. #}
+          <div class="hidden" aria-hidden="true">
+            {{ form.website.label }}
+            {{ form.website(tabindex="-1", autocomplete="off") }}
+          </div>
+
+          <div class="mt-2 flex flex-col-reverse items-start gap-5 border-t hairline pt-8 sm:flex-row sm:items-center sm:justify-between">
+            <p class="max-w-xs text-xs leading-5 text-base-content/45">
+              Your details are only used to reply to this enquiry. See the
+              <a href="{{ url_for('legal.privacy') }}" class="underline decoration-base-content/30 underline-offset-2 hover:text-base-content">privacy policy</a>.
+            </p>
+            <button type="submit" class="btn btn-primary h-12 shrink-0 px-8">
+              Send enquiry <span aria-hidden="true">&rarr;</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Company / Phone -->
-        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-          {{ field(form.company) }}
-          {{ field(form.phone, autocomplete="tel") }}
-        </div>
-
-        <!-- Project information -->
-        {{ field(form.project_type) }}
-
-        {{ field(form.project_description) }}
-
-        {{ field(form.current_process) }}
-
-        {{ field(form.desired_outcome) }}
-
-        <!-- Budget / Timeline -->
-        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-          {{ field(form.budget_range) }}
-          {{ field(form.timeline) }}
-        </div>
-
-        {{ field(form.referral_source) }}
-
-        <!--
-          Honeypot field.
-
-          This remains in the HTML because the Flask backend expects
-          the field to exist. It is visually hidden from genuine users
-          but remains available to automated spam submissions.
-        -->
-        <div
-          class="hidden"
-          aria-hidden="true"
-        >
-          {{ form.website.label }}
-          {{ form.website(
-              tabindex="-1",
-              autocomplete="off"
-          ) }}
-        </div>
-
-        <!-- Submit -->
-        <div class="mt-2">
-          <button
-            type="submit"
-            class="btn btn-secondary btn-lg w-full"
-          >
-            Submit Inquiry
-          </button>
-        </div>
-
-      </div>
-    </form>
+      </form>
+    </div>
 
   </div>
 </section>

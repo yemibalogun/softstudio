@@ -1,29 +1,22 @@
-<article class="card h-full rounded-box">
-  <div class="card-body">
+{# Service card. Whole card is the link target (stretched title link). #}
+<article class="card group flex h-full flex-col rounded-box p-7 sm:p-8">
 
-    <!-- Service title -->
-    <h3 class="card-title text-xl">
-      {{ service.title }}
-    </h3>
+  <h3 class="text-[1.55rem] font-medium leading-[1.15] tracking-[-0.03em] text-base-content">
+    <a
+      href="{{ url_for('services.detail', slug=service.slug) }}"
+      class="after:absolute after:inset-0 after:content-['']"
+    >{{ service.title }}</a>
+  </h3>
 
-    <!-- Short service description -->
-    <p class="text-sm leading-6 text-base-content/60">
-      {{ service.summary }}
-    </p>
+  <p class="mt-4 text-[0.95rem] leading-7 text-base-content/55">
+    {{ service.summary }}
+  </p>
 
-    <!--
-      mt-auto keeps the action aligned toward the bottom when cards
-      have different description lengths.
-    -->
-    <div class="mt-auto pt-5">
-      <a
-        href="{{ url_for('services.detail', slug=service.slug) }}"
-        class="btn btn-ghost btn-sm px-0 hover:bg-transparent hover:text-primary"
-      >
-        Learn More
-        <span aria-hidden="true">→</span>
-      </a>
-    </div>
-
+  <div class="mt-auto flex items-center justify-between pt-9">
+    <span class="text-sm text-base-content/60 transition-colors duration-500 group-hover:text-base-content">Learn more</span>
+    <span class="row-link__arrow shrink-0 group-hover:rotate-[-45deg] group-hover:border-[#eaf1ff] group-hover:bg-[#eaf1ff] group-hover:text-[#050a18]" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+    </span>
   </div>
+
 </article>

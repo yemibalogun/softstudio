@@ -1,235 +1,185 @@
-<header class="sticky top-0 z-50 px-4 pt-3 sm:px-6 sm:pt-4 lg:px-8">
-  <div class="mx-auto w-full max-w-6xl">
-    <div class="flex min-h-14 items-center justify-between gap-4 rounded-full border border-base-300/70 bg-base-100/70 py-2 pl-5 pr-2.5 shadow-[0_10px_40px_-12px_rgba(0,0,0,0.55)] backdrop-blur-xl">
+{#
+  Site header. Transparent over the page at rest with an inset hairline;
+  frosted glass once the page scrolls (motion.js sets [data-scrolled]).
+  The active page gets a glowing cyan underline sitting on the hairline.
 
-      <!-- Brand -->
-      <a
-        href="{{ url_for('main.index') }}"
-        class="group flex shrink-0 items-center gap-2.5"
-        aria-label="{{ site_name }} home"
+  JS hooks kept: data-nav-toggle / aria-expanded / aria-controls on the
+  menu button, data-nav-panel + #mobile-nav-panel on the panel (main.js).
+#}
+{% set nav_items = [
+  ('projects.index', '/projects', 'Applications'),
+  ('courses.index', '/courses', 'Courses'),
+  ('services.index', '/services', 'Services'),
+  ('blog.index', '/blog', 'Blog'),
+  ('main.about', '/about', 'About'),
+] %}
+
+<header class="site-header" data-site-header>
+  <div class="shell site-header__bar flex items-center justify-between gap-6">
+
+    <!-- Brand -->
+    <a
+      href="{{ url_for('main.index') }}"
+      class="group flex shrink-0 items-center gap-3"
+      aria-label="{{ site_name }} home"
+    >
+      <img
+        src="{{ url_for('static', filename='images/brand/jaybalo_logo.png') }}"
+        alt=""
+        class="h-8 w-auto transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-[-8deg]"
       >
-        <img
-          src="{{ url_for('static', filename='images/brand/jaybalo_logo.png') }}"
-          alt="{{ site_name }} logo"
-          class="h-9 w-auto transition-transform duration-200 group-hover:scale-105"
-        >
+      <span class="hidden text-[0.95rem] font-medium tracking-tight text-base-content sm:inline">
+        {{ site_name }}
+      </span>
+    </a>
 
-        <span class="hidden font-display text-lg font-semibold tracking-tight sm:inline">
-          {{ site_name }}
-        </span>
-      </a>
-
-      <!--
-        Desktop navigation.
-
-        The existing Jinja current_path checks are preserved so the
-        server still determines which page is currently active.
-      -->
-      <nav
-        class="hidden lg:block"
-        aria-label="Primary"
-      >
-        <ul class="flex items-center gap-1">
-
-          {% set nav_items = [
-            ('projects.index', '/projects', 'Applications'),
-            ('courses.index', '/courses', 'Courses'),
-            ('services.index', '/services', 'Services'),
-            ('blog.index', '/blog', 'Blog'),
-            ('main.about', '/about', 'About'),
-          ] %}
-
-          {% for endpoint, prefix, label in nav_items %}
-            {% set is_active = (current_path == prefix) if prefix == '/about' else current_path.startswith(prefix) %}
-            <li>
-              <a
-                href="{{ url_for(endpoint) }}"
-                class="relative rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 hover:text-primary after:absolute after:inset-x-3 after:-bottom-px after:h-px after:origin-left after:scale-x-0 after:bg-primary after:transition-transform hover:after:scale-x-100 {% if is_active %}text-primary after:scale-x-100{% else %}text-base-content/70{% endif %}"
-                {% if is_active %}aria-current="page"{% endif %}
-              >
-                {{ label }}
-              </a>
-            </li>
-          {% endfor %}
-
-        </ul>
-      </nav>
-
-      <!-- Desktop actions + mobile menu button -->
-      <div class="flex items-center gap-2">
-
-        <!-- Authentication-dependent action -->
-        {% if current_user.is_authenticated %}
-
-          <!-- Account menu (holds the log-out action) -->
-          <div class="dropdown dropdown-end hidden sm:block">
-            <div
-              tabindex="0"
-              role="button"
-              class="btn btn-sm btn-ghost gap-2"
-              aria-label="Account menu"
-            >
-              {% if current_user.avatar_url %}
-                <img
-                  src="{{ current_user.avatar_url }}"
-                  alt=""
-                  class="h-6 w-6 rounded-full object-cover"
-                >
-              {% else %}
-                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20 text-xs font-semibold text-primary">
-                  {{ (current_user.full_name or current_user.email)[:1]|upper }}
-                </span>
-              {% endif %}
-              <span class="max-w-[9rem] truncate">{{ current_user.full_name or current_user.email }}</span>
-              <svg
-                width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round" aria-hidden="true"
-              >
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </div>
-            <ul
-              tabindex="0"
-              class="dropdown-content menu z-50 mt-3 w-56 rounded-2xl border border-base-300/70 bg-base-100/95 p-2 shadow-xl backdrop-blur-xl"
-            >
-              <li class="truncate px-3 py-2 text-xs text-base-content/50">{{ current_user.email }}</li>
-              <li><a href="{{ url_for('learning.dashboard') }}">Dashboard</a></li>
-              <li><a href="{{ url_for('account.profile') }}">Account</a></li>
-              <li><a href="{{ url_for('auth.logout') }}" class="text-error hover:bg-error/10">Log out</a></li>
-            </ul>
-          </div>
-
-        {% else %}
-
-          <a
-            href="{{ url_for('auth.login') }}"
-            class="btn btn-sm btn-ghost hidden sm:inline-flex"
-          >
-            Login
-          </a>
-
-        {% endif %}
-
-        <!-- Primary CTA -->
-        <a
-          href="{{ url_for('contact.index') }}"
-          class="btn btn-sm btn-primary hidden sm:inline-flex"
-        >
-          Start a project
-        </a>
-
-        <!--
-          Mobile navigation toggle.
-
-          IMPORTANT:
-          data-nav-toggle, aria-expanded and aria-controls are retained
-          because your existing JavaScript uses these attributes.
-        -->
-        <button
-          type="button"
-          class="btn btn-square btn-ghost lg:hidden"
-          data-nav-toggle
-          aria-expanded="false"
-          aria-controls="mobile-nav-panel"
-          aria-label="Open menu"
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            aria-hidden="true"
-          >
-            <line x1="4" y1="7" x2="20" y2="7"></line>
-            <line x1="4" y1="12" x2="20" y2="12"></line>
-            <line x1="4" y1="17" x2="20" y2="17"></line>
-          </svg>
-        </button>
-
-      </div>
-    </div>
-  </div>
-</header>
-
-<!--
-  Mobile navigation panel.
-
-  The data-nav-panel attribute is intentionally preserved because
-  the existing navigation.js/main.js logic can continue controlling
-  this panel without any backend changes.
--->
-<div
-  id="mobile-nav-panel"
-  data-nav-panel
-  class="mx-4 mt-2 overflow-hidden rounded-2xl border border-base-300/70 bg-base-100/95 shadow-xl backdrop-blur-xl sm:mx-6 lg:hidden"
->
-  <div class="w-full px-4 py-5 sm:px-6">
-
-    <nav aria-label="Mobile navigation">
-      <ul class="flex flex-col gap-1">
-
-        {% for endpoint, prefix, label in [
-          ('projects.index', '/projects', 'Applications'),
-          ('courses.index', '/courses', 'Courses'),
-          ('services.index', '/services', 'Services'),
-          ('blog.index', '/blog', 'Blog'),
-          ('main.about', '/about', 'About'),
-        ] %}
+    <!-- Desktop navigation -->
+    <nav class="hidden h-full lg:block" aria-label="Primary">
+      <ul class="flex h-full items-center">
+        {% for endpoint, prefix, label in nav_items %}
           {% set is_active = (current_path == prefix) if prefix == '/about' else current_path.startswith(prefix) %}
-          <li>
+          <li class="h-full">
             <a
               href="{{ url_for(endpoint) }}"
-              class="block rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-base-200 hover:text-primary {% if is_active %}bg-base-200 text-primary{% else %}text-base-content/80{% endif %}"
+              class="nav-link"
               {% if is_active %}aria-current="page"{% endif %}
-            >
-              {{ label }}
-            </a>
+            >{{ label }}</a>
           </li>
         {% endfor %}
-
       </ul>
     </nav>
 
-    <!-- Mobile actions -->
-    <div class="mt-5 border-t border-base-300 pt-5">
+    <!-- Actions + mobile menu button -->
+    <div class="flex items-center gap-2">
 
       {% if current_user.is_authenticated %}
 
-        <p class="truncate px-1 pb-3 text-xs text-base-content/50">
-          Signed in as {{ current_user.email }}
-        </p>
-        <div class="flex flex-col gap-3">
-          <a href="{{ url_for('learning.dashboard') }}" class="btn btn-outline w-full">
-            Dashboard
-          </a>
-          <a href="{{ url_for('account.profile') }}" class="btn btn-outline w-full">
-            Account
-          </a>
-          <a href="{{ url_for('contact.index') }}" class="btn btn-primary w-full">
-            Start a project
-          </a>
-          <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost w-full text-error">
-            Log out
-          </a>
+        <!-- Account menu (holds the log-out action) -->
+        <div class="dropdown dropdown-end hidden sm:block">
+          <div
+            tabindex="0"
+            role="button"
+            class="btn btn-sm btn-ghost gap-2 font-normal"
+            aria-label="Account menu"
+          >
+            {% if current_user.avatar_url %}
+              <img
+                src="{{ current_user.avatar_url }}"
+                alt=""
+                class="h-6 w-6 rounded-lg object-cover"
+              >
+            {% else %}
+              <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/20 text-xs font-medium text-secondary">
+                {{ (current_user.full_name or current_user.email)[:1]|upper }}
+              </span>
+            {% endif %}
+            <span class="max-w-[9rem] truncate">{{ current_user.full_name or current_user.email }}</span>
+            <svg
+              width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <ul
+            tabindex="0"
+            class="surface dropdown-content menu z-50 mt-3 w-60 p-2 shadow-2xl backdrop-blur-xl"
+          >
+            <li class="truncate px-3 py-2 text-xs text-base-content/50">{{ current_user.email }}</li>
+            <li><a href="{{ url_for('learning.dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('account.profile') }}">Account</a></li>
+            <li><a href="{{ url_for('auth.logout') }}" class="text-error hover:bg-error/10">Log out</a></li>
+          </ul>
         </div>
 
       {% else %}
 
-        <div class="grid gap-3 sm:grid-cols-2">
-          <a href="{{ url_for('auth.login') }}" class="btn btn-outline w-full">
-            Login
-          </a>
-          <a href="{{ url_for('contact.index') }}" class="btn btn-primary w-full">
-            Start a project
-          </a>
-        </div>
+        <a
+          href="{{ url_for('auth.login') }}"
+          class="btn btn-sm btn-ghost hidden font-normal text-base-content/70 hover:text-base-content sm:inline-flex"
+        >
+          Log in
+        </a>
 
       {% endif %}
 
+      <a
+        href="{{ url_for('contact.index') }}"
+        class="btn btn-sm btn-primary hidden px-4 sm:inline-flex"
+      >
+        Start a project
+      </a>
+
+      <button
+        type="button"
+        class="btn btn-square btn-ghost lg:hidden"
+        data-nav-toggle
+        aria-expanded="false"
+        aria-controls="mobile-nav-panel"
+        aria-label="Open menu"
+      >
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <line x1="4" y1="9" x2="20" y2="9"></line>
+          <line x1="4" y1="15" x2="20" y2="15"></line>
+        </svg>
+      </button>
+
     </div>
   </div>
-</div>
+
+  <span class="site-header__rule" aria-hidden="true"></span>
+
+  <!-- Mobile navigation panel -->
+  <div
+    id="mobile-nav-panel"
+    data-nav-panel
+    class="shell pb-6 lg:hidden"
+  >
+    <nav aria-label="Mobile navigation" class="border-t hairline pt-4">
+      <ul class="flex flex-col">
+        {% for endpoint, prefix, label in nav_items %}
+          {% set is_active = (current_path == prefix) if prefix == '/about' else current_path.startswith(prefix) %}
+          <li>
+            <a
+              href="{{ url_for(endpoint) }}"
+              class="flex items-center justify-between border-b hairline py-4 text-2xl font-medium tracking-[-0.03em] transition-colors {% if is_active %}text-base-content{% else %}text-base-content/70 hover:text-base-content{% endif %}"
+              {% if is_active %}aria-current="page"{% endif %}
+            >
+              {{ label }}
+              {% if is_active %}<span class="h-1.5 w-1.5 rounded-full bg-secondary shadow-[0_0_10px_rgba(124,203,255,0.8)]" aria-hidden="true"></span>{% endif %}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <div class="mt-6">
+      {% if current_user.is_authenticated %}
+        <p class="truncate pb-3 text-xs text-base-content/50">
+          Signed in as {{ current_user.email }}
+        </p>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <a href="{{ url_for('learning.dashboard') }}" class="btn btn-outline w-full">Dashboard</a>
+          <a href="{{ url_for('account.profile') }}" class="btn btn-outline w-full">Account</a>
+          <a href="{{ url_for('contact.index') }}" class="btn btn-primary w-full">Start a project</a>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost w-full text-error">Log out</a>
+        </div>
+      {% else %}
+        <div class="grid gap-3 sm:grid-cols-2">
+          <a href="{{ url_for('auth.login') }}" class="btn btn-outline w-full">Log in</a>
+          <a href="{{ url_for('contact.index') }}" class="btn btn-primary w-full">Start a project</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</header>

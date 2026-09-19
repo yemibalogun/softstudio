@@ -1,0 +1,23 @@
+{#
+  Shared page header for inner pages: tracked label, large headline, accent
+  rule, lead paragraph. Blurs in on load (motion.js).
+
+    {% from "components/page_header.html" import page_header %}
+    {{ page_header("Applications", "Software built for", lean="real businesses.",
+                   lede="Real software, built to solve real business problems.") }}
+
+  `lean` is the phrase the headline leans on; it is lit with the accent.
+  All arguments are escaped.
+#}
+{% macro page_header(eyebrow, title, lean=none, lede=none, align="left") -%}
+<header class="{% if align == 'center' %}mx-auto text-center{% endif %} max-w-3xl" data-reveal-group="120">
+  <span class="eyebrow" data-reveal>{{ eyebrow }}</span>
+  <h1 class="mt-6 text-[clamp(2.5rem,5.2vw,4.4rem)] text-base-content" data-reveal>
+    {{ title }}{% if lean %} <em>{{ lean }}</em>{% endif %}
+  </h1>
+  <span class="accent-rule {% if align == 'center' %}accent-rule--center{% endif %} mt-8" data-reveal="rule"></span>
+  {% if lede %}
+    <p class="lede mt-7 {% if align == 'center' %}mx-auto{% endif %} max-w-2xl" data-reveal>{{ lede }}</p>
+  {% endif %}
+</header>
+{%- endmacro %}

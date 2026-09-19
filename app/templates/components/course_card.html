@@ -1,78 +1,64 @@
-<article class="card card--gold h-full overflow-hidden rounded-box">
-  <!-- Course thumbnail -->
+{#
+  Course card. Whole card is the link target (stretched title link); the
+  thumbnail only renders when one exists, so there are no empty grey plates.
+  Set `wide` in the including template for a single, full-width feature.
+#}
+{% set is_wide = wide|default(false) %}
+<article class="card group flex h-full flex-col overflow-hidden rounded-box">
+
   {% if course.thumbnail %}
-    <figure class="aspect-video overflow-hidden bg-base-200">
+    <figure class="{% if is_wide %}aspect-[21/9]{% else %}aspect-[16/9]{% endif %} overflow-hidden border-b hairline">
       <img
         src="{{ course.thumbnail }}"
         alt="{{ course.title }} thumbnail"
         loading="lazy"
-        class="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+        class="h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
       >
     </figure>
-  {% else %}
-    <!-- Fallback keeps all course cards the same height when no image exists. -->
-    <div class="flex aspect-video items-center justify-center bg-base-200">
-      <span class="text-sm font-medium text-base-content/30">
-        {{ course.title }}
-      </span>
-    </div>
   {% endif %}
 
-  <div class="card-body">
+  <div class="flex flex-1 flex-col p-8 sm:p-10 {% if is_wide %}lg:grid lg:grid-cols-12 lg:gap-10 lg:p-14{% endif %}">
 
-    <!-- Course metadata -->
-    <p class="text-xs font-semibold uppercase tracking-[0.12em] text-primary">
-      {{ course.difficulty|title }}
-      <span class="mx-1 text-base-content/30">·</span>
-      {{ course.lesson_count }} lessons
-    </p>
+    <div class="{% if is_wide %}lg:col-span-6{% endif %}">
+      <p class="text-xs uppercase tracking-[0.22em] text-base-content/45">
+        {{ course.difficulty|title }}
+        <span class="mx-2 text-base-content/25">/</span>
+        {{ course.lesson_count }} lessons
+      </p>
 
-    <!-- Course title -->
-    <h3 class="card-title mt-1 text-xl">
-      {{ course.title }}
-    </h3>
+      <h3 class="mt-5 font-medium leading-[1.1] tracking-[-0.03em] text-base-content {% if is_wide %}text-[clamp(1.8rem,3vw,2.6rem)]{% else %}text-[clamp(1.5rem,2.2vw,1.9rem)]{% endif %}">
+        <a
+          href="{{ url_for('courses.detail', slug=course.slug) }}"
+          class="after:absolute after:inset-0 after:content-['']"
+        >{{ course.title }}</a>
+      </h3>
+    </div>
 
-    <!-- Course description -->
-    <p class="text-sm leading-6 text-base-content/60">
-      {{ course.short_description }}
-    </p>
+    <div class="flex flex-1 flex-col {% if is_wide %}lg:col-span-5 lg:col-start-8{% endif %}">
+      <p class="mt-4 text-[0.95rem] leading-7 text-base-content/55 {% if is_wide %}lg:mt-9{% endif %}">
+        {{ course.short_description }}
+      </p>
 
-    <!-- Price and action -->
-    <div class="mt-auto flex items-center justify-between gap-4 pt-5">
+      <div class="mt-auto flex items-end justify-between gap-4 pt-10">
+        <p class="tabular-nums">
+          {% if course.discount_price %}
+            <span class="mr-2 text-sm text-base-content/35 line-through">
+              {{ course.currency }} {{ "{:,.0f}".format(course.price) }}
+            </span>
+            <span class="text-lg font-medium text-base-content">
+              {{ course.currency }} {{ "{:,.0f}".format(course.discount_price) }}
+            </span>
+          {% else %}
+            <span class="text-lg font-medium text-base-content">
+              {{ course.currency }} {{ "{:,.0f}".format(course.price) }}
+            </span>
+          {% endif %}
+        </p>
 
-      <!--
-        Keep the existing pricing logic exactly as supplied by Flask.
-        We only change the presentation classes.
-      -->
-      <div class="font-semibold text-base-content">
-
-        {% if course.discount_price %}
-
-          <span class="mr-1 text-sm font-normal text-base-content/40 line-through">
-            {{ course.currency }} {{ "%.0f"|format(course.price) }}
-          </span>
-
-          <span class="text-secondary">
-            {{ course.currency }} {{ "%.0f"|format(course.discount_price) }}
-          </span>
-
-        {% else %}
-
-          <span>
-            {{ course.currency }} {{ "%.0f"|format(course.price) }}
-          </span>
-
-        {% endif %}
-
+        <span class="row-link__arrow shrink-0 group-hover:rotate-[-45deg] group-hover:border-[#eaf1ff] group-hover:bg-[#eaf1ff] group-hover:text-[#050a18]" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </span>
       </div>
-
-      <a
-        href="{{ url_for('courses.detail', slug=course.slug) }}"
-        class="btn btn-secondary btn-sm shrink-0"
-      >
-        View Course
-      </a>
-
     </div>
 
   </div>

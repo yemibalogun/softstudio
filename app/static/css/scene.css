@@ -1,0 +1,533 @@
+/*
+ * Scene pieces: the site header, the hero "planet", horizon glows, and the
+ * editorial list rows used on the home page.
+ *
+ * The planet is the site's one signature object. It rises into view on
+ * load, and as the visitor scrolls, motion.js lifts and enlarges it while
+ * the hero copy blurs away, the camera move from the reference. Its surface
+ * is a field of faint hexagonal cells lit electric blue from above.
+ */
+
+/* ====================================================================
+   Site header
+   ==================================================================== */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color 600ms var(--ease-out-soft),
+    border-color 600ms var(--ease-out-soft),
+    -webkit-backdrop-filter 600ms var(--ease-out-soft),
+    backdrop-filter 600ms var(--ease-out-soft);
+}
+
+.site-header[data-scrolled],
+.site-header:has([data-nav-toggle][aria-expanded="true"]) {
+  background-color: rgba(5, 7, 13, 0.72);
+  border-bottom-color: rgba(232, 237, 246, 0.07);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+}
+
+.site-header__bar {
+  height: 4.5rem;
+}
+
+/* Hairline under the bar at rest, inset to the content measure (reference). */
+.site-header__rule {
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: min(76rem, 100%);
+  translate: -50% 0;
+  height: 1px;
+  padding-inline: clamp(1.25rem, 5vw, 3rem);
+  background-clip: content-box;
+  background-color: rgba(232, 237, 246, 0.07);
+  transition: opacity 600ms var(--ease-out-soft);
+}
+
+.site-header[data-scrolled] .site-header__rule {
+  opacity: 0;
+}
+
+.nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 4.5rem;
+  padding-inline: 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 450;
+  color: rgba(232, 237, 246, 0.6);
+  transition: color 400ms var(--ease-out-soft);
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0.9rem;
+  right: 0.9rem;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-secondary);
+  box-shadow: 0 0 12px rgba(124, 203, 255, 0.6);
+  transform: scaleX(0);
+  transition: transform 600ms var(--ease-out-soft);
+}
+
+.nav-link:hover {
+  color: var(--color-base-content);
+}
+
+.nav-link[aria-current="page"] {
+  color: #ffffff;
+}
+
+.nav-link[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+
+/* Until the scripts have run, keep the (JS-driven) mobile panel closed so it
+   never flashes open. If JS fails, motion-init.js drops .js and it shows. */
+.js:not(.motion-live) #mobile-nav-panel {
+  display: none;
+}
+
+/* Mobile panel slides down softly instead of popping. */
+#mobile-nav-panel:not([hidden]) {
+  animation: panel-in 500ms var(--ease-out-soft) both;
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    filter: blur(6px);
+  }
+}
+
+/* ====================================================================
+   Hero
+   ==================================================================== */
+
+.hero {
+  /* How much of the planet shows above the fold. */
+  --peek: clamp(9rem, 27svh, 16rem);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: calc(100svh - 4.5rem);
+  min-height: 40rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The sky layer holds the planet and fades it to transparent toward the
+   bottom of the hero, so it dissolves into the page background instead of
+   ending on a hard edge when it rises. */
+.hero__sky {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 84%, transparent 100%);
+}
+
+.hero__content {
+  position: relative;
+  z-index: 2;
+  will-change: transform, opacity, filter;
+}
+
+/* The planet: an absolutely placed rig (moved by motion.js on scroll)
+   holding the sphere (which rises in with a CSS animation on load). */
+.planet-rig {
+  --planet: clamp(40rem, 92vw, 86rem);
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: calc(100% - var(--peek));
+  width: var(--planet);
+  aspect-ratio: 1;
+  margin-left: calc(var(--planet) / -2);
+  transform-origin: 50% 0%;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.planet {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation: planet-rise 2600ms var(--ease-out-soft) 150ms both;
+}
+
+@keyframes planet-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14%, 0) scale(0.96);
+  }
+}
+
+/* Atmosphere: a haze just outside the limb. */
+.planet::before {
+  content: "";
+  position: absolute;
+  inset: -6%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(0, 87, 255, 0) 45%,
+    rgba(0, 87, 255, 0.34) 47.4%,
+    rgba(40, 120, 255, 0.12) 50%,
+    rgba(0, 87, 255, 0) 56%
+  );
+  filter: blur(6px);
+}
+
+.planet__body,
+.planet__cells,
+.planet__dust,
+.planet__limb {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+/* Lit from directly above: a bright cap fading to night. */
+.planet__body {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% -4%, #3b7dff 0%, #0f47e6 7%, #07288f 16%, #041545 30%, #030a1f 46%, #02050d 64%);
+}
+
+/* Hexagonal cells wrapped onto the sphere (tools/scene_art.py), so they
+   foreshorten toward the limb. Strongest under the lit cap, gone by the
+   night side. The whole surface sways a few degrees, a slow rotation. */
+.planet__cells {
+  background: url("../images/planet-cells.svg") center / 100% 100% no-repeat;
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(circle at 50% 0%, #000 0%, rgba(0, 0, 0, 0.75) 20%, rgba(0, 0, 0, 0.25) 38%, transparent 55%);
+  mask-image: radial-gradient(circle at 50% 0%, #000 0%, rgba(0, 0, 0, 0.75) 20%, rgba(0, 0, 0, 0.25) 38%, transparent 55%);
+  animation: planet-sway 80s var(--ease-in-out-soft) infinite alternate;
+}
+
+@keyframes planet-sway {
+  from {
+    transform: rotate(-4deg);
+  }
+  to {
+    transform: rotate(4deg);
+  }
+}
+
+/* Cyan sparkle dust on the surface (the reference's glittering cells). */
+.planet__dust {
+  background-image: var(--dust);
+  background-size: 300px 300px;
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(circle at 50% 0%, #000 0%, rgba(0, 0, 0, 0.4) 20%, transparent 40%);
+  mask-image: radial-gradient(circle at 50% 0%, #000 0%, rgba(0, 0, 0, 0.4) 20%, transparent 40%);
+  animation: dust-twinkle 5s ease-in-out infinite alternate;
+}
+
+@keyframes dust-twinkle {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 0.65;
+  }
+}
+
+/* The thin bright limb, limb darkening toward the sides, and the inner /
+   outer blue glow. */
+.planet__limb {
+  background: radial-gradient(circle at 50% 50%, rgba(2, 5, 13, 0) 60%, rgba(2, 5, 13, 0.45) 71%);
+  box-shadow:
+    inset 0 2px 1px -1px rgba(200, 228, 255, 0.85),
+    inset 0 28px 60px -24px rgba(90, 160, 255, 0.55),
+    0 -2px 24px rgba(124, 203, 255, 0.28),
+    0 -24px 120px -10px rgba(0, 87, 255, 0.5);
+}
+
+/* Scroll cue, seated on the planet's limb like the reference's arrow. */
+.hero__cue {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: clamp(1.5rem, 4svh, 2.5rem);
+  translate: -50% 0;
+  background-color: rgba(5, 7, 13, 0.45);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.hero__cue svg {
+  animation: cue-bob 2.8s var(--ease-in-out-soft) infinite;
+}
+
+@keyframes cue-bob {
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+/* A smaller horizon for closing sections: a planet limb glowing up from
+   the bottom edge. */
+.horizon {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.horizon::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 100%;
+  width: min(70rem, 140vw);
+  aspect-ratio: 1;
+  translate: -50% -9%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 0%, #1b56ff 0%, #07288f 9%, #041240 22%, #02050d 48%);
+  box-shadow:
+    inset 0 2px 1px -1px rgba(200, 228, 255, 0.7),
+    0 -20px 100px -10px rgba(0, 87, 255, 0.45);
+}
+
+/* ====================================================================
+   Editorial rows (selected work, courses)
+   ==================================================================== */
+
+.row-list {
+  border-top: 1px solid rgba(232, 237, 246, 0.08);
+}
+
+.row-link {
+  position: relative;
+  display: grid;
+  gap: 0.75rem 2rem;
+  padding-block: clamp(1.75rem, 3vw, 2.5rem);
+  border-bottom: 1px solid rgba(232, 237, 246, 0.08);
+  isolation: isolate;
+}
+
+@media (min-width: 768px) {
+  .row-link {
+    grid-template-columns: 3.5rem minmax(0, 1.15fr) minmax(0, 1fr) auto;
+    align-items: baseline;
+  }
+}
+
+/* Soft light sweeps in behind the hovered row. */
+.row-link::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 -1rem;
+  border-radius: 1rem;
+  background: radial-gradient(40rem 8rem at var(--mx, 30%) 50%, rgba(0, 87, 255, 0.1), transparent 70%);
+  opacity: 0;
+  transition: opacity 600ms var(--ease-out-soft);
+}
+
+.row-link:hover::before {
+  opacity: 1;
+}
+
+.row-link__index {
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: rgba(124, 203, 255, 0.8);
+}
+
+.row-link__title {
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: var(--color-base-content);
+  transition:
+    transform 700ms var(--ease-out-soft),
+    color 500ms var(--ease-out-soft);
+}
+
+.row-link:hover .row-link__title {
+  transform: translateX(0.5rem);
+  color: #ffffff;
+}
+
+.row-link__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(232, 237, 246, 0.14);
+  color: rgba(232, 237, 246, 0.7);
+  align-self: center;
+  transition:
+    background-color 600ms var(--ease-out-soft),
+    border-color 600ms var(--ease-out-soft),
+    color 600ms var(--ease-out-soft),
+    transform 700ms var(--ease-out-soft);
+}
+
+.row-link:hover .row-link__arrow {
+  background-color: #eaf1ff;
+  border-color: #eaf1ff;
+  color: #050a18;
+  transform: rotate(-45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .planet,
+  .planet__cells,
+  .planet__dust,
+  .hero__cue svg {
+    animation: none;
+  }
+  .row-link:hover .row-link__title,
+  .row-link:hover .row-link__arrow {
+    transform: none;
+  }
+}
+
+/* ====================================================================
+   Auth panel - vertical rhythm between Flask-WTF fields
+   ==================================================================== */
+
+.auth-panel .form-control {
+  margin-bottom: 1.25rem;
+}
+
+/* ====================================================================
+   Pagination (components/pagination.html)
+   ==================================================================== */
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 4rem;
+}
+
+.pagination a,
+.pagination span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding-inline: 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: rgba(232, 237, 246, 0.6);
+  transition:
+    color 400ms var(--ease-out-soft),
+    border-color 400ms var(--ease-out-soft),
+    background-color 400ms var(--ease-out-soft);
+}
+
+.pagination a:hover {
+  color: var(--color-base-content);
+  border-color: rgba(232, 237, 246, 0.16);
+}
+
+.pagination .is-active {
+  color: #050a18;
+  background-color: #eaf1ff;
+}
+
+.pagination a[aria-disabled="true"] {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ====================================================================
+   Legal documents (legal/_legal_base.html)
+   ==================================================================== */
+
+.legal-content {
+  max-width: 44rem;
+  color: rgba(232, 237, 246, 0.66);
+  font-size: 1.02rem;
+  line-height: 1.8;
+}
+
+.legal-content h2 {
+  margin-top: 3.5rem;
+  font-size: 1.45rem;
+  line-height: 1.3;
+  letter-spacing: -0.03em;
+  color: var(--color-base-content);
+}
+
+.legal-content h2:first-child {
+  margin-top: 0;
+}
+
+.legal-content h3 {
+  margin-top: 2rem;
+  font-size: 1.1rem;
+  color: var(--color-base-content);
+}
+
+.legal-content p,
+.legal-content ul,
+.legal-content ol {
+  margin-top: 1rem;
+}
+
+.legal-content ul,
+.legal-content ol {
+  padding-left: 1.25rem;
+}
+
+.legal-content ul {
+  list-style-type: disc;
+}
+
+.legal-content ol {
+  list-style-type: decimal;
+}
+
+.legal-content li + li {
+  margin-top: 0.5rem;
+}
+
+.legal-content li::marker {
+  color: rgba(124, 203, 255, 0.6);
+}
+
+.legal-content a {
+  color: var(--color-secondary);
+  text-decoration: underline;
+  text-decoration-color: rgba(124, 203, 255, 0.35);
+  text-underline-offset: 3px;
+}
+
+.legal-content a:hover {
+  text-decoration-color: currentColor;
+}
+
+.legal-content strong {
+  color: var(--color-base-content);
+  font-weight: 500;
+}

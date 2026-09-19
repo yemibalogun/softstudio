@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#080B12">
+  <meta name="theme-color" content="#05070D">
   <title>{% block title %}SoftStudio{% endblock %}</title>
   
   <!-- Apple touch icon should be specified in the head -->
@@ -42,19 +42,15 @@
     href="{{ url_for('static', filename='site.webmanifest') }}"
   >
 
+  <!-- Before first paint: marks html.js so reveal animations start hidden
+       without a flash (see the file for its no-JS safety net). -->
+  <script src="{{ url_for('static', filename='js/motion-init.js') }}"></script>
+
   <!-- Fonts: self-hosted (see @font-face in tailwind.input.css). Preload the
-       two latin faces used above the fold; the rest load from the stylesheet. -->
+       latin face used above the fold; the rest load from the stylesheet. -->
   <link
     rel="preload" as="font" type="font/woff2" crossorigin
-    href="{{ url_for('static', filename='fonts/inter-latin.woff2') }}"
-  >
-  <link
-    rel="preload" as="font" type="font/woff2" crossorigin
-    href="{{ url_for('static', filename='fonts/space-grotesk-latin.woff2') }}"
-  >
-  <link
-    rel="preload" as="font" type="font/woff2" crossorigin
-    href="{{ url_for('static', filename='fonts/fraunces-latin.woff2') }}"
+    href="{{ url_for('static', filename='fonts/geist-latin.woff2') }}"
   >
 
   <!--
@@ -83,6 +79,11 @@
     href="{{ url_for('static', filename='css/particles.css') }}"
   >
 
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/scene.css') }}"
+  >
+
   <!-- Pygments token palette for fenced code blocks in blog posts. -->
   <link
     rel="stylesheet"
@@ -95,22 +96,12 @@
 <body class="min-h-screen text-base-content antialiased">
   {% include "components/particle_background.html" %}
 
-  <!-- <a href="#main-content" class="skip-link">
-    Skip to main content
-  </a> -->
-
-  <!--
-    Keyboard accessibility.
-
-    Tailwind/DaisyUI migration does not change the existing
-    accessibility behavior.
-  -->
-  <!-- <a
+  <a
     href="#main-content"
-    class="skip-link"
+    class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-base-content focus:px-5 focus:py-2.5 focus:text-sm focus:font-medium focus:text-base-100"
   >
     Skip to main content
-  </a> -->
+  </a>
 
   {% include "components/navbar.html" %}
 
@@ -122,7 +113,7 @@
     The Jinja block remains completely unchanged so every existing
     child template continues to work.
   -->
-  <main id="main-content" class="relative z-0">
+  <main id="main-content" class="relative z-0 focus:outline-none" tabindex="-1">
     {% block content %}{% endblock %}
   </main>
 
@@ -135,6 +126,12 @@
   <!-- Existing application JavaScript -->
   <script
     src="{{ url_for('static', filename='js/main.js') }}"
+    defer
+  ></script>
+
+  <!-- Reveal, header and hero motion -->
+  <script
+    src="{{ url_for('static', filename='js/motion.js') }}"
     defer
   ></script>
 

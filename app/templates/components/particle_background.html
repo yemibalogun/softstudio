@@ -1,24 +1,20 @@
 {#
-  Ambient background.
+  Ambient background: navy ground, one slow electric-blue field, a two-layer
+  star field drifting upward, grain and vignette. Pure CSS (particles.css),
+  transform / opacity only, frozen under prefers-reduced-motion.
 
-  Three stacked, GPU-cheap layers (transform/opacity only, no canvas, no
-  scroll or pointer listeners):
-    1. two large blurred colour fields that drift very slowly
-    2. a faint fixed dot-grid for depth
-    3. a static grain + vignette to kill banding on the dark base
-
-  The #particle-background id is kept so existing CSS / any downstream
-  references keep resolving. Everything collapses to static under
-  prefers-reduced-motion (see particles.css).
+  The #particle-background id is kept so existing references keep resolving.
 #}
 <div
   id="particle-background"
   aria-hidden="true"
-  class="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-base-100"
+  class="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
 >
-  <div class="ambient-field ambient-field--primary"></div>
-  <div class="ambient-field ambient-field--secondary"></div>
-  <div class="ambient-grid"></div>
+  <div class="ambient-field"></div>
+  <div class="ambient-starmask">
+    <div class="ambient-stars ambient-stars--far"></div>
+    <div class="ambient-stars ambient-stars--near"></div>
+  </div>
   <div class="ambient-grain"></div>
   <div class="ambient-vignette"></div>
 </div>
