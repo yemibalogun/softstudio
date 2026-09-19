@@ -14,6 +14,7 @@ from app.admin.forms import (
     BlogPostForm, BlogCategoryForm, TestimonialForm, slugify,
 )
 from app.admin.services import unique_slug, parse_csv_names, get_or_create_by_name
+from app.uploads import delete_uploaded_image, store_image
 
 bp = Blueprint("admin", __name__)
 
@@ -483,7 +484,12 @@ def blog_create():
 
         _apply_blog_form(post, form, is_new=True)
         db.session.add(post)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            delete_uploaded_image(post.featured_image)  # don't orphan the new file
+            raise
         flash("Blog post created.", "success")
         return redirect(url_for("admin.blog_list"))
     return render_template("admin/blog_form.html", form=form, post=None)
@@ -504,8 +510,18 @@ def blog_edit(post_id):
         form = _blog_form_with_categories()
 
     if form.validate_on_submit():
+        previous_image = post.featured_image
         _apply_blog_form(post, form, is_new=False)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            if post.featured_image != previous_image:
+                delete_uploaded_image(post.featured_image)
+            raise
+        # Only after the new value is safely stored: drop a replaced upload.
+        if previous_image != post.featured_image:
+            delete_uploaded_image(previous_image)
         flash("Blog post updated.", "success")
         return redirect(url_for("admin.blog_list"))
     return render_template("admin/blog_form.html", form=form, post=post)
@@ -522,7 +538,16 @@ def _apply_blog_form(post: BlogPost, form: BlogPostForm, is_new: bool) -> None:
     # Stored as raw Markdown; rendered + sanitized at display time by the
     # `markdown` Jinja filter (app/blog/render.py).
     post.body = form.body.data
-    post.featured_image = form.featured_image.data
+
+    # Featured image: a new upload wins, then "remove", then the URL field.
+    # The upload was already validated and re-encoded during form validation.
+    if form.processed_image is not None:
+        post.featured_image = store_image(form.processed_image, "blog")
+    elif form.remove_featured_image.data:
+        post.featured_image = None
+    else:
+        post.featured_image = form.featured_image.data or None
+
     post.category_id = form.category_id.data or None
 
     was_published = post.published
@@ -547,8 +572,10 @@ def _apply_blog_form(post: BlogPost, form: BlogPostForm, is_new: bool) -> None:
 @admin_required
 def blog_delete(post_id):
     post = BlogPost.query.get_or_404(post_id)
+    image = post.featured_image
     db.session.delete(post)
     db.session.commit()
+    delete_uploaded_image(image)
     flash("Blog post deleted.", "info")
     return redirect(url_for("admin.blog_list"))
 

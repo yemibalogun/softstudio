@@ -7,7 +7,9 @@
 {% endblock %}
 
 {% block og_image %}
-{{ post.og_image or post.featured_image or super() }}
+{%- set og = post.og_image or post.featured_image -%}
+{#- Uploaded images are stored as site-relative paths; social cards need absolute URLs. -#}
+{%- if og -%}{{ (site_url ~ og) if og.startswith('/') else og }}{%- else -%}{{ super() }}{%- endif -%}
 {% endblock %}
 
 {% block og_type %}article{% endblock %}

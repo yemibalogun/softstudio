@@ -68,8 +68,16 @@ class BaseConfig:
     DEFAULT_CURRENCY = os.environ.get("DEFAULT_CURRENCY", "NGN")
 
     # Uploads
-    MAX_CONTENT_LENGTH = 8 * 1024 * 1024  # 8 MB
-    UPLOAD_ALLOWED_IMAGE_EXT = {"png", "jpg", "jpeg", "webp", "svg"}
+    MAX_CONTENT_LENGTH = 8 * 1024 * 1024  # 8 MB, whole request (Flask returns 413 above this)
+    # Public images written by app/uploads.py, served at /static/images/uploads/.
+    # In Docker this directory is a named volume shared with nginx.
+    UPLOAD_FOLDER = os.environ.get(
+        "UPLOAD_FOLDER", os.path.join(basedir, "app", "static", "images", "uploads")
+    )
+    IMAGE_UPLOAD_MAX_BYTES = 5 * 1024 * 1024  # 5 MB per image
+    # No SVG: it is XML that can carry script and would be served from our origin.
+    # Reference only; the enforced allowlist is app/uploads.py ALLOWED_EXTENSIONS.
+    UPLOAD_ALLOWED_IMAGE_EXT = {"png", "jpg", "jpeg", "webp"}
     UPLOAD_ALLOWED_RESOURCE_EXT = {"pdf", "zip"}
 
     # Rate limiting (Flask-Limiter storage backend)

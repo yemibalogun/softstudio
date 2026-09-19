@@ -110,6 +110,7 @@ def _register_error_handlers(app: Flask) -> None:
         400: "errors/400.html",
         403: "errors/403.html",
         404: "errors/404.html",
+        413: "errors/413.html",
         429: "errors/429.html",
         500: "errors/500.html",
     }

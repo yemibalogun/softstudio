@@ -4,8 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#05070D">
-  <title>{% block title %}SoftStudio{% endblock %}</title>
-  
+  <title>{% block title %}{{ site_name }} · Custom Software, Applications and Developer Training{% endblock %}</title>
+
+  {#
+    SEO / social meta. These blocks must live here in base.html, not in an
+    {% include %}: Jinja never lets a child template override blocks inside an
+    included file, so the per-page description, og:image, og:type and robots
+    overrides were silently ignored while this sat in partials/seo.html.
+  #}
+  <meta name="description" content="{% filter trim %}{% block meta_description %}Custom software development, business automation, and practical developer training.{% endblock %}{% endfilter %}">
+  <link rel="canonical" href="{% block canonical %}{{ site_url }}{{ current_path }}{% endblock %}">
+  <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
+
+  <meta property="og:site_name" content="{{ site_name }}">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:title" content="{% filter trim %}{% block og_title %}{{ self.title() }}{% endblock %}{% endfilter %}">
+  <meta property="og:description" content="{% filter trim %}{% block og_description %}{{ self.meta_description() }}{% endblock %}{% endfilter %}">
+  <meta property="og:url" content="{{ self.canonical() }}">
+  <meta property="og:image" content="{% filter trim %}{% block og_image %}{{ site_url }}/static/images/brand/og-default.png{% endblock %}{% endfilter %}">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ self.og_title()|trim }}">
+  <meta name="twitter:description" content="{{ self.og_description()|trim }}">
+  <meta name="twitter:image" content="{{ self.og_image()|trim }}">
+
   <!-- Apple touch icon should be specified in the head -->
   <link
     rel="apple-touch-icon"
@@ -13,7 +35,6 @@
     href="{{ url_for('static', filename='images/brand/jaybalo_logo.png') }}"
   >
 
-  {% include "partials/seo.html" %}
   {% include "partials/structured_data.html" %}
   {% block structured_data_extra %}{% endblock %}
 

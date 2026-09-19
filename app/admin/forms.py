@@ -1,11 +1,14 @@
 import re
 
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField
 from wtforms import (
     StringField, TextAreaField, BooleanField, SelectField, DecimalField,
     IntegerField,
 )
-from wtforms.validators import DataRequired, Optional, Length, NumberRange, URL
+from wtforms.validators import DataRequired, Optional, Length, NumberRange, URL, ValidationError
+
+from app.uploads import ALLOWED_EXTENSIONS, ImageUploadError, is_uploaded_image, process_image
 
 
 def slugify(value: str) -> str:
@@ -126,12 +129,28 @@ class LessonForm(FlaskForm):
     published = BooleanField("Published", default=True)
 
 
+# File-picker filter for the browser. A convenience only: the server does
+# the real validation in app/uploads.py.
+IMAGE_ACCEPT = ",".join(sorted("." + ext for ext in ALLOWED_EXTENSIONS)) + ",image/jpeg,image/png,image/webp"
+
+
+def image_url(form, field):
+    """An absolute http(s) URL, or a path to an image this site stored itself."""
+    if not field.data or is_uploaded_image(field.data):
+        return
+    URL(message="Enter a full http(s) image URL.")(form, field)
+    if not field.data.lower().startswith(("http://", "https://")):
+        raise ValidationError("Enter a full http(s) image URL.")
+
+
 class BlogPostForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired(), Length(max=200)])
     slug = StringField("Slug", validators=[Optional(), Length(max=220)])
     excerpt = StringField("Excerpt", validators=[Optional(), Length(max=400)])
     body = TextAreaField("Body (Markdown)", validators=[DataRequired()])
-    featured_image = StringField("Featured image URL", validators=[Optional(), URL(), Length(max=512)])
+    featured_image_file = FileField("Featured image", render_kw={"accept": IMAGE_ACCEPT})
+    featured_image = StringField("Or use an image URL", validators=[Optional(), image_url, Length(max=512)])
+    remove_featured_image = BooleanField("Remove the current image")
     category_id = SelectField("Category", coerce=int, validators=[Optional()])
     tags_csv = StringField("Tags (comma-separated)", validators=[Optional(), Length(max=300)])
     published = BooleanField("Published")
@@ -139,6 +158,19 @@ class BlogPostForm(FlaskForm):
     meta_title = StringField("Meta title", validators=[Optional(), Length(max=180)])
     meta_description = StringField("Meta description", validators=[Optional(), Length(max=300)])
     og_image = StringField("OG image URL", validators=[Optional(), URL(), Length(max=512)])
+
+    # Set by validate_featured_image_file() when a valid image was uploaded.
+    processed_image = None
+
+    def validate_featured_image_file(self, field):
+        """Full content validation of the upload (see app/uploads.py)."""
+        upload = field.data
+        if not upload or not getattr(upload, "filename", ""):
+            return
+        try:
+            self.processed_image = process_image(upload)
+        except ImageUploadError as exc:
+            raise ValidationError(str(exc)) from None
 
 
 class BlogCategoryForm(FlaskForm):

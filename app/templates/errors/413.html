@@ -1,0 +1,14 @@
+{% extends "errors/_error_base.html" %}
+
+{% block title %}413 · Upload too large{% endblock %}
+
+{% block error_code %}413{% endblock %}
+
+{% block error_title %}
+That upload is too large.
+{% endblock %}
+
+{% block error_message %}
+Requests are limited to 8 MB and images to 5 MB. Go back, choose a smaller
+file, and try again.
+{% endblock %}
