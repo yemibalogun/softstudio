@@ -1,0 +1,134 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}Products — Admin{% endblock %}
+
+{% block admin_content %}
+
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-3xl font-bold">Products</h1>
+    <p class="mt-1 text-base-content/60">
+      Each product gets its own public URL, social card and waitlist.
+    </p>
+  </div>
+
+  <a href="{{ url_for('admin.product_create') }}" class="btn btn-primary btn-sm">
+    + New Product
+  </a>
+</div>
+
+{% if products %}
+
+<div class="card border border-base-300 bg-base-200 shadow-sm">
+  <div class="card-body p-0">
+
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Product URL</th>
+            <th>Published</th>
+            <th>Waitlist</th>
+            <th>Signups</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for product in products %}
+          {% set product_url = site_url.rstrip('/') ~ url_for('products.detail', slug=product.slug) %}
+          <tr>
+
+            <td>
+              <div class="font-semibold">{{ product.title }}</div>
+            </td>
+
+            <td>
+              <div
+                class="flex items-center gap-2"
+                data-share
+                data-share-url="{{ product_url }}"
+                data-share-title="{{ product.title }}"
+                data-share-text="{{ product.short_description }}"
+              >
+                <a
+                  href="{{ url_for('products.detail', slug=product.slug) }}"
+                  class="link link-hover font-mono text-xs"
+                  target="_blank" rel="noopener"
+                >/products/{{ product.slug }}</a>
+
+                <button type="button" class="btn btn-ghost btn-xs" data-share-copy>
+                  <span data-share-copy-label>Copy link</span>
+                </button>
+                <span class="sr-only" role="status" aria-live="polite" data-share-status></span>
+              </div>
+            </td>
+
+            <td>
+              <form method="POST" action="{{ url_for('admin.product_toggle_published', product_id=product.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                {% if product.published %}
+                  <button type="submit" class="badge badge-success gap-1 cursor-pointer" title="Click to unpublish">✓ Yes</button>
+                {% else %}
+                  <button type="submit" class="badge badge-ghost gap-1 cursor-pointer" title="Click to publish">No</button>
+                {% endif %}
+              </form>
+            </td>
+
+            <td>
+              <form method="POST" action="{{ url_for('admin.product_toggle_waitlist', product_id=product.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                {% if product.waitlist_enabled %}
+                  <button type="submit" class="badge badge-info gap-1 cursor-pointer" title="Click to close the waitlist">Open</button>
+                {% else %}
+                  <button type="submit" class="badge badge-ghost gap-1 cursor-pointer" title="Click to open the waitlist">Closed</button>
+                {% endif %}
+              </form>
+            </td>
+
+            <td>
+              <a href="{{ url_for('admin.product_waitlist', product_id=product.id) }}" class="link link-hover">
+                {{ product.subscriber_count }}
+              </a>
+            </td>
+
+            <td>
+              <div class="flex flex-wrap gap-2">
+                <a href="{{ url_for('admin.product_edit', product_id=product.id) }}" class="btn btn-secondary btn-sm">
+                  Edit
+                </a>
+
+                <form
+                  method="POST"
+                  action="{{ url_for('admin.product_delete', product_id=product.id) }}"
+                  onsubmit="return confirm('Delete this product and its waitlist? This cannot be undone.');"
+                >
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-error btn-outline btn-sm">Delete</button>
+                </form>
+              </div>
+            </td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+
+  </div>
+</div>
+
+{% else %}
+
+  {% include "components/empty_state.html" with context %}
+
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/product-share.js') }}" defer></script>
+{% endblock %}

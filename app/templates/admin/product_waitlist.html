@@ -1,0 +1,82 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}{{ product.title }} waitlist — Admin{% endblock %}
+
+{% block admin_content %}
+
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-3xl font-bold">{{ product.title }} — waitlist</h1>
+    <p class="mt-1 text-base-content/60">
+      {{ subscribers|length }} signup{{ "" if subscribers|length == 1 else "s" }}.
+      These addresses are only ever visible here.
+    </p>
+  </div>
+
+  <div class="flex gap-2">
+    <a href="{{ url_for('admin.product_edit', product_id=product.id) }}" class="btn btn-ghost btn-sm">Edit product</a>
+    <a href="{{ url_for('admin.products_list') }}" class="btn btn-ghost btn-sm">← Products</a>
+  </div>
+</div>
+
+{% if by_source %}
+  <div class="mb-6 flex flex-wrap gap-2">
+    {% for source, count in by_source %}
+      <span class="badge badge-outline gap-2">{{ source }} <span class="font-semibold">{{ count }}</span></span>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if subscribers %}
+
+<div class="card border border-base-300 bg-base-200 shadow-sm">
+  <div class="card-body p-0">
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Source</th>
+            <th>Campaign</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for subscriber in subscribers %}
+          <tr>
+            <td class="font-mono text-xs">{{ subscriber.email }}</td>
+            <td>{{ subscriber.name or "—" }}</td>
+            <td><span class="badge badge-ghost">{{ subscriber.source or "direct" }}</span></td>
+            <td class="text-xs text-base-content/60">
+              {% if subscriber.utm_campaign or subscriber.utm_medium or subscriber.utm_content %}
+                {{ [subscriber.utm_medium, subscriber.utm_campaign, subscriber.utm_content]|select|join(" · ") }}
+              {% else %}—{% endif %}
+            </td>
+            <td class="text-xs">{{ subscriber.created_at|datefmt("datetime") }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+</div>
+
+{% else %}
+
+<div class="card border border-base-300 bg-base-200 shadow-sm">
+  <div class="card-body">
+    <p class="text-base-content/60">
+      No signups yet. Share
+      <code class="rounded bg-base-300/50 px-2 py-1 text-xs">{{ site_url.rstrip('/') }}{{ url_for('products.detail', slug=product.slug) }}?utm_source=instagram</code>
+      to track where they come from.
+    </p>
+  </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% from "components/closing_cta.html" import closing_cta %}
+
+{#
+  Every tag below is derived from the product record, so a new product needs
+  no template or route work. The SEO blocks are the ones declared in
+  base.html; product_url / product_image_url are built in the route from the
+  configured SITE_URL and are always absolute.
+#}
+{% block title %}{{ product.meta_title or product.title }} · {{ site_name }}{% endblock %}
+
+{% block meta_description %}{{ product.meta_description or product.short_description }}{% endblock %}
+
+{% block canonical %}{{ product_url }}{% endblock %}
+
+{% block og_type %}product{% endblock %}
+
+{% block og_title %}{{ product.meta_title or product.title }}{% endblock %}
+
+{% block og_image %}{{ product_image_url }}{% endblock %}
+
+{% block structured_data_extra %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": {{ product.title|tojson }},
+  "description": {{ (product.meta_description or product.short_description)|tojson }},
+  "image": {{ product_image_url|tojson }},
+  "url": {{ product_url|tojson }},
+  "brand": {"@type": "Brand", "name": {{ site_name|tojson }}}
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+<section class="pb-[clamp(4rem,8vw,6rem)] pt-[clamp(3rem,7vw,5rem)]">
+  <div class="shell">
+
+    {% set crumbs = [
+      ("Products", url_for('products.index')),
+      (product.title, None)
+    ] %}
+    {% include "components/breadcrumbs.html" %}
+
+    <div class="mt-12 grid gap-12 lg:grid-cols-12 lg:items-start">
+
+      <div class="lg:col-span-7" data-reveal-group="120">
+        <span class="eyebrow" data-reveal>Product</span>
+        <h1 class="mt-6 text-[clamp(2.5rem,5.4vw,4.6rem)] text-base-content" data-reveal>
+          {{ product.title }}
+        </h1>
+        <span class="accent-rule mt-8" data-reveal="rule"></span>
+        <p class="lede mt-7 max-w-2xl" data-reveal>{{ product.short_description }}</p>
+
+        <div class="mt-10 flex flex-wrap items-center gap-3" data-reveal>
+          {% if product.waitlist_enabled %}
+            <a href="#waitlist" class="btn btn-primary">Join the waitlist</a>
+          {% elif product.cta_url %}
+            <a href="{{ product.cta_url }}" class="btn btn-primary">{{ product.cta_label or "Open" }}</a>
+          {% endif %}
+
+          {# Share: native sheet where the browser has one, copy-link everywhere else. #}
+          <div
+            class="flex flex-wrap items-center gap-2"
+            data-share
+            data-share-url="{{ product_url }}"
+            data-share-title="{{ product.title }}"
+            data-share-text="{{ product.short_description }}"
+          >
+            <button type="button" class="btn btn-outline" data-share-button hidden>
+              Share
+            </button>
+            <button type="button" class="btn btn-outline" data-share-copy>
+              <span data-share-copy-label>Copy link</span>
+            </button>
+            <a
+              class="btn btn-ghost btn-sm"
+              data-share-network="whatsapp"
+              href="https://wa.me/?text={{ (product.title ~ ' — ' ~ product_url)|urlencode }}"
+              target="_blank" rel="noopener noreferrer"
+            >WhatsApp</a>
+            <a
+              class="btn btn-ghost btn-sm"
+              href="https://www.linkedin.com/sharing/share-offsite/?url={{ product_url|urlencode }}"
+              target="_blank" rel="noopener noreferrer"
+            >LinkedIn</a>
+            <a
+              class="btn btn-ghost btn-sm"
+              href="https://twitter.com/intent/tweet?url={{ product_url|urlencode }}&text={{ product.title|urlencode }}"
+              target="_blank" rel="noopener noreferrer"
+            >X</a>
+            <span class="sr-only" role="status" aria-live="polite" data-share-status></span>
+          </div>
+        </div>
+      </div>
+
+      {% if product.image %}
+        <div class="lg:col-span-5" data-reveal>
+          <figure class="overflow-hidden rounded-box border hairline">
+            <img
+              src="{{ product.image }}"
+              alt="{{ product.title }}"
+              class="h-full w-full object-cover"
+            >
+          </figure>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</section>
+
+{% if product.description %}
+<section class="pb-[clamp(3rem,6vw,5rem)]">
+  <div class="shell">
+    {#
+      Markdown, rendered and sanitized by the same filter the blog uses
+      (app/blog/render.py). `prose` supplies the typography; without it the
+      headings and lists in a description would render unstyled.
+    #}
+    <div class="prose prose-lg max-w-3xl" data-reveal>
+      {{ product.description|markdown }}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if product.waitlist_enabled %}
+<section class="pb-[clamp(5rem,10vw,8rem)]" id="waitlist">
+  <div class="shell">
+    <div class="card mx-auto max-w-xl p-8 sm:p-10" data-reveal>
+
+      {% if joined %}
+        <h2 class="text-[1.9rem] leading-tight text-base-content">You’re on the list.</h2>
+        <p class="mt-4 text-[0.98rem] leading-7 text-base-content/60">
+          We’ll notify you when {{ product.title }} is available.
+        </p>
+      {% else %}
+        <h2 class="text-[1.9rem] leading-tight text-base-content">Join the waitlist</h2>
+        <p class="mt-4 text-[0.98rem] leading-7 text-base-content/60">
+          Be the first to know when it’s available.
+        </p>
+
+        <form
+          method="POST"
+          action="{{ url_for('products.waitlist', slug=product.slug) }}"
+          class="mt-8 flex flex-col gap-4"
+          novalidate
+        >
+          {{ form.hidden_tag() }}
+
+          <div class="form-control w-full">
+            <label class="mb-2.5 block text-sm text-base-content/70" for="{{ form.email.id }}">
+              {{ form.email.label.text }}
+            </label>
+            {{ form.email(
+              class="input input-bordered w-full text-[0.95rem]" + (" input-error" if form.email.errors else ""),
+              type="email", autocomplete="email", required=true, placeholder="you@example.com"
+            ) }}
+            {% for error in form.email.errors %}
+              <p class="mt-2 text-sm text-error" role="alert">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <div class="form-control w-full">
+            <label class="mb-2.5 block text-sm text-base-content/70" for="{{ form.name.id }}">
+              {{ form.name.label.text }} <span class="text-base-content/40">(optional)</span>
+            </label>
+            {{ form.name(
+              class="input input-bordered w-full text-[0.95rem]" + (" input-error" if form.name.errors else ""),
+              autocomplete="name"
+            ) }}
+            {% for error in form.name.errors %}
+              <p class="mt-2 text-sm text-error" role="alert">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          {# Honeypot: off-screen, not hidden from assistive tech by display:none #}
+          <div class="absolute left-[-9999px]" aria-hidden="true">
+            {{ form.website(tabindex="-1", autocomplete="off") }}
+          </div>
+
+          <button type="submit" class="btn btn-primary mt-2">Join the Waitlist</button>
+
+          <p class="text-xs leading-6 text-base-content/45">
+            One email when it launches. No list sharing, unsubscribe any time.
+          </p>
+        </form>
+      {% endif %}
+
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{{ closing_cta("Building something", lean="like this?",
+                lede="Tell us what you are trying to ship and we will tell you how we would build it.") }}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/product-share.js') }}" defer></script>
+{% endblock %}

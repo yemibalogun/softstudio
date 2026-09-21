@@ -47,6 +47,7 @@ from app.models.enrollment import Enrollment, LessonProgress  # noqa: E402,F401
 from app.models.payment import Purchase, Payment, Coupon  # noqa: E402,F401
 from app.models.inquiry import ProjectInquiry  # noqa: E402,F401
 from app.models.blog import BlogPost, BlogCategory, BlogTag  # noqa: E402,F401
+from app.models.product import Product, WaitlistSubscriber  # noqa: E402,F401
 from app.models.testimonial import Testimonial  # noqa: E402,F401
 from app.models.consent import CookieConsent  # noqa: E402,F401
 
@@ -58,5 +59,6 @@ __all__ = [
     "Purchase", "Payment", "Coupon",
     "ProjectInquiry",
     "BlogPost", "BlogCategory", "BlogTag",
+    "Product", "WaitlistSubscriber",
     "Testimonial", "CookieConsent",
 ]

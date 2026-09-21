@@ -7,11 +7,11 @@ from app.extensions import db
 from app.models import (
     ProjectInquiry, Purchase, Enrollment, Course, Project, ProjectImage, Technology,
     Service, CourseCategory, CourseSection, Lesson, BlogPost, BlogCategory, BlogTag,
-    Testimonial,
+    Testimonial, Product, WaitlistSubscriber,
 )
 from app.admin.forms import (
     ProjectForm, ServiceForm, CourseForm, CourseCategoryForm, CourseSectionForm, LessonForm,
-    BlogPostForm, BlogCategoryForm, TestimonialForm, slugify,
+    BlogPostForm, BlogCategoryForm, TestimonialForm, ProductForm, slugify,
 )
 from app.admin.services import unique_slug, parse_csv_names, get_or_create_by_name
 from app.uploads import delete_uploaded_image, store_image
@@ -184,6 +184,137 @@ def project_image_delete(project_id, image_id):
     db.session.delete(image)
     db.session.commit()
     return redirect(url_for("admin.project_edit", project_id=project_id))
+
+
+# =====================================================================
+# Products
+# =====================================================================
+
+@bp.route("/products")
+@admin_required
+def products_list():
+    items = Product.query.order_by(Product.display_order, Product.created_at.desc()).all()
+    return render_template("admin/products_list.html", products=items)
+
+
+@bp.route("/products/new", methods=["GET", "POST"])
+@admin_required
+def product_create():
+    form = ProductForm()
+    if form.validate_on_submit():
+        product = Product()
+        _apply_product_form(product, form, is_new=True)
+        db.session.add(product)
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            delete_uploaded_image(product.image)  # don't orphan the new file
+            raise
+        flash("Product created.", "success")
+        return redirect(url_for("admin.products_list"))
+    return render_template("admin/product_form.html", form=form, product=None)
+
+
+@bp.route("/products/<int:product_id>/edit", methods=["GET", "POST"])
+@admin_required
+def product_edit(product_id):
+    product = Product.query.get_or_404(product_id)
+    form = ProductForm(obj=product)
+    previous_image = product.image
+
+    if form.validate_on_submit():
+        _apply_product_form(product, form, is_new=False)
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            if product.image != previous_image:
+                delete_uploaded_image(product.image)
+            raise
+        # Only after the new value is safely stored: drop a replaced upload.
+        if previous_image != product.image:
+            delete_uploaded_image(previous_image)
+        flash("Product updated.", "success")
+        return redirect(url_for("admin.products_list"))
+    return render_template("admin/product_form.html", form=form, product=product)
+
+
+def _apply_product_form(product: Product, form: ProductForm, is_new: bool) -> None:
+    product.title = form.title.data
+    base_slug: str = form.slug.data or form.title.data or ""
+    product.slug = unique_slug(Product, base_slug, current_id=product.id if not is_new else None)
+    product.short_description = form.short_description.data
+    product.description = form.description.data
+
+    # Image: a new upload wins, then "remove", then the URL field.
+    if form.processed_image is not None:
+        product.image = store_image(form.processed_image, "products")
+    elif form.remove_image.data:
+        product.image = None
+    else:
+        product.image = form.image.data or None
+
+    product.published = form.published.data
+    product.waitlist_enabled = form.waitlist_enabled.data
+    product.featured = form.featured.data
+    product.display_order = form.display_order.data or 0
+    product.cta_label = form.cta_label.data or None
+    product.cta_url = form.cta_url.data or None
+    product.meta_title = form.meta_title.data
+    product.meta_description = form.meta_description.data
+    product.og_image = form.og_image.data
+
+
+@bp.route("/products/<int:product_id>/delete", methods=["POST"])
+@admin_required
+def product_delete(product_id):
+    product = Product.query.get_or_404(product_id)
+    image = product.image
+    db.session.delete(product)  # waitlist rows cascade
+    db.session.commit()
+    delete_uploaded_image(image)
+    flash("Product deleted.", "info")
+    return redirect(url_for("admin.products_list"))
+
+
+@bp.route("/products/<int:product_id>/toggle-published", methods=["POST"])
+@admin_required
+def product_toggle_published(product_id):
+    product = Product.query.get_or_404(product_id)
+    product.published = not product.published
+    db.session.commit()
+    return redirect(url_for("admin.products_list"))
+
+
+@bp.route("/products/<int:product_id>/toggle-waitlist", methods=["POST"])
+@admin_required
+def product_toggle_waitlist(product_id):
+    product = Product.query.get_or_404(product_id)
+    product.waitlist_enabled = not product.waitlist_enabled
+    db.session.commit()
+    return redirect(url_for("admin.products_list"))
+
+
+@bp.route("/products/<int:product_id>/waitlist")
+@admin_required
+def product_waitlist(product_id):
+    """Subscriber list for one product. Admin-only: emails are never public."""
+    product = Product.query.get_or_404(product_id)
+    subscribers = (
+        WaitlistSubscriber.query.filter_by(product_id=product.id)
+        .order_by(WaitlistSubscriber.created_at.desc())
+        .all()
+    )
+    by_source: dict[str, int] = {}
+    for sub in subscribers:
+        by_source[sub.source or "direct"] = by_source.get(sub.source or "direct", 0) + 1
+    return render_template(
+        "admin/product_waitlist.html",
+        product=product,
+        subscribers=subscribers,
+        by_source=sorted(by_source.items(), key=lambda kv: -kv[1]),
+    )
 
 
 # =====================================================================

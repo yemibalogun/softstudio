@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template
 
-from app.models import Project, Course, Service, Testimonial
+from app.models import Project, Course, Service, Testimonial, Product
 
 bp = Blueprint("main", __name__)
 
@@ -59,6 +59,7 @@ def sitemap():
     urls = [
         url_for("main.index"),
         url_for("projects.index"),
+        url_for("products.index"),
         url_for("courses.index"),
         url_for("services.index"),
         url_for("blog.index"),
@@ -69,6 +70,14 @@ def sitemap():
         url_for("legal.terms"),
         url_for("legal.refunds"),
     ]
+    urls += [
+        url_for("products.detail", slug=slug)
+        for (slug,) in Product.query.with_entities(Product.slug)
+        .filter_by(published=True)
+        .order_by(Product.display_order)
+        .all()
+    ]
+
     xml_items = "".join(
         f"<url><loc>{current_app.config['SITE_URL']}{u}</loc></url>" for u in urls
     )

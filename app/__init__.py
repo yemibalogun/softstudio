@@ -82,6 +82,7 @@ def _register_blueprints(app: Flask) -> None:
     from app.auth.routes import bp as auth_bp
     from app.account.routes import bp as account_bp
     from app.projects.routes import bp as projects_bp
+    from app.products.routes import bp as products_bp
     from app.courses.routes import bp as courses_bp
     from app.learning.routes import bp as learning_bp
     from app.services.routes import bp as services_bp
@@ -95,6 +96,7 @@ def _register_blueprints(app: Flask) -> None:
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(account_bp, url_prefix="/account")
     app.register_blueprint(projects_bp, url_prefix="/projects")
+    app.register_blueprint(products_bp, url_prefix="/products")
     app.register_blueprint(courses_bp, url_prefix="/courses")
     app.register_blueprint(learning_bp, url_prefix="/dashboard")
     app.register_blueprint(services_bp, url_prefix="/services")
@@ -164,6 +166,13 @@ def _register_context_processors(app: Flask) -> None:
 
 
 def _register_template_filters(app: Flask) -> None:
+    from app.seo import absolute_url, default_social_image_url
+
+    # Social cards and canonical links need absolute URLs built from the
+    # configured SITE_URL (never the request Host). See app/seo.py.
+    app.add_template_global(absolute_url, "abs_url")
+    app.add_template_global(default_social_image_url, "default_social_image_url")
+
     @app.template_filter("markdown")
     def markdown_filter(text):
         """Render a Markdown string (blog post body) to sanitized HTML."""

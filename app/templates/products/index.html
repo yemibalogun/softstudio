@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+
+{% block title %}Products · {{ site_name }}{% endblock %}
+
+{% block meta_description %}
+Tools and products built at {{ site_name }} — each with its own page and waitlist.
+{% endblock %}
+
+{% block content %}
+
+<section class="pb-[clamp(5rem,10vw,8rem)] pt-[clamp(4rem,9vw,7rem)]">
+  <div class="shell">
+
+    {{ page_header("Products", "Tools we are", lean="shipping.",
+                   lede="Each product has its own page, its own link, and a waitlist you can join before it launches.") }}
+
+    {% if products %}
+      <div class="mt-16 grid gap-6 md:mt-20 md:grid-cols-2" data-reveal-group="110">
+        {% for product in products %}
+          <div data-reveal>
+            <article class="card group flex h-full flex-col overflow-hidden rounded-box">
+
+              {% if product.image %}
+                <figure class="aspect-[16/10] overflow-hidden border-b hairline">
+                  <img
+                    src="{{ product.image }}"
+                    alt="{{ product.title }}"
+                    loading="lazy"
+                    class="h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+                  >
+                </figure>
+              {% endif %}
+
+              <div class="flex flex-1 flex-col p-7 sm:p-8">
+                <p class="flex items-center gap-2.5 text-xs uppercase tracking-[0.22em] text-base-content/45">
+                  Product
+                </p>
+
+                <h2 class="mt-5 text-[1.55rem] font-medium leading-[1.15] tracking-[-0.03em] text-base-content">
+                  <a
+                    href="{{ url_for('products.detail', slug=product.slug) }}"
+                    class="after:absolute after:inset-0 after:content-['']"
+                  >{{ product.title }}</a>
+                </h2>
+
+                <p class="mt-4 text-[0.95rem] leading-7 text-base-content/55">
+                  {{ product.short_description }}
+                </p>
+
+                <div class="mt-auto flex items-center justify-between gap-3 pt-9">
+                  <span class="inline-flex items-center gap-2 text-xs text-base-content/55">
+                    {% if product.waitlist_enabled %}
+                      <span class="h-1.5 w-1.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(124,203,255,0.7)]" aria-hidden="true"></span>
+                      Waitlist open
+                    {% else %}
+                      <span class="h-1.5 w-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(79,216,168,0.7)]" aria-hidden="true"></span>
+                      Available
+                    {% endif %}
+                  </span>
+
+                  <span class="row-link__arrow shrink-0 group-hover:rotate-[-45deg] group-hover:border-[#eaf1ff] group-hover:bg-[#eaf1ff] group-hover:text-[#050a18]" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                  </span>
+                </div>
+              </div>
+
+            </article>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="mt-16">
+        {% include "components/empty_state.html" %}
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+{% endblock %}

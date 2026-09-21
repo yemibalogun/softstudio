@@ -173,6 +173,50 @@ class BlogPostForm(FlaskForm):
             raise ValidationError(str(exc)) from None
 
 
+class ProductForm(FlaskForm):
+    """
+    A product's public page is generated entirely from these fields — no
+    route or template work is needed to launch a new one.
+    """
+
+    title = StringField("Title", validators=[DataRequired(), Length(max=160)])
+    slug = StringField("Slug", validators=[Optional(), Length(max=180)])
+    short_description = StringField(
+        "Short description (used in the social card)",
+        validators=[DataRequired(), Length(max=280)],
+    )
+    description = TextAreaField("Description (Markdown)", validators=[Optional()])
+
+    image_file = FileField("Product image", render_kw={"accept": IMAGE_ACCEPT})
+    image = StringField("Or use an image URL", validators=[Optional(), image_url, Length(max=512)])
+    remove_image = BooleanField("Remove the current image")
+
+    published = BooleanField("Published")
+    waitlist_enabled = BooleanField("Waitlist enabled")
+    featured = BooleanField("Featured")
+    display_order = IntegerField("Display order", default=0, validators=[Optional()])
+
+    cta_label = StringField("CTA label", validators=[Optional(), Length(max=80)])
+    cta_url = StringField("CTA URL", validators=[Optional(), URL(), Length(max=512)])
+
+    meta_title = StringField("Meta title", validators=[Optional(), Length(max=180)])
+    meta_description = StringField("Meta description", validators=[Optional(), Length(max=300)])
+    og_image = StringField("OG image URL", validators=[Optional(), image_url, Length(max=512)])
+
+    # Set by validate_image_file() when a valid image was uploaded.
+    processed_image = None
+
+    def validate_image_file(self, field):
+        """Full content validation of the upload (see app/uploads.py)."""
+        upload = field.data
+        if not upload or not getattr(upload, "filename", ""):
+            return
+        try:
+            self.processed_image = process_image(upload)
+        except ImageUploadError as exc:
+            raise ValidationError(str(exc)) from None
+
+
 class BlogCategoryForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired(), Length(max=120)])
     slug = StringField("Slug", validators=[Optional(), Length(max=140)])
