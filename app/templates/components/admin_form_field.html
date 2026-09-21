@@ -1,4 +1,8 @@
-{% macro afield(f) %}
+{#
+  Admin form field. Pass rows=N to render a multi-line field with textarea
+  styling (used by the blog body, which is Markdown).
+#}
+{% macro afield(f, rows=none) %}
 <div class="form-control w-full">
 
   {% if f.type == "BooleanField" %}
@@ -14,9 +18,21 @@
       <span class="label-text font-medium">{{ f.label.text }}</span>
     </label>
 
-    {{ f(
-      class="input input-bordered w-full" + (" input-error" if f.errors else "")
-    ) }}
+    {% if rows %}
+      {#
+        wrap="soft" + break-words keeps long Markdown lines inside the box
+        instead of scrolling sideways; resize-y lets it be dragged taller.
+      #}
+      {{ f(
+        rows=rows,
+        wrap="soft",
+        class="textarea textarea-bordered w-full admin-textarea" + (" textarea-error" if f.errors else "")
+      ) }}
+    {% else %}
+      {{ f(
+        class="input input-bordered w-full" + (" input-error" if f.errors else "")
+      ) }}
+    {% endif %}
 
   {% endif %}
 

@@ -145,3 +145,19 @@ input:-webkit-autofill {
   box-shadow: 0 0 0 1000px #080c16 inset;
   transition: background-color 9999s ease-out 0s;
 }
+
+/* ------------------------------------------------------------------ */
+/* Long-form admin fields (the blog body, which is Markdown)            */
+/* ------------------------------------------------------------------ */
+
+/* Tall enough to see a post at a glance, draggable taller, and long
+   lines wrap instead of scrolling sideways. */
+.admin-textarea {
+  min-height: 30rem;
+  resize: vertical;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
