@@ -33,6 +33,11 @@ note() { echo "==> $*"; }
 
 certsh() { $EDGE run --rm --no-deps -T --entrypoint sh certbot -c "$1"; }
 
+# A placeholder certificate so nginx can start before the real one exists.
+make_temp_cert() {
+    certsh "rm -rf $LE/live/$PRIMARY $LE/archive/$PRIMARY $LE/renewal/$PRIMARY.conf         && mkdir -p $LE/live/$PRIMARY         && openssl req -x509 -nodes -newkey rsa:2048 -days 1 -subj /CN=$PRIMARY              -keyout $LE/live/$PRIMARY/privkey.pem -out $LE/live/$PRIMARY/fullchain.pem 2>/dev/null"
+}
+
 food_compose() { (cd "$FOOD_DIR" && docker compose -p food_store "$@"); }
 
 # Any HTTP answer means the site is being served; 000 means nothing answered.
