@@ -33,6 +33,19 @@ note() { echo "==> $*"; }
 
 certsh() { $EDGE run --rm --no-deps -T --entrypoint sh certbot -c "$1"; }
 
+# Is there a real certificate for this domain, as opposed to none at all or
+# one of the placeholders below? A placeholder is self-signed, so its issuer
+# and subject match. Checking only that a file exists once let a placeholder
+# masquerade as the food store's certificate, and the site served a
+# self-signed certificate until it was spotted.
+is_real_cert() {
+    local out subject issuer
+    out=$(certsh "openssl x509 -in $LE/live/$1/fullchain.pem -noout -subject -issuer 2>/dev/null" 2>/dev/null | tr -d '\r')
+    subject=$(printf '%s\n' "$out" | sed -n 's/^subject=//p')
+    issuer=$(printf '%s\n' "$out" | sed -n 's/^issuer=//p')
+    [ -n "$subject" ] && [ -n "$issuer" ] && [ "$subject" != "$issuer" ]
+}
+
 # A placeholder certificate so nginx can start before the real one exists.
 make_temp_cert() {
     certsh "rm -rf $LE/live/$PRIMARY $LE/archive/$PRIMARY $LE/renewal/$PRIMARY.conf \
@@ -94,21 +107,24 @@ docker ps --format '{{.Names}}' | grep -q '^softstudio-web-' || die "The softstu
 mkdir -p "$EDGE_DIR/certbot/conf" "$EDGE_DIR/certbot/www"
 
 # ------------------------------------------- the food store's certificate
-if ! certsh "test -s $LE/live/${FOOD_DOMAINS[0]}/fullchain.pem"; then
+if ! is_real_cert "${FOOD_DOMAINS[0]}"; then
     note "Importing the food store's certificate so it keeps serving HTTPS"
     [ -d "$FOOD_DIR/certbot/conf/live/${FOOD_DOMAINS[0]}" ] \
         || die "No certificate found at $FOOD_DIR/certbot/conf/live/${FOOD_DOMAINS[0]}"
-    # Root-owned files, so the copy runs in a container.
+    # Root-owned files, so the copy runs in a container. Any placeholder is
+    # cleared first: cp would not replace a live/ directory that is in the way.
+    docker run --rm -v "$EDGE_DIR/certbot/conf:/dst" alpine:3.20 sh -c \
+        "rm -rf /dst/live/${FOOD_DOMAINS[0]} /dst/archive/${FOOD_DOMAINS[0]} /dst/renewal/${FOOD_DOMAINS[0]}.conf"
     docker run --rm \
         -v "$FOOD_DIR/certbot/conf:/src:ro" \
         -v "$EDGE_DIR/certbot/conf:/dst" \
         alpine:3.20 sh -c 'cp -a /src/. /dst/'
-    certsh "test -s $LE/live/${FOOD_DOMAINS[0]}/fullchain.pem" \
-        || die "The certificate did not copy across."
+    is_real_cert "${FOOD_DOMAINS[0]}" \
+        || die "The food store's certificate did not copy across."
 fi
 
 # ------------------------------------------ a certificate so nginx starts
-if ! certsh "test -f $LE/renewal/$PRIMARY.conf"; then
+if ! is_real_cert "$PRIMARY" || ! certsh "test -f $LE/renewal/$PRIMARY.conf"; then
     note "Creating a temporary certificate for $PRIMARY so nginx can start"
     make_temp_cert
     BOOTSTRAP=true
@@ -173,8 +189,13 @@ if $BOOTSTRAP; then
     # directory exists"), so clear it first. nginx keeps serving from the
     # copy it already loaded until the reload below.
     certsh "rm -rf $LE/live/$PRIMARY $LE/archive/$PRIMARY $LE/renewal/$PRIMARY.conf"
+    # Importing another site's certificates brings its ACME account along, and
+    # certbot refuses to guess between accounts, so name one explicitly.
+    account=$(certsh "ls /etc/letsencrypt/accounts/acme-v02.api.letsencrypt.org/directory 2>/dev/null | head -1" 2>/dev/null | tr -d '\r' | tail -1)
+    account_args=()
+    [ -n "$account" ] && account_args=(--account "$account")
     if ! $EDGE run --rm --no-deps -T --entrypoint certbot certbot certonly --webroot -w /var/www/certbot \
-            "${domain_args[@]}" --email "$EMAIL" --agree-tos --no-eff-email -n; then
+            "${domain_args[@]}" "${account_args[@]}" --email "$EMAIL" --agree-tos --no-eff-email -n; then
         make_temp_cert  # put a placeholder back so nginx can restart
         die "The certificate request failed (see above). Both sites are still up; re-run when it is fixed."
     fi
@@ -182,8 +203,13 @@ if $BOOTSTRAP; then
 fi
 
 note "Verifying"
-for domain in "${FOOD_DOMAINS[0]}" "$PRIMARY"; do
-    answers https "$domain" && echo "    https://$domain OK" || die "https://$domain is not answering."
+for domain in "${FOOD_DOMAINS[@]}" "${SITE_DOMAINS[@]}"; do
+    # Validates the chain on purpose (no -k): a placeholder certificate left
+    # in place has to fail here rather than look like success.
+    code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' "https://$domain/" || true)
+    [ -n "$code" ] && [ "$code" != 000 ] \
+        || die "https://$domain is not answering with a valid certificate. Check: docker logs edge-nginx-1 --tail=50"
+    echo "    https://$domain $code"
 done
 
 echo
