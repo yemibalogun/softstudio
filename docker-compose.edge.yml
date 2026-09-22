@@ -1,0 +1,31 @@
+# Production behind the shared front door (deploy/edge).
+#
+# The site's own nginx is not started here: the edge terminates TLS, serves
+# the static files and proxies to gunicorn, which it reaches on this
+# project's network as "softstudio-web". Only the edge publishes ports.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.edge.yml up -d
+#
+# docker-compose.prod.yml remains the standalone alternative, for running
+# this site alone on a host with nothing else on 80/443.
+
+services:
+  db:
+    restart: always
+
+  web:
+    restart: always
+    environment:
+      FLASK_ENV: production
+    # Two workers: this VPS has ~2 GB of RAM shared with another site.
+    command: gunicorn --bind 0.0.0.0:8000 --workers 2 --timeout 60 --access-logfile - --error-logfile - wsgi:app
+    networks:
+      default:
+        aliases:
+          - softstudio-web
+
+  # Behind the edge this is dead weight; keep it out of the way but still
+  # startable on its own (`--profile standalone`) for debugging.
+  nginx:
+    profiles:
+      - standalone

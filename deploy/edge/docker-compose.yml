@@ -1,0 +1,61 @@
+# Shared front door for every site on this VPS.
+#
+# One nginx owns ports 80/443 and routes each domain to its own site; one
+# certbot renews every certificate. The sites themselves stay completely
+# separate: their own code, containers, databases and deploys. Each site's
+# app is reached over that site's own Docker network, so nothing is exposed
+# to the host but 80 and 443.
+#
+#   docker compose -f /opt/edge/docker-compose.yml up -d
+#
+# Adding a site later: drop a vhost in nginx/conf.d/, join its network and
+# its static volume below, then run deploy/edge/setup-edge.sh to issue the
+# certificate.
+name: edge
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+      # Each site's static files, served straight from disk.
+      - /opt/softstudio/app/static:/srv/jaybalostudio/static:ro
+      - softstudio_uploaded_images:/srv/jaybalostudio/static/images/uploads:ro
+      - food_store_static_volume:/srv/shamsfoodstore/static:ro
+    networks:
+      - softstudio
+      - food_store
+    # Reload every 6h so renewed certificates are picked up without a restart.
+    command: /bin/sh -c 'while :; do sleep 6h; nginx -s reload; done & exec nginx -g "daemon off;"'
+
+  certbot:
+    image: certbot/certbot
+    restart: always
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    # Renews any certificate within 30 days of expiry, for every site.
+    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done'
+
+networks:
+  softstudio:
+    name: softstudio_default
+    external: true
+  food_store:
+    name: food_store_default
+    external: true
+
+volumes:
+  softstudio_uploaded_images:
+    name: softstudio_uploaded_images
+    external: true
+  food_store_static_volume:
+    name: food_store_static_volume
+    external: true

@@ -1,19 +1,47 @@
 #!/usr/bin/env bash
-# Build, migrate and (re)start jaybalostudio.com with its own nginx + HTTPS.
-#   bash deploy/deploy.sh you@example.com   # first run: also obtains the certificate
-#   bash deploy/deploy.sh                   # every release after that
+# Build, migrate and (re)start jaybalostudio.com.
+#
+# Two modes, chosen by DEPLOY_MODE in .env:
+#
+#   DEPLOY_MODE=edge        this site runs behind the shared front door
+#                           (deploy/edge), which owns 80/443 and the
+#                           certificates for every site on the host.
+#                             bash deploy/deploy.sh
+#
+#   DEPLOY_MODE=standalone  (default) this site owns 80/443 and manages its
+#                           own certificate. For a host with nothing else on
+#                           those ports.
+#                             bash deploy/deploy.sh you@example.com   # first run
+#                             bash deploy/deploy.sh                   # releases
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
+
 DOMAINS=(jaybalostudio.com www.jaybalostudio.com)
 PRIMARY=${DOMAINS[0]}
 EMAIL=${1:-}
 LE=/etc/letsencrypt
 
 die() { echo "$*" >&2; exit 1; }
-# Run a shell snippet in the certbot image with the certificate volumes mounted.
-# (The certificate files are root-only on the host.)
+
+docker info >/dev/null 2>&1 || die "Cannot talk to Docker. If setup-server.sh just added you to the docker group, log out and SSH back in."
+[ -f .env ] || die ".env is missing. Run: cp .env.example .env && nano .env"
+if ! grep -q '^DATABASE_URL=postgresql://' .env || grep -q 'REPLACE_WITH' .env; then
+  die ".env: DATABASE_URL is not filled in."
+fi
+
+MODE=$(sed -n 's/^DEPLOY_MODE=\(.*\)$/\1/p' .env | tail -1 | tr -d '"'"'"' ' || true)
+MODE=${MODE:-standalone}
+
+if [ "$MODE" = "edge" ]; then
+  COMPOSE="docker compose -f docker-compose.yml -f docker-compose.edge.yml"
+else
+  COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
+  mkdir -p certbot/conf certbot/www
+fi
+
+# Run a shell snippet in the certbot image with the certificate volumes
+# mounted (the certificate files are root-only on the host). Standalone only.
 certsh() { $COMPOSE run --rm --no-deps -T --entrypoint sh certbot -c "$1"; }
 make_temp_cert() {
   certsh "rm -rf $LE/live/$PRIMARY $LE/archive/$PRIMARY $LE/renewal/$PRIMARY.conf \
@@ -22,19 +50,12 @@ make_temp_cert() {
          -keyout $LE/live/$PRIMARY/privkey.pem -out $LE/live/$PRIMARY/fullchain.pem 2>/dev/null"
 }
 
-docker info >/dev/null 2>&1 || die "Cannot talk to Docker. If setup-server.sh just added you to the docker group, log out and SSH back in."
-[ -f .env ] || die ".env is missing. Run: cp .env.example .env && nano .env"
-if ! grep -q '^DATABASE_URL=postgresql://' .env || grep -q 'REPLACE_WITH' .env; then
-  die ".env: DATABASE_URL is not filled in."
-fi
-mkdir -p certbot/conf certbot/www
-
 if git rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1; then
   echo "==> Pulling latest code"
   git pull --ff-only
 fi
 
-echo "==> Building image"
+echo "==> Building image ($MODE mode)"
 $COMPOSE build web
 
 echo "==> Starting database"
@@ -43,6 +64,37 @@ $COMPOSE up -d db
 echo "==> Applying migrations"
 $COMPOSE run --rm -T web flask db upgrade
 
+# ---------------------------------------------------------------- edge mode
+if [ "$MODE" = "edge" ]; then
+  echo "==> Starting the app"
+  $COMPOSE up -d --remove-orphans
+
+  echo "==> Waiting for the app"
+  for i in $(seq 1 30); do
+    $COMPOSE exec -T web python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/robots.txt')" >/dev/null 2>&1 && break
+    [ "$i" = 30 ] && die "App did not respond. Check: $COMPOSE logs --tail=100 web"
+    sleep 2
+  done
+  echo "    app OK"
+
+  if ! docker ps --format '{{.Names}}' | grep -q '^edge-nginx'; then
+    echo
+    echo "The app is running, but the shared front door is not."
+    echo "Start it once with: bash deploy/edge/setup-edge.sh you@example.com"
+    exit 0
+  fi
+
+  docker exec edge-nginx-1 nginx -s reload >/dev/null 2>&1 || true
+  if curl -fsS -o /dev/null -m 15 "https://$PRIMARY/robots.txt" 2>/dev/null; then
+    echo "Live: https://$PRIMARY"
+  else
+    echo "App is up, but https://$PRIMARY did not answer from here. Check: docker logs edge-nginx-1 --tail=50" >&2
+    exit 1
+  fi
+  exit 0
+fi
+
+# ------------------------------------------------------------ standalone mode
 bootstrap=false
 if ! certsh "test -f $LE/renewal/$PRIMARY.conf"; then
   [ -n "$EMAIL" ] || die "No HTTPS certificate yet. First deploy: bash deploy/deploy.sh you@example.com"
@@ -69,7 +121,8 @@ fi
 echo "==> Starting services"
 if ! $COMPOSE up -d --remove-orphans; then
   die "Could not start. If the error says port 80/443 is already allocated, another site on this server
-is using those ports on this IP. Set HTTP_BIND/HTTPS_BIND in .env to an IP address of our own."
+is using those ports. Either put this site behind the shared front door (DEPLOY_MODE=edge in .env,
+then bash deploy/edge/setup-edge.sh), or give it an IP of its own with HTTP_BIND/HTTPS_BIND."
 fi
 
 echo "==> Waiting for the app"

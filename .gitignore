@@ -173,3 +173,6 @@ vite.config.ts.timestamp-*
 # Deployment
 certbot/
 .playwright-mcp/
+
+# Certificates and ACME challenges for the shared front door
+deploy/edge/certbot/
