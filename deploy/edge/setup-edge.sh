@@ -35,7 +35,10 @@ certsh() { $EDGE run --rm --no-deps -T --entrypoint sh certbot -c "$1"; }
 
 # A placeholder certificate so nginx can start before the real one exists.
 make_temp_cert() {
-    certsh "rm -rf $LE/live/$PRIMARY $LE/archive/$PRIMARY $LE/renewal/$PRIMARY.conf         && mkdir -p $LE/live/$PRIMARY         && openssl req -x509 -nodes -newkey rsa:2048 -days 1 -subj /CN=$PRIMARY              -keyout $LE/live/$PRIMARY/privkey.pem -out $LE/live/$PRIMARY/fullchain.pem 2>/dev/null"
+    certsh "rm -rf $LE/live/$PRIMARY $LE/archive/$PRIMARY $LE/renewal/$PRIMARY.conf \
+        && mkdir -p $LE/live/$PRIMARY \
+        && openssl req -x509 -nodes -newkey rsa:2048 -days 1 -subj /CN=$PRIMARY \
+             -keyout $LE/live/$PRIMARY/privkey.pem -out $LE/live/$PRIMARY/fullchain.pem 2>/dev/null"
 }
 
 food_compose() { (cd "$FOOD_DIR" && docker compose -p food_store "$@"); }
@@ -107,10 +110,7 @@ fi
 # ------------------------------------------ a certificate so nginx starts
 if ! certsh "test -f $LE/renewal/$PRIMARY.conf"; then
     note "Creating a temporary certificate for $PRIMARY so nginx can start"
-    certsh "rm -rf $LE/live/$PRIMARY $LE/archive/$PRIMARY $LE/renewal/$PRIMARY.conf \
-        && mkdir -p $LE/live/$PRIMARY \
-        && openssl req -x509 -nodes -newkey rsa:2048 -days 1 -subj /CN=$PRIMARY \
-             -keyout $LE/live/$PRIMARY/privkey.pem -out $LE/live/$PRIMARY/fullchain.pem 2>/dev/null"
+    make_temp_cert
     BOOTSTRAP=true
 else
     BOOTSTRAP=false
@@ -169,8 +169,13 @@ if $BOOTSTRAP; then
     note "Requesting the certificate for $PRIMARY"
     domain_args=()
     for domain in "${SITE_DOMAINS[@]}"; do domain_args+=(-d "$domain"); done
+    # certbot will not write over the placeholder's live/ directory ("live
+    # directory exists"), so clear it first. nginx keeps serving from the
+    # copy it already loaded until the reload below.
+    certsh "rm -rf $LE/live/$PRIMARY $LE/archive/$PRIMARY $LE/renewal/$PRIMARY.conf"
     if ! $EDGE run --rm --no-deps -T --entrypoint certbot certbot certonly --webroot -w /var/www/certbot \
             "${domain_args[@]}" --email "$EMAIL" --agree-tos --no-eff-email -n; then
+        make_temp_cert  # put a placeholder back so nginx can restart
         die "The certificate request failed (see above). Both sites are still up; re-run when it is fixed."
     fi
     $EDGE exec -T nginx nginx -s reload
