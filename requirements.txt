@@ -1,19 +1,35 @@
-Flask
-Flask-SQLAlchemy
-Flask-Migrate
-Flask-Login
-Flask-WTF
-Flask-Limiter
-Flask-Mail
-Authlib
-requests
-psycopg2-binary
-python-dotenv
-gunicorn
-email-validator
-bleach
-Markdown
-Pygments
-itsdangerous
-Werkzeug
-Pillow
+# Pinned so a rebuild installs what was tested, not whatever is newest.
+#
+# These are the versions GitHub Actions run 36251806491 installed and passed
+# lint, migrations and the full suite with. Unpinned, this file let a fresh
+# install pull SQLAlchemy 2.1, which changed the default driver for a bare
+# "postgresql://" URL from psycopg2 to psycopg 3 and broke `flask db upgrade`.
+#
+# To move a version: bump it here, run the suite, and let CI confirm before
+# deploying. `pip list --outdated` shows what is available.
+
+Flask==3.1.3
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.1.0
+Flask-Login==0.6.3
+Flask-WTF==1.3.0
+Flask-Limiter==4.1.1
+Flask-Mail==0.10.0
+
+# Pinned explicitly although Flask-SQLAlchemy pulls it in: this is the
+# package whose default-driver change broke the build, so the version the
+# app runs against should be stated here rather than inferred.
+SQLAlchemy==2.1.1
+
+Authlib==1.8.0
+requests==2.34.2
+psycopg2-binary==2.9.13
+python-dotenv==1.2.3
+gunicorn==26.2.0
+email-validator==2.3.0
+bleach==6.4.0
+Markdown==3.11
+Pygments==2.21.0
+itsdangerous==2.2.0
+Werkzeug==3.1.8
+Pillow==12.3.0
