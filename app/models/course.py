@@ -80,7 +80,10 @@ class CourseSection(db.Model, TimestampMixin):
     __tablename__ = "course_sections"
 
     id = db.Column(db.Integer, primary_key=True)
-    course_id = db.Column(db.Integer, db.ForeignKey("courses.id", ondelete="CASCADE"), nullable=False, index=True)
+    course_id = db.Column(
+        db.Integer, db.ForeignKey("courses.id", ondelete="CASCADE"),
+        nullable=False, index=True,
+    )
 
     title = db.Column(db.String(180), nullable=False)
     display_order = db.Column(db.Integer, default=0, nullable=False)

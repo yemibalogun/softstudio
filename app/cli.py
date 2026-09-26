@@ -20,8 +20,8 @@ def register_cli_commands(app: Flask) -> None:
         admin_role = Role.query.filter_by(name="admin").first()
         if not admin_role:
             admin_role = Role()
-            admin_role.name="admin"
-            admin_role.description="Full administrative access"
+            admin_role.name = "admin"
+            admin_role.description = "Full administrative access"
 
             db.session.add(admin_role)
             db.session.flush()
@@ -76,21 +76,20 @@ def register_cli_commands(app: Flask) -> None:
         )
         if created:
             section = CourseSection()
-            section.course_id=course.id
-            section.title="Getting Started"
-            section.display_order=1
+            section.course_id = course.id
+            section.title = "Getting Started"
+            section.display_order = 1
             db.session.add(section)
             db.session.flush()
 
             lesson = Lesson()
-            lesson.section_id=section.id
-            lesson.title="Introduction"
-            lesson.slug="introduction"
-            lesson.is_free_preview=True
-            lesson.display_order=1
+            lesson.section_id = section.id
+            lesson.title = "Introduction"
+            lesson.slug = "introduction"
+            lesson.is_free_preview = True
+            lesson.display_order = 1
 
             db.session.add(lesson)
-            
 
         _get_or_create(
             Testimonial,
@@ -126,8 +125,8 @@ def register_cli_commands(app: Flask) -> None:
         admin_role = Role.query.filter_by(name="admin").first()
         if not admin_role:
             admin_role = Role()
-            admin_role.name="admin"
-            admin_role.description="Full administrative access"
+            admin_role.name = "admin"
+            admin_role.description = "Full administrative access"
 
             db.session.add(admin_role)
             db.session.flush()
@@ -138,10 +137,10 @@ def register_cli_commands(app: Flask) -> None:
             click.echo(f"Promoted existing user {email} to admin.")
         else:
             user = User()
-            user.email=email.lower()
-            user.full_name=full_name
+            user.email = email.lower()
+            user.full_name = full_name
             user.role_id = admin_role.id
-            user.email_verified=True
+            user.email_verified = True
             user.set_password(password)
             db.session.add(user)
             click.echo(f"Created admin user {email}.")

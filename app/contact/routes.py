@@ -27,22 +27,22 @@ def index():
             return redirect(url_for("contact.success"))
 
         inquiry = ProjectInquiry()
-        inquiry.name=_clean(form.name.data)
-        inquiry.email=(form.email.data or "").strip().lower()
-        inquiry.company=_clean(form.company.data)
-        inquiry.phone=_clean(form.phone.data)
-        inquiry.project_type=form.project_type.data
-        inquiry.project_description=_clean(form.project_description.data)
-        inquiry.current_process=_clean(form.current_process.data)
-        inquiry.desired_outcome=_clean(form.desired_outcome.data)
-        inquiry.budget_range=_clean(form.budget_range.data)
-        inquiry.timeline=_clean(form.timeline.data)
-        inquiry.referral_source=_clean(form.referral_source.data)
+        inquiry.name = _clean(form.name.data)
+        inquiry.email = (form.email.data or "").strip().lower()
+        inquiry.company = _clean(form.company.data)
+        inquiry.phone = _clean(form.phone.data)
+        inquiry.project_type = form.project_type.data
+        inquiry.project_description = _clean(form.project_description.data)
+        inquiry.current_process = _clean(form.current_process.data)
+        inquiry.desired_outcome = _clean(form.desired_outcome.data)
+        inquiry.budget_range = _clean(form.budget_range.data)
+        inquiry.timeline = _clean(form.timeline.data)
+        inquiry.referral_source = _clean(form.referral_source.data)
         # request.remote_addr is now the real client IP - ProxyFix (app/__init__.py)
         # parses the trusted X-Forwarded-For hop instead of us reading the raw header.
-        inquiry.ip_address=request.remote_addr
-        inquiry.user_agent=request.headers.get("User-Agent", "")[:255]
-        
+        inquiry.ip_address = request.remote_addr
+        inquiry.user_agent = request.headers.get("User-Agent", "")[:255]
+
         db.session.add(inquiry)
         db.session.commit()
 

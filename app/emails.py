@@ -41,7 +41,6 @@ def send_email(
     msg.html = html_body
     msg.body = text_body
     msg.sender = current_app.config["MAIL_DEFAULT_SENDER"]
-    
 
     try:
         mail.send(msg)

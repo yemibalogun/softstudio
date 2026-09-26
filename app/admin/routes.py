@@ -77,7 +77,7 @@ def project_create():
     form = ProjectForm()
     if form.validate_on_submit():
         project = Project()
-        project.title=form.title.data
+        project.title = form.title.data
         _apply_project_form(project, form, is_new=True)
         db.session.add(project)
         db.session.commit()
@@ -168,10 +168,11 @@ def project_image_add(project_id):
     alt_text = request.form.get("alt_text", "").strip()
     if image_url:
         project_image = ProjectImage()
-        project_image.project_id=project.id, image_url=image_url, alt_text=alt_text
-        project_image.display_order=len(project.images)
+        project_image.project_id = project.id
+        project_image.image_url = image_url
+        project_image.alt_text = alt_text
+        project_image.display_order = len(project.images)
         db.session.add(project_image)
-        
         db.session.commit()
         flash("Image added.", "success")
     return redirect(url_for("admin.project_edit", project_id=project.id))
@@ -334,7 +335,7 @@ def service_create():
     form = ServiceForm()
     if form.validate_on_submit():
         service = Service()
-        service.title=form.title.data
+        service.title = form.title.data
         _apply_service_form(service, form, is_new=True)
         db.session.add(service)
         db.session.commit()
@@ -407,7 +408,7 @@ def course_create():
     form = _course_form_with_categories()
     if form.validate_on_submit():
         course = Course()
-        course.title=form.title.data
+        course.title = form.title.data
         _apply_course_form(course, form, is_new=True)
         db.session.add(course)
         db.session.commit()
@@ -513,9 +514,9 @@ def section_add(course_id):
     form = CourseSectionForm()
     if form.validate_on_submit():
         course_section = CourseSection()
-        course_section.course_id=course.id
-        course_section.title=form.title.data
-        course_section.display_order=form.display_order.data or len(course.sections)
+        course_section.course_id = course.id
+        course_section.title = form.title.data
+        course_section.display_order = form.display_order.data or len(course.sections)
 
         db.session.add(course_section)
 
@@ -554,16 +555,16 @@ def lesson_add(course_id, section_id):
             counter += 1
 
         lesson = Lesson()
-        lesson.section_id=section.id
-        lesson.title=form.title.data
-        lesson.slug=slug
-        lesson.description=form.description.data
-        lesson.video_url=form.video_url.data
-        lesson.duration_seconds=form.duration_seconds.data or 0
-        lesson.display_order=form.display_order.data or len(section.lessons)
-        lesson.is_free_preview=form.is_free_preview.data
-        lesson.published=form.published.data
-                    
+        lesson.section_id = section.id
+        lesson.title = form.title.data
+        lesson.slug = slug
+        lesson.description = form.description.data
+        lesson.video_url = form.video_url.data
+        lesson.duration_seconds = form.duration_seconds.data or 0
+        lesson.display_order = form.display_order.data or len(section.lessons)
+        lesson.is_free_preview = form.is_free_preview.data
+        lesson.published = form.published.data
+
         db.session.add(lesson)
 
         db.session.commit()
@@ -610,8 +611,8 @@ def blog_create():
     form = _blog_form_with_categories()
     if form.validate_on_submit():
         post = BlogPost()
-        post.title=form.title.data
-        post.author_id=current_user.id
+        post.title = form.title.data
+        post.author_id = current_user.id
 
         _apply_blog_form(post, form, is_new=True)
         db.session.add(post)

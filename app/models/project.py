@@ -76,7 +76,10 @@ class ProjectImage(db.Model, TimestampMixin):
     __tablename__ = "project_images"
 
     id = db.Column(db.Integer, primary_key=True)
-    project_id = db.Column(db.Integer, db.ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True)
+    project_id = db.Column(
+        db.Integer, db.ForeignKey("projects.id", ondelete="CASCADE"),
+        nullable=False, index=True,
+    )
 
     image_url = db.Column(db.String(512), nullable=False)
     alt_text = db.Column(db.String(255))

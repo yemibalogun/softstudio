@@ -110,13 +110,13 @@ def compute_price(course: Course, coupon: Coupon | None = None) -> float:
 def create_purchase(user, course: Course, coupon: Coupon | None = None) -> Purchase:
     amount = compute_price(course, coupon)
     purchase = Purchase()
-    purchase.user_id=user.id
-    purchase.course_id=course.id
-    purchase.coupon_id=coupon.id if coupon else None
-    purchase.amount=amount
-    purchase.currency=course.currency
-    purchase.status="pending"
-    
+    purchase.user_id = user.id
+    purchase.course_id = course.id
+    purchase.coupon_id = coupon.id if coupon else None
+    purchase.amount = amount
+    purchase.currency = course.currency
+    purchase.status = "pending"
+
     db.session.add(purchase)
     db.session.commit()
     return purchase
@@ -130,12 +130,12 @@ def activate_enrollment(purchase: Purchase) -> Enrollment:
         enrollment.enrolled_at = datetime.now(timezone.utc)
     else:
         enrollment = Enrollment()
-        enrollment.user_id=purchase.user_id
-        enrollment.course_id=purchase.course_id
-        enrollment.purchase_id=purchase.id
-        enrollment.status="active"
-        enrollment.enrolled_at=datetime.now(timezone.utc)
-        
+        enrollment.user_id = purchase.user_id
+        enrollment.course_id = purchase.course_id
+        enrollment.purchase_id = purchase.id
+        enrollment.status = "active"
+        enrollment.enrolled_at = datetime.now(timezone.utc)
+
         db.session.add(enrollment)
     purchase.status = "completed"
     db.session.commit()
@@ -179,12 +179,12 @@ def process_verified_payment(purchase: Purchase, result: VerificationResult, pro
 
     if not payment:
         payment = Payment()
-        payment.purchase_id=purchase.id
-        payment.provider=provider_name
-        payment.provider_reference=result.provider_reference
-        payment.amount=result.amount
-        payment.currency=result.currency
-        
+        payment.purchase_id = purchase.id
+        payment.provider = provider_name
+        payment.provider_reference = result.provider_reference
+        payment.amount = result.amount
+        payment.currency = result.currency
+
         db.session.add(payment)
 
     payment.raw_provider_response = result.raw_response

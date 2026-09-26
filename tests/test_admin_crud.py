@@ -1,4 +1,6 @@
-from app.models import Project, Course, CourseCategory, BlogPost, BlogCategory, Testimonial
+from app.models import (
+    Project, ProjectImage, Course, CourseCategory, BlogPost, BlogCategory, Testimonial,
+)
 from tests.conftest import login
 
 
@@ -101,6 +103,74 @@ def test_project_crud_blocked_for_non_admin(client, user):
     assert resp.status_code == 403
     resp = client.post("/admin/projects/new", data={"title": "x", "short_description": "x"})
     assert resp.status_code == 403
+
+
+def _make_project(db):
+    project = Project(
+        title="Gallery Project", slug="gallery-project",
+        short_description="Has a gallery.", published=True,
+    )
+    db.session.add(project)
+    db.session.commit()
+    return project
+
+
+def test_project_image_add_stores_url_and_alt_text(client, admin_user, db):
+    """
+    Regression: this route used to read
+
+        project_image.project_id=project.id, image_url=image_url, alt_text=alt_text
+
+    which Python parses as a chained assignment, not three keyword
+    arguments, so every submission raised ValueError instead of saving
+    the image.
+    """
+    _login_admin(client, admin_user)
+    project = _make_project(db)
+
+    resp = client.post(
+        f"/admin/projects/{project.id}/images/add",
+        data={"image_url": "/static/images/uploads/projects/gallery-1.webp",
+              "alt_text": "The queue dashboard"},
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+
+    images = ProjectImage.query.filter_by(project_id=project.id).all()
+    assert len(images) == 1
+    image = images[0]
+    assert image.image_url == "/static/images/uploads/projects/gallery-1.webp"
+    assert image.alt_text == "The queue dashboard"
+    assert image.display_order == 0
+
+
+def test_project_images_get_increasing_display_order(client, admin_user, db):
+    _login_admin(client, admin_user)
+    project = _make_project(db)
+
+    for n in (1, 2, 3):
+        client.post(
+            f"/admin/projects/{project.id}/images/add",
+            data={"image_url": f"/static/images/uploads/projects/g{n}.webp", "alt_text": f"Shot {n}"},
+            follow_redirects=True,
+        )
+
+    orders = [i.display_order for i in ProjectImage.query.filter_by(project_id=project.id)
+              .order_by(ProjectImage.display_order).all()]
+    assert orders == [0, 1, 2]
+
+
+def test_project_image_add_ignores_a_blank_url(client, admin_user, db):
+    _login_admin(client, admin_user)
+    project = _make_project(db)
+
+    resp = client.post(
+        f"/admin/projects/{project.id}/images/add",
+        data={"image_url": "   ", "alt_text": "nothing"},
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    assert ProjectImage.query.filter_by(project_id=project.id).count() == 0
 
 
 # =====================================================================

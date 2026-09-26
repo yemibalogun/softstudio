@@ -127,8 +127,8 @@ def mark_complete(course_slug, lesson_slug):
     ).first()
     if not progress:
         progress = LessonProgress()
-        progress.user_id=current_user.id
-        progress.lesson_id=target_lesson.id
+        progress.user_id = current_user.id
+        progress.lesson_id = target_lesson.id
 
         db.session.add(progress)
     progress.completed = True

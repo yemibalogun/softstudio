@@ -45,7 +45,10 @@ class LessonProgress(db.Model, TimestampMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    lesson_id = db.Column(db.Integer, db.ForeignKey("lessons.id", ondelete="CASCADE"), nullable=False, index=True)
+    lesson_id = db.Column(
+        db.Integer, db.ForeignKey("lessons.id", ondelete="CASCADE"),
+        nullable=False, index=True,
+    )
 
     completed = db.Column(db.Boolean, default=False, nullable=False, index=True)
     completed_at = db.Column(db.DateTime(timezone=True))
