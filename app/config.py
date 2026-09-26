@@ -17,12 +17,31 @@ def _bool_env(key: str, default: bool = False) -> bool:
     return val.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _db_url(key: str, default: str) -> str:
+    """
+    The database URL with the driver we actually ship named explicitly.
+
+    A bare "postgresql://" URL leaves the driver up to SQLAlchemy's
+    default, and that default changed: 2.0 picks psycopg2, 2.1 picks
+    psycopg 3. requirements.txt ships psycopg2-binary, so an unpinned
+    install of 2.1 would import a driver that is not there. Naming the
+    driver keeps the URL meaning the same thing across versions, whatever
+    DATABASE_URL a deployment sets. "postgres://" is also normalised,
+    since SQLAlchemy dropped that alias.
+    """
+    url = os.environ.get(key, default)
+    for prefix in ("postgresql://", "postgres://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg2://" + url[len(prefix):]
+    return url
+
+
 class BaseConfig:
     """Shared configuration across all environments."""
 
     SECRET_KEY = os.environ.get("SECRET_KEY", "change-me-in-production")
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
+    SQLALCHEMY_DATABASE_URI = _db_url(
         "DATABASE_URL", "postgresql://softstudio:softstudio@db:5432/softstudio"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -91,7 +110,7 @@ class BaseConfig:
 
 class DevelopmentConfig(BaseConfig):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
+    SQLALCHEMY_DATABASE_URI = _db_url(
         "DATABASE_URL", "postgresql://softstudio:softstudio@localhost:5432/softstudio_dev"
     )
     WTF_CSRF_SSL_STRICT = False
@@ -100,7 +119,7 @@ class DevelopmentConfig(BaseConfig):
 class TestingConfig(BaseConfig):
     TESTING = True
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
+    SQLALCHEMY_DATABASE_URI = _db_url(
         "TEST_DATABASE_URL", "postgresql://softstudio:softstudio@localhost:5432/softstudio_test"
     )
     WTF_CSRF_ENABLED = False
