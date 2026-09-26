@@ -51,8 +51,13 @@ class Product(db.Model, TimestampMixin):
 
     @property
     def social_image(self) -> str | None:
-        """The image a social card should use, before it is made absolute."""
-        return self.og_image or self.image or None
+        """
+        The image a social card should use, before it is made absolute.
+
+        The uploaded product image wins, as it does everywhere on the site;
+        og_image is only for pages that have no image of their own.
+        """
+        return self.image or self.og_image or None
 
     @property
     def subscriber_count(self) -> int:

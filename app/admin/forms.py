@@ -17,6 +17,20 @@ def slugify(value: str) -> str:
     return value.strip("-")
 
 
+# File-picker filter for the browser. A convenience only: the server does
+# the real validation in app/uploads.py.
+IMAGE_ACCEPT = ",".join(sorted("." + ext for ext in ALLOWED_EXTENSIONS)) + ",image/jpeg,image/png,image/webp"
+
+
+def image_url(form, field):
+    """An absolute http(s) URL, or a path to an image this site stored itself."""
+    if not field.data or is_uploaded_image(field.data):
+        return
+    URL(message="Enter a full http(s) image URL.")(form, field)
+    if not field.data.lower().startswith(("http://", "https://")):
+        raise ValidationError("Enter a full http(s) image URL.")
+
+
 class ProjectForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired(), Length(max=160)])
     slug = StringField("Slug", validators=[Optional(), Length(max=180)])
@@ -38,8 +52,8 @@ class ProjectForm(FlaskForm):
     featured = BooleanField("Featured on homepage")
     published = BooleanField("Published")
 
-    thumbnail = StringField("Thumbnail URL", validators=[Optional(), URL(), Length(max=512)])
-    hero_image = StringField("Hero image URL", validators=[Optional(), URL(), Length(max=512)])
+    thumbnail = StringField("Thumbnail URL", validators=[Optional(), image_url, Length(max=512)])
+    hero_image = StringField("Hero image URL", validators=[Optional(), image_url, Length(max=512)])
     demo_video = StringField("Demo video URL", validators=[Optional(), URL(), Length(max=512)])
 
     live_url = StringField("Live URL", validators=[Optional(), URL(), Length(max=512)])
@@ -54,7 +68,10 @@ class ProjectForm(FlaskForm):
 
     meta_title = StringField("Meta title", validators=[Optional(), Length(max=180)])
     meta_description = StringField("Meta description", validators=[Optional(), Length(max=300)])
-    og_image = StringField("OG image URL", validators=[Optional(), URL(), Length(max=512)])
+    og_image = StringField(
+        "Social image URL (optional - the uploaded image is used by default)",
+        validators=[Optional(), image_url, Length(max=512)],
+    )
 
 
 class ServiceForm(FlaskForm):
@@ -76,7 +93,7 @@ class CourseForm(FlaskForm):
     short_description = StringField("Short description", validators=[DataRequired(), Length(max=280)])
     description = TextAreaField("Description", validators=[Optional()])
 
-    thumbnail = StringField("Thumbnail URL", validators=[Optional(), URL(), Length(max=512)])
+    thumbnail = StringField("Thumbnail URL", validators=[Optional(), image_url, Length(max=512)])
     promo_video_url = StringField("Promo video URL", validators=[Optional(), URL(), Length(max=512)])
 
     price = DecimalField("Price", places=2, validators=[DataRequired(), NumberRange(min=0)])
@@ -104,7 +121,10 @@ class CourseForm(FlaskForm):
 
     meta_title = StringField("Meta title", validators=[Optional(), Length(max=180)])
     meta_description = StringField("Meta description", validators=[Optional(), Length(max=300)])
-    og_image = StringField("OG image URL", validators=[Optional(), URL(), Length(max=512)])
+    og_image = StringField(
+        "Social image URL (optional - the uploaded image is used by default)",
+        validators=[Optional(), image_url, Length(max=512)],
+    )
 
 
 class CourseCategoryForm(FlaskForm):
@@ -129,20 +149,6 @@ class LessonForm(FlaskForm):
     published = BooleanField("Published", default=True)
 
 
-# File-picker filter for the browser. A convenience only: the server does
-# the real validation in app/uploads.py.
-IMAGE_ACCEPT = ",".join(sorted("." + ext for ext in ALLOWED_EXTENSIONS)) + ",image/jpeg,image/png,image/webp"
-
-
-def image_url(form, field):
-    """An absolute http(s) URL, or a path to an image this site stored itself."""
-    if not field.data or is_uploaded_image(field.data):
-        return
-    URL(message="Enter a full http(s) image URL.")(form, field)
-    if not field.data.lower().startswith(("http://", "https://")):
-        raise ValidationError("Enter a full http(s) image URL.")
-
-
 class BlogPostForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired(), Length(max=200)])
     slug = StringField("Slug", validators=[Optional(), Length(max=220)])
@@ -157,7 +163,10 @@ class BlogPostForm(FlaskForm):
 
     meta_title = StringField("Meta title", validators=[Optional(), Length(max=180)])
     meta_description = StringField("Meta description", validators=[Optional(), Length(max=300)])
-    og_image = StringField("OG image URL", validators=[Optional(), URL(), Length(max=512)])
+    og_image = StringField(
+        "Social image URL (optional - the uploaded image is used by default)",
+        validators=[Optional(), image_url, Length(max=512)],
+    )
 
     # Set by validate_featured_image_file() when a valid image was uploaded.
     processed_image = None
@@ -201,7 +210,10 @@ class ProductForm(FlaskForm):
 
     meta_title = StringField("Meta title", validators=[Optional(), Length(max=180)])
     meta_description = StringField("Meta description", validators=[Optional(), Length(max=300)])
-    og_image = StringField("OG image URL", validators=[Optional(), image_url, Length(max=512)])
+    og_image = StringField(
+        "Social image URL (optional - the uploaded image is used by default)",
+        validators=[Optional(), image_url, Length(max=512)],
+    )
 
     # Set by validate_image_file() when a valid image was uploaded.
     processed_image = None

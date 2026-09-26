@@ -130,7 +130,14 @@ def test_seo_overrides_win_over_defaults(client, app, db, product):
     html = client.get(f"/products/{product.slug}").data.decode()
     assert _meta(html, "property", "og:title") == product.meta_title
     assert _meta(html, "property", "og:description") == product.meta_description
-    # An already-absolute URL passes through untouched.
+    # The uploaded product image is what gets shared; og_image is only a
+    # fallback for products without one (see tests/test_social_images.py).
+    assert _meta(html, "property", "og:image") == app.config["SITE_URL"].rstrip("/") + product.image
+
+    product.image = None
+    db.session.commit()
+    html = client.get(f"/products/{product.slug}").data.decode()
+    # With no image of its own, the field is used, absolute and untouched.
     assert _meta(html, "property", "og:image") == "https://cdn.example.com/card.png"
 
 

@@ -6,11 +6,8 @@
 {{ post.meta_description or post.excerpt }}
 {% endblock %}
 
-{% block og_image %}
-{%- set og = post.og_image or post.featured_image -%}
-{#- Uploaded images are stored as site-relative paths; social cards need absolute URLs. -#}
-{%- if og -%}{{ (site_url ~ og) if og.startswith('/') else og }}{%- else -%}{{ super() }}{%- endif -%}
-{% endblock %}
+{#- The featured image uploaded with the post is what gets shared. -#}
+{% block og_image %}{{ abs_url(post.featured_image or post.og_image) or default_social_image_url() }}{% endblock %}
 
 {% block og_type %}article{% endblock %}
 

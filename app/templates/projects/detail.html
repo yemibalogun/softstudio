@@ -7,9 +7,8 @@
 {{ project.meta_description or project.short_description }}
 {% endblock %}
 
-{% block og_image %}
-{{ project.og_image or project.thumbnail or super() }}
-{% endblock %}
+{#- The project's own images come first; hero is the larger one. -#}
+{% block og_image %}{{ abs_url(project.hero_image or project.thumbnail or project.og_image) or default_social_image_url() }}{% endblock %}
 
 {% block og_type %}article{% endblock %}
 

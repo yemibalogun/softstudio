@@ -6,9 +6,8 @@
 {{ course.meta_description or course.short_description }}
 {% endblock %}
 
-{% block og_image %}
-{{ course.og_image or course.thumbnail or super() }}
-{% endblock %}
+{#- The course thumbnail uploaded in the admin is what gets shared. -#}
+{% block og_image %}{{ abs_url(course.thumbnail or course.og_image) or default_social_image_url() }}{% endblock %}
 
 {% block structured_data_extra %}
 <script type="application/ld+json">

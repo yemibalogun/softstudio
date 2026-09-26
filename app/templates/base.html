@@ -21,7 +21,15 @@
   <meta property="og:title" content="{% filter trim %}{% block og_title %}{{ self.title() }}{% endblock %}{% endfilter %}">
   <meta property="og:description" content="{% filter trim %}{% block og_description %}{{ self.meta_description() }}{% endblock %}{% endfilter %}">
   <meta property="og:url" content="{{ self.canonical() }}">
-  <meta property="og:image" content="{% filter trim %}{% block og_image %}{{ site_url }}/static/images/brand/og-default.png{% endblock %}{% endfilter %}">
+  {#
+    Social card image. Pages override og_image with their own picture; the
+    rule across the site is that the image uploaded for that piece of
+    content wins, and the "Social image URL" field is only a fallback.
+    Always run values through abs_url(): a site-relative upload path is
+    ignored by Facebook, WhatsApp, LinkedIn and X, which need a full URL.
+  #}
+  <meta property="og:image" content="{% filter trim %}{% block og_image %}{{ default_social_image_url() }}{% endblock %}{% endfilter %}">
+  <meta property="og:image:alt" content="{{ self.og_title()|trim }}">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{{ self.og_title()|trim }}">
