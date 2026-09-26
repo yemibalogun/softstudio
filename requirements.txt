@@ -18,8 +18,11 @@ Flask-Mail==0.10.0
 
 # Pinned explicitly although Flask-SQLAlchemy pulls it in: this is the
 # package whose default-driver change broke the build, so the version the
-# app runs against should be stated here rather than inferred.
-SQLAlchemy==2.1.1
+# app runs against should be stated here rather than inferred. 2.0.54 is
+# what production has been running, so a rebuild changes nothing there.
+# Moving to 2.1 is a deliberate upgrade: it changes the default driver for
+# a bare postgresql:// URL, which app/config.py already guards against.
+SQLAlchemy==2.0.54
 
 Authlib==1.8.0
 requests==2.34.2
