@@ -13,7 +13,7 @@ from app.admin.forms import (
     ProjectForm, ServiceForm, CourseForm, CourseCategoryForm, CourseSectionForm, LessonForm,
     BlogPostForm, BlogCategoryForm, TestimonialForm, ProductForm, slugify,
 )
-from app.admin.services import unique_slug, parse_csv_names, get_or_create_by_name
+from app.admin.services import unique_slug, parse_csv_names, get_or_create_all_by_name
 from app.uploads import delete_uploaded_image, store_image
 
 bp = Blueprint("admin", __name__)
@@ -127,7 +127,7 @@ def _apply_project_form(project: Project, form: ProjectForm, is_new: bool) -> No
     project.og_image = form.og_image.data
 
     names = parse_csv_names(form.technologies_csv.data or "")
-    technologies = [get_or_create_by_name(Technology, name) for name in names]
+    technologies = get_or_create_all_by_name(Technology, names)
     project.technologies.clear()
     project.technologies.extend(technologies)
 
@@ -697,7 +697,7 @@ def _apply_blog_form(post: BlogPost, form: BlogPostForm, is_new: bool) -> None:
     # the assigned list to Any to satisfy static type checkers while preserving runtime behavior.
     from typing import Any, cast
 
-    post.tags = cast(Any, [get_or_create_by_name(BlogTag, name) for name in names])
+    post.tags = cast(Any, get_or_create_all_by_name(BlogTag, names))
 
 
 @bp.route("/blog/<int:post_id>/delete", methods=["POST"])

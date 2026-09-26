@@ -53,13 +53,52 @@ def parse_csv_names(value: str) -> list[str]:
 
 
 def get_or_create_by_name(model, name: str, extra_defaults=None):
-    instance = model.query.filter_by(name=name).first()
+    """Return an existing named/slugged record or create a new one."""
+    name = name.strip()
+
+    if not name:
+        raise ValueError("Name cannot be empty.")
+
+    slug = slugify(name)
+
+    # Check the slug as well as the name because the database enforces
+    # uniqueness on the slug. This prevents duplicate-key errors when
+    # two differently formatted names generate the same slug.
+    instance = model.query.filter(
+        db.or_(
+            model.name == name,
+            model.slug == slug,
+        )
+    ).first()
+
     if instance:
         return instance
-    kwargs = {"name": name, "slug": slugify(name)}
+
+    kwargs = {"name": name, "slug": slug}
+
     if extra_defaults:
         kwargs.update(extra_defaults)
+
     instance = model(**kwargs)
     db.session.add(instance)
     db.session.flush()
+
     return instance
+
+
+def get_or_create_all_by_name(model, names) -> list:
+    """
+    Resolve a list of names to records, with no repeats.
+
+    Two names in one list can resolve to the same record, because
+    get_or_create_by_name matches on slug as well as name: "Flask" and
+    "flask" are one tag. The association tables for tags and technologies
+    have a composite primary key over (parent_id, child_id), so assigning
+    the same record twice fails on insert. Order is kept, so the first
+    spelling a user typed is the one that decides position.
+    """
+    resolved: dict[str, object] = {}
+    for name in names:
+        instance = get_or_create_by_name(model, name)
+        resolved.setdefault(instance.slug, instance)
+    return list(resolved.values())
