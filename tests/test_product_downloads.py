@@ -365,7 +365,7 @@ def test_opening_a_link_shows_a_page_and_spends_nothing(client, app, product):
     html = resp.data.decode()
     assert "Download JSWM Abbreviator Setup 2.0.0.exe" in html
     assert '<meta name="robots" content="noindex, nofollow">' in html
-    assert resp.headers["Referrer-Policy"] == "no-referrer"
+    assert resp.headers["Referrer-Policy"] == "same-origin"
     assert "no-store" in resp.headers["Cache-Control"]
     assert "noindex" in resp.headers["X-Robots-Tag"]
     assert _lead().link_uses == 0
@@ -463,6 +463,39 @@ def test_the_download_button_requires_its_csrf_token(client, app, product):
         assert _lead().link_uses == 0
     finally:
         app.config["WTF_CSRF_ENABLED"] = False
+
+
+def test_the_download_button_works_over_https_with_csrf_on(client, app, product):
+    """
+    Regression for the production 400. Over HTTPS Flask-WTF requires a
+    same-origin Referer on every POST, so the link page must not send
+    Referrer-Policy: no-referrer - a browser would then send no Referer and
+    the Download button could never work. Plain-HTTP tests could not see it.
+    """
+    link = _get_link(client, app)
+    https = {"base_url": "https://localhost"}
+    app.config["WTF_CSRF_ENABLED"] = True
+    app.config["WTF_CSRF_SSL_STRICT"] = True   # as ProductionConfig sets it
+    try:
+        page = client.get(link, **https)
+        policy = page.headers["Referrer-Policy"]
+        assert policy in ("same-origin", "strict-origin", "strict-origin-when-cross-origin"), (
+            f"{policy!r} withholds the same-origin Referer the CSRF check needs"
+        )
+        assert policy != "no-referrer"
+        token = re.search(r'name="csrf_token"[^>]*value="([^"]+)"', page.data.decode()).group(1)
+
+        # What a browser sends under that policy: the page's own URL.
+        resp = client.post(link, data={"csrf_token": token},
+                           headers={"Referer": f"https://localhost{link}"}, **https)
+        assert resp.status_code == 200 and resp.data == EXE
+
+        # And without a Referer, Flask-WTF refuses - which is why the policy matters.
+        bare = client.post(link, data={"csrf_token": token}, **https)
+        assert bare.status_code == 400 and EXE not in bare.data
+    finally:
+        app.config["WTF_CSRF_ENABLED"] = False
+        app.config["WTF_CSRF_SSL_STRICT"] = False
 
 
 def test_lead_details_never_appear_on_public_pages(client, app, product):

@@ -3,7 +3,7 @@
 {#
   The page an emailed download link opens. The URL carries a personal token,
   so it is never indexed, never canonical (that is the product page), and is
-  sent with Referrer-Policy: no-referrer by the route.
+  sent with Referrer-Policy: same-origin by the route (never to third parties).
 
   The file itself is released only by the form's POST: mail scanners open
   every link in a message, and a GET that served the file would spend the

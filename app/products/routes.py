@@ -304,11 +304,16 @@ _LINK_STATUS = {"ok": 200, "unknown": 404, "unavailable": 404, "expired": 410, "
 
 def _private(response):
     """
-    Headers for anything carrying a download token. no-referrer keeps the
+    Headers for anything carrying a download token. same-origin keeps the
     token out of the Referer sent to fonts and other third-party requests
     the page makes; no-store keeps it out of shared caches.
+
+    Not no-referrer: the page's Download button posts back to this site,
+    and over HTTPS Flask-WTF rejects a POST that has no same-origin Referer
+    (WTF_CSRF_SSL_STRICT). With no-referrer every real download failed with
+    400 in production, while tests over plain HTTP passed.
     """
-    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Referrer-Policy"] = "same-origin"
     response.headers["Cache-Control"] = "private, no-store"
     response.headers["X-Robots-Tag"] = "noindex, nofollow"
     return response
