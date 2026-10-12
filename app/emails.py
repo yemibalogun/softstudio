@@ -158,3 +158,25 @@ def send_security_notification(user, event: str, detail: str | None = None) -> b
         event=event,
         detail=detail,
     )
+
+
+def send_product_download_link(download_request, product, download_url: str) -> bool:
+    """
+    The emailed link for a gated download. Deliberately a link and not the
+    file: Gmail and Outlook.com refuse any message carrying an .exe, and an
+    installer is usually past attachment size limits anyway.
+    """
+    from app.downloads import format_size
+
+    max_age = current_app.config["DOWNLOAD_LINK_MAX_AGE"]
+    return send_email(
+        subject=f"Your download: {product.title}",
+        recipients=[download_request.email],
+        template_base="product_download",
+        download_request=download_request,
+        product=product,
+        download_url=download_url,
+        file_size=format_size(product.download_size),
+        valid_days=max(1, max_age // 86400),
+        max_uses=current_app.config["DOWNLOAD_LINK_MAX_USES"],
+    )

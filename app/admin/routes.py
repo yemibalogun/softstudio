@@ -1,17 +1,23 @@
 from functools import wraps
 
-from flask import Blueprint, render_template, redirect, url_for, flash, abort, request
+import csv
+import io
+
+from flask import (
+    Blueprint, Response, current_app, render_template, redirect, url_for, flash, abort, request,
+)
 from flask_login import login_required, current_user
 
-from app.extensions import db
+from app.downloads import DownloadFileError, delete_download, format_size, store_download
+from app.extensions import csrf, db
 from app.models import (
     ProjectInquiry, Purchase, Enrollment, Course, Project, ProjectImage, Technology,
     Service, CourseCategory, CourseSection, Lesson, BlogPost, BlogCategory, BlogTag,
-    Testimonial, Product, WaitlistSubscriber,
+    Testimonial, Product, WaitlistSubscriber, DownloadRequest, utcnow,
 )
 from app.admin.forms import (
     ProjectForm, ServiceForm, CourseForm, CourseCategoryForm, CourseSectionForm, LessonForm,
-    BlogPostForm, BlogCategoryForm, TestimonialForm, ProductForm, slugify,
+    BlogPostForm, BlogCategoryForm, TestimonialForm, ProductForm, ProductDownloadForm, slugify,
 )
 from app.admin.services import unique_slug, parse_csv_names, get_or_create_all_by_name
 from app.uploads import delete_uploaded_image, store_image
@@ -238,7 +244,15 @@ def product_edit(product_id):
             delete_uploaded_image(previous_image)
         flash("Product updated.", "success")
         return redirect(url_for("admin.products_list"))
-    return render_template("admin/product_form.html", form=form, product=product)
+    return render_template(
+        "admin/product_form.html",
+        form=form,
+        product=product,
+        download_form=ProductDownloadForm(
+            data={"version": product.download_version, "enabled": product.download_enabled}
+        ),
+        download_size=format_size(product.download_size),
+    )
 
 
 def _apply_product_form(product: Product, form: ProductForm, is_new: bool) -> None:
@@ -272,9 +286,11 @@ def _apply_product_form(product: Product, form: ProductForm, is_new: bool) -> No
 def product_delete(product_id):
     product = Product.query.get_or_404(product_id)
     image = product.image
-    db.session.delete(product)  # waitlist rows cascade
+    installer = product.download_file
+    db.session.delete(product)  # waitlist and download rows cascade
     db.session.commit()
     delete_uploaded_image(image)
+    delete_download(installer)
     flash("Product deleted.", "info")
     return redirect(url_for("admin.products_list"))
 
@@ -315,6 +331,178 @@ def product_waitlist(product_id):
         product=product,
         subscribers=subscribers,
         by_source=sorted(by_source.items(), key=lambda kv: -kv[1]),
+    )
+
+
+# ---------------------------------------------------------------------
+# Product downloads
+# ---------------------------------------------------------------------
+
+def _download_section(product: Product) -> str:
+    return url_for("admin.product_edit", product_id=product.id) + "#download"
+
+
+@bp.route("/products/<int:product_id>/download", methods=["POST"])
+@csrf.exempt
+@admin_required
+def product_download_save(product_id):
+    """
+    Attach or replace a product's installer, and set its version and switch.
+
+    Exempt from the global CSRF hook on purpose, not unprotected: that hook
+    reads the request body in before_request, under the site-wide 8 MB cap,
+    so an installer would be refused before this view could raise the limit.
+    The ProductDownloadForm below carries and validates its own CSRF token,
+    after the limit is raised.
+    """
+    # Headroom over the file limit for the multipart envelope; the real cap
+    # on the file itself is enforced while it streams, in store_download.
+    request.max_content_length = current_app.config["MAX_DOWNLOAD_UPLOAD_BYTES"] + 1024 * 1024
+
+    product = Product.query.get_or_404(product_id)
+    form = ProductDownloadForm()
+    if not form.validate_on_submit():
+        for errors in form.errors.values():
+            for error in errors:
+                flash(error, "error")
+        return redirect(_download_section(product))
+
+    upload = form.file.data
+    has_upload = bool(upload and getattr(upload, "filename", ""))
+    if not has_upload and not product.download_file:
+        flash("Choose an installer file to upload.", "error")
+        return redirect(_download_section(product))
+
+    previous_file = product.download_file
+    stored = None
+    if has_upload:
+        try:
+            stored = store_download(upload, fallback_stem=product.slug)
+        except DownloadFileError as exc:
+            flash(str(exc), "error")
+            return redirect(_download_section(product))
+        product.download_file = stored.path
+        product.download_filename = stored.filename
+        product.download_size = stored.size
+        product.download_sha256 = stored.sha256
+        product.download_updated_at = utcnow()
+
+    product.download_version = form.version.data or None
+    product.download_enabled = form.enabled.data
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        if stored is not None:
+            delete_download(stored.path)  # don't orphan the new file
+        raise
+
+    # Only after the new file is safely recorded: drop the one it replaced.
+    if stored is not None and previous_file and previous_file != stored.path:
+        delete_download(previous_file)
+
+    if stored is not None:
+        flash(f"Uploaded {stored.filename} ({format_size(stored.size)}).", "success")
+    else:
+        flash("Download settings saved.", "success")
+    if product.download_enabled and not product.published:
+        flash("The download is switched on, but the product is not published yet.", "info")
+    return redirect(_download_section(product))
+
+
+@bp.route("/products/<int:product_id>/download/remove", methods=["POST"])
+@admin_required
+def product_download_remove(product_id):
+    """Detach the installer. Existing links stop working at once."""
+    product = Product.query.get_or_404(product_id)
+    installer = product.download_file
+    product.download_file = None
+    product.download_filename = None
+    product.download_size = None
+    product.download_sha256 = None
+    product.download_version = None
+    product.download_updated_at = None
+    product.download_enabled = False
+    db.session.commit()
+    delete_download(installer)
+    flash("Download removed.", "info")
+    return redirect(_download_section(product))
+
+
+@bp.route("/products/<int:product_id>/toggle-download", methods=["POST"])
+@admin_required
+def product_toggle_download(product_id):
+    product = Product.query.get_or_404(product_id)
+    if not product.download_file:
+        flash("Upload an installer before switching the download on.", "error")
+        return redirect(_download_section(product))
+    product.download_enabled = not product.download_enabled
+    db.session.commit()
+    return redirect(url_for("admin.products_list"))
+
+
+@bp.route("/products/<int:product_id>/downloads")
+@admin_required
+def product_downloads(product_id):
+    """Who asked for a product's download. Admin-only: emails are never public."""
+    product = Product.query.get_or_404(product_id)
+    leads = (
+        DownloadRequest.query.filter_by(product_id=product.id)
+        .order_by(DownloadRequest.created_at.desc())
+        .all()
+    )
+    by_source: dict[str, int] = {}
+    for lead in leads:
+        by_source[lead.source or "direct"] = by_source.get(lead.source or "direct", 0) + 1
+    return render_template(
+        "admin/product_downloads.html",
+        product=product,
+        leads=leads,
+        downloaded=sum(1 for lead in leads if lead.download_count),
+        by_source=sorted(by_source.items(), key=lambda kv: -kv[1]),
+    )
+
+
+def _csv_safe(value) -> str:
+    """
+    Names and emails are typed by visitors. A cell starting with = + - or @
+    is run as a formula by Excel and Sheets, so those get a leading quote.
+    """
+    text = "" if value is None else str(value)
+    return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
+
+
+@bp.route("/products/<int:product_id>/downloads.csv")
+@admin_required
+def product_downloads_csv(product_id):
+    product = Product.query.get_or_404(product_id)
+    leads = (
+        DownloadRequest.query.filter_by(product_id=product.id)
+        .order_by(DownloadRequest.created_at.asc())
+        .all()
+    )
+    out = io.StringIO()
+    writer = csv.writer(out)
+    writer.writerow([
+        "name", "email", "requested_at", "times_requested", "downloads",
+        "first_downloaded_at", "last_downloaded_at", "source", "utm_medium",
+        "utm_campaign", "utm_content",
+    ])
+    for lead in leads:
+        writer.writerow([_csv_safe(v) for v in (
+            lead.name, lead.email, lead.created_at.isoformat(), lead.request_count,
+            lead.download_count,
+            lead.first_downloaded_at.isoformat() if lead.first_downloaded_at else "",
+            lead.last_downloaded_at.isoformat() if lead.last_downloaded_at else "",
+            lead.source, lead.utm_medium, lead.utm_campaign, lead.utm_content,
+        )])
+    return Response(
+        out.getvalue(),
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition": f'attachment; filename="{product.slug}-downloads.csv"',
+            "Cache-Control": "private, no-store",
+        },
     )
 
 

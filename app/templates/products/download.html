@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{#
+  The page an emailed download link opens. The URL carries a personal token,
+  so it is never indexed, never canonical (that is the product page), and is
+  sent with Referrer-Policy: no-referrer by the route.
+
+  The file itself is released only by the form's POST: mail scanners open
+  every link in a message, and a GET that served the file would spend the
+  visitor's downloads on those scans.
+#}
+{% block title %}Download {{ product.title }} · {{ site_name }}{% endblock %}
+{% block meta_description %}Download {{ product.title }}.{% endblock %}
+{% block canonical %}{{ site_url.rstrip('/') }}{{ url_for('products.detail', slug=product.slug) }}{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+{% set product_page = url_for('products.detail', slug=product.slug) %}
+
+<section class="pb-[clamp(5rem,10vw,8rem)] pt-[clamp(3rem,7vw,5rem)]">
+  <div class="shell">
+    <div class="card mx-auto max-w-xl p-8 sm:p-10">
+
+      {% if state == "ok" %}
+        <span class="eyebrow">Your download</span>
+        <h1 class="mt-6 text-[clamp(2rem,4vw,2.8rem)] leading-tight text-base-content">{{ product.title }}</h1>
+
+        <dl class="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 text-sm">
+          <dt class="text-base-content/50">File</dt>
+          <dd class="min-w-0 break-words text-base-content/85">{{ product.download_filename }}</dd>
+          {% if product.download_version %}
+            <dt class="text-base-content/50">Version</dt>
+            <dd class="text-base-content/85">{{ product.download_version }}</dd>
+          {% endif %}
+          {% if download_size %}
+            <dt class="text-base-content/50">Size</dt>
+            <dd class="text-base-content/85">{{ download_size }}</dd>
+          {% endif %}
+          {% if product.download_platform %}
+            <dt class="text-base-content/50">For</dt>
+            <dd class="text-base-content/85">{{ product.download_platform }}</dd>
+          {% endif %}
+        </dl>
+
+        <form method="POST" class="mt-10">
+          {{ form.hidden_tag() }}
+          {% if form.errors %}
+            <p class="mb-4 text-sm text-error" role="alert">
+              That didn’t go through. Reload the page and try again.
+            </p>
+          {% endif %}
+          <button type="submit" class="btn btn-primary w-full">
+            Download {{ product.download_filename }}
+          </button>
+        </form>
+
+        <p class="mt-6 text-xs leading-6 text-base-content/45">
+          This link is personal to {{ lead.name.split(' ')[0] }}. It has
+          {{ uses_left }} download{{ "" if uses_left == 1 else "s" }} left and works until
+          {{ expires_at|datefmt("long") }}.
+        </p>
+
+        {% if product.download_sha256 %}
+          <details class="mt-6 text-xs text-base-content/45">
+            <summary class="cursor-pointer select-none">Verify the file</summary>
+            <p class="mt-3 leading-6">
+              The SHA-256 checksum of the genuine file is:
+            </p>
+            <code class="mt-2 block break-all rounded bg-base-300/40 p-3 font-mono text-[0.7rem] text-base-content/70">{{ product.download_sha256 }}</code>
+          </details>
+        {% endif %}
+
+      {% else %}
+        {% set messages = {
+          "expired": ("This link has expired.",
+                      "Download links work for a limited time. Request a new one and it will arrive in a minute."),
+          "used_up": ("This link has been used up.",
+                      "Each link allows a limited number of downloads. Request a new one from the product page."),
+          "unavailable": ("This download isn’t available right now.",
+                          "It may be being updated. Please check the product page again shortly."),
+          "unknown": ("This link isn’t valid.",
+                      "It may have been replaced by a newer link, or copied incompletely. Request a fresh one from the product page."),
+        } %}
+        {% set heading, detail = messages[state] %}
+
+        <span class="eyebrow">{{ product.title }}</span>
+        <h1 class="mt-6 text-[clamp(1.9rem,3.6vw,2.5rem)] leading-tight text-base-content">{{ heading }}</h1>
+        <p class="mt-4 text-[0.98rem] leading-7 text-base-content/60">{{ detail }}</p>
+
+        <a href="{{ product_page }}#download" class="btn btn-primary mt-8">
+          {% if state == "unavailable" %}Back to {{ product.title }}{% else %}Get a new link{% endif %}
+        </a>
+      {% endif %}
+
+    </div>
+  </div>
+</section>
+{% endblock %}

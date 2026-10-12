@@ -32,6 +32,7 @@
             <th>Published</th>
             <th>Waitlist</th>
             <th>Signups</th>
+            <th>Download</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -95,6 +96,26 @@
             </td>
 
             <td>
+              {% if product.download_file %}
+                <div class="flex items-center gap-2">
+                  <form method="POST" action="{{ url_for('admin.product_toggle_download', product_id=product.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    {% if product.download_enabled %}
+                      <button type="submit" class="badge badge-info gap-1 cursor-pointer" title="Click to stop offering the download">On</button>
+                    {% else %}
+                      <button type="submit" class="badge badge-ghost gap-1 cursor-pointer" title="Click to offer the download">Off</button>
+                    {% endif %}
+                  </form>
+                  <a href="{{ url_for('admin.product_downloads', product_id=product.id) }}" class="link link-hover text-sm" title="People who requested it">
+                    {{ product.download_request_count }}
+                  </a>
+                </div>
+              {% else %}
+                <a href="{{ url_for('admin.product_edit', product_id=product.id) }}#download" class="text-xs text-base-content/40 link link-hover">Add file</a>
+              {% endif %}
+            </td>
+
+            <td>
               <div class="flex flex-wrap gap-2">
                 <a href="{{ url_for('admin.product_edit', product_id=product.id) }}" class="btn btn-secondary btn-sm">
                   Edit
@@ -103,7 +124,7 @@
                 <form
                   method="POST"
                   action="{{ url_for('admin.product_delete', product_id=product.id) }}"
-                  onsubmit="return confirm('Delete this product and its waitlist? This cannot be undone.');"
+                  onsubmit="return confirm('Delete this product, its waitlist, its download and its list of requests? This cannot be undone.');"
                 >
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button type="submit" class="btn btn-error btn-outline btn-sm">Delete</button>

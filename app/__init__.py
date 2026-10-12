@@ -191,6 +191,12 @@ def _register_template_filters(app: Flask) -> None:
             out += value.strftime(" %H:%M")
         return out
 
+    @app.template_filter("filesize")
+    def filesize(value) -> str:
+        """Bytes as Windows Explorer shows them: 15513636 -> "14.8 MB"."""
+        from app.downloads import format_size
+        return format_size(value)
+
 
 def _register_cli(app: Flask) -> None:
     from app.cli import register_cli_commands

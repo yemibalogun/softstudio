@@ -1,0 +1,18 @@
+Here's your download, {{ download_request.name.split(' ')[0] }}.
+
+Thanks for your interest in {{ product.title }}. Download it here:
+
+{{ download_url }}
+
+File: {{ product.download_filename }}
+{% if product.download_version %}Version: {{ product.download_version }}
+{% endif %}{% if file_size %}Size: {{ file_size }}
+{% endif %}{% if product.download_platform %}For: {{ product.download_platform }}
+{% endif %}
+This link is personal to you. It works for {{ valid_days }} day{{ "" if valid_days == 1 else "s" }} and up to {{ max_uses }} downloads. If it runs out, request a new one from the product page.
+{% if product.download_sha256 %}
+SHA-256: {{ product.download_sha256 }}
+{% endif %}
+—
+{{ site_name }}
+{{ site_url }}

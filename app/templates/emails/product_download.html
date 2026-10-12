@@ -1,0 +1,29 @@
+{% extends "emails/_base.html" %}
+{% from "emails/_button.html" import email_button %}
+{% block subject %}Your download: {{ product.title }}{% endblock %}
+{% block body %}
+<h1 style="font-size:22px; margin:0 0 16px; color:#F5F7FA;">Here's your download, {{ download_request.name.split(' ')[0] }}.</h1>
+<p style="font-size:15px; line-height:1.6; color:#9CA3AF; margin:0 0 16px;">
+  Thanks for your interest in {{ product.title }}. Use the button below to download it.
+</p>
+{{ email_button(download_url, "Download " ~ product.title, color="#2563EB", text_color="#F5F7FA") }}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#18202C; border:1px solid #273244; border-radius:10px; margin: 0 0 16px;">
+  <tr>
+    <td style="padding: 16px 20px; font-size:14px; line-height:1.7; color:#F5F7FA;">
+      <p style="margin:0;"><strong>File:</strong> {{ product.download_filename }}</p>
+      {% if product.download_version %}<p style="margin:0;"><strong>Version:</strong> {{ product.download_version }}</p>{% endif %}
+      {% if file_size %}<p style="margin:0;"><strong>Size:</strong> {{ file_size }}</p>{% endif %}
+      {% if product.download_platform %}<p style="margin:0;"><strong>For:</strong> {{ product.download_platform }}</p>{% endif %}
+    </td>
+  </tr>
+</table>
+<p style="font-size:13px; line-height:1.6; color:#6B7280; margin:24px 0 0;">
+  This link is personal to you. It works for {{ valid_days }} day{{ "" if valid_days == 1 else "s" }}
+  and up to {{ max_uses }} downloads. If it runs out, request a new one from the product page.
+</p>
+{% if product.download_sha256 %}
+<p style="font-size:12px; line-height:1.6; color:#6B7280; margin:12px 0 0; word-break:break-all;">
+  SHA-256: {{ product.download_sha256 }}
+</p>
+{% endif %}
+{% endblock %}

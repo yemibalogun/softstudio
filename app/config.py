@@ -98,6 +98,25 @@ class BaseConfig:
     # No SVG: it is XML that can carry script and would be served from our origin.
     # Reference only; the enforced allowlist is app/uploads.py ALLOWED_EXTENSIONS.
     UPLOAD_ALLOWED_IMAGE_EXT = {"png", "jpg", "jpeg", "webp"}
+
+    # Private files: lesson resources and product installers. Never under
+    # /static and never served by nginx directly - only through a view that
+    # checks who is asking. In Docker this is the protected_uploads volume.
+    PROTECTED_UPLOADS_DIR = os.environ.get("PROTECTED_UPLOADS_DIR", "/data/protected")
+
+    # Product downloads (app/downloads.py, app/products/routes.py).
+    # Installers are far larger than the 8 MB request cap above, so the one
+    # admin route that receives them raises the limit for itself only.
+    MAX_DOWNLOAD_UPLOAD_BYTES = int(
+        os.environ.get("MAX_DOWNLOAD_UPLOAD_BYTES", str(500 * 1024 * 1024))
+    )
+    # How long an emailed download link works, and how many times. The use
+    # cap stops one link being passed around in place of signing up.
+    DOWNLOAD_LINK_MAX_AGE = int(os.environ.get("DOWNLOAD_LINK_MAX_AGE", str(7 * 24 * 3600)))
+    DOWNLOAD_LINK_MAX_USES = int(os.environ.get("DOWNLOAD_LINK_MAX_USES", "5"))
+    # Minimum gap between two link emails to the same address for the same
+    # product, so the form cannot be used to flood someone else's inbox.
+    DOWNLOAD_REQUEST_COOLDOWN = int(os.environ.get("DOWNLOAD_REQUEST_COOLDOWN", "120"))
     UPLOAD_ALLOWED_RESOURCE_EXT = {"pdf", "zip"}
 
     # Rate limiting (Flask-Limiter storage backend)

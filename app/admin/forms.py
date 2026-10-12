@@ -9,6 +9,7 @@ from wtforms import (
 from wtforms.validators import DataRequired, Optional, Length, NumberRange, URL, ValidationError
 
 from app.uploads import ALLOWED_EXTENSIONS, ImageUploadError, is_uploaded_image, process_image
+from app.downloads import ACCEPT_ATTR as DOWNLOAD_ACCEPT
 
 
 def slugify(value: str) -> str:
@@ -243,3 +244,23 @@ class TestimonialForm(FlaskForm):
     approved = BooleanField("Approved")
     featured = BooleanField("Featured on homepage")
     display_order = IntegerField("Display order", default=0, validators=[Optional()])
+
+
+class ProductDownloadForm(FlaskForm):
+    """
+    The installer attached to a product, kept apart from ProductForm: this
+    is the only form that may carry a file far beyond the site-wide 8 MB
+    request cap, and its route raises that cap for itself alone.
+    """
+
+    file = FileField(
+        "Installer file",
+        render_kw={"accept": DOWNLOAD_ACCEPT},
+    )
+    version = StringField(
+        "Version (optional)",
+        filters=[lambda v: v.strip() if isinstance(v, str) else v],
+        validators=[Optional(), Length(max=40)],
+        render_kw={"placeholder": "2.0.0"},
+    )
+    enabled = BooleanField("Offer this download on the product page")

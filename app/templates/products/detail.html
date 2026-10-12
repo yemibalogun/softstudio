@@ -55,10 +55,15 @@
         <p class="lede mt-7 max-w-2xl" data-reveal>{{ product.short_description }}</p>
 
         <div class="mt-10 flex flex-wrap items-center gap-3" data-reveal>
+          {% if download_offered %}
+            <a href="#download" class="btn btn-primary">
+              Download{% if product.download_platform %} for {{ product.download_platform }}{% endif %}
+            </a>
+          {% endif %}
           {% if product.waitlist_enabled %}
-            <a href="#waitlist" class="btn btn-primary">Join the waitlist</a>
+            <a href="#waitlist" class="btn {{ 'btn-outline' if download_offered else 'btn-primary' }}">Join the waitlist</a>
           {% elif product.cta_url %}
-            <a href="{{ product.cta_url }}" class="btn btn-primary">{{ product.cta_label or "Open" }}</a>
+            <a href="{{ product.cta_url }}" class="btn {{ 'btn-outline' if download_offered else 'btn-primary' }}">{{ product.cta_label or "Open" }}</a>
           {% endif %}
 
           {# Share: native sheet where the browser has one, copy-link everywhere else. #}
@@ -122,6 +127,84 @@
     #}
     <div class="prose prose-lg max-w-3xl" data-reveal>
       {{ product.description|markdown }}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if download_offered %}
+<section class="pb-[clamp(5rem,10vw,8rem)]" id="download">
+  <div class="shell">
+    <div class="card mx-auto max-w-xl p-8 sm:p-10" data-reveal>
+
+      {% if download_state == "sent" %}
+        <h2 class="text-[1.9rem] leading-tight text-base-content">Check your inbox.</h2>
+        <p class="mt-4 text-[0.98rem] leading-7 text-base-content/60">
+          We’ve emailed you a link to download {{ product.title }}. It works for
+          {{ download_valid_days }} day{{ "" if download_valid_days == 1 else "s" }}.
+          If it hasn’t arrived in a few minutes, check your spam folder.
+        </p>
+        <a href="{{ url_for('products.detail', slug=product.slug) }}#download" class="link link-hover mt-6 inline-block text-sm text-base-content/60">
+          Send it to a different address
+        </a>
+      {% else %}
+        {% if download_state == "failed" %}
+          <div class="alert alert-warning alert-soft mb-8 text-sm" role="alert">
+            We couldn’t send the email just now. Please try again in a few minutes.
+          </div>
+        {% endif %}
+
+        <h2 class="text-[1.9rem] leading-tight text-base-content">Download {{ product.title }}</h2>
+        <p class="mt-4 text-[0.98rem] leading-7 text-base-content/60">
+          Enter your name and email and we’ll send you the download link.
+        </p>
+
+        <ul class="mt-6 flex flex-wrap gap-2 text-xs text-base-content/55">
+          {% if product.download_platform %}<li class="badge badge-outline">{{ product.download_platform }}</li>{% endif %}
+          {% if product.download_version %}<li class="badge badge-outline">Version {{ product.download_version }}</li>{% endif %}
+          {% if download_size %}<li class="badge badge-outline">{{ download_size }}</li>{% endif %}
+        </ul>
+
+        <form
+          method="POST"
+          action="{{ url_for('products.request_download', slug=product.slug) }}"
+          class="mt-8 flex flex-col gap-4"
+          novalidate
+        >
+          {{ download_form.hidden_tag() }}
+
+          {% for field, attrs in [
+            (download_form.name, {"autocomplete": "name", "placeholder": "Your name"}),
+            (download_form.email, {"type": "email", "autocomplete": "email", "placeholder": "you@example.com"}),
+          ] %}
+            <div class="form-control w-full">
+              <label class="mb-2.5 block text-sm text-base-content/70" for="{{ field.id }}">
+                {{ field.label.text }}
+              </label>
+              {{ field(
+                class="input input-bordered w-full text-[0.95rem]" + (" input-error" if field.errors else ""),
+                required=true, **attrs
+              ) }}
+              {% for error in field.errors %}
+                <p class="mt-2 text-sm text-error" role="alert">{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endfor %}
+
+          {# Honeypot: off-screen, not hidden from assistive tech by display:none #}
+          <div class="absolute left-[-9999px]" aria-hidden="true">
+            {{ download_form.website(tabindex="-1", autocomplete="off") }}
+          </div>
+
+          <button type="submit" class="btn btn-primary mt-2">Email me the download link</button>
+
+          <p class="text-xs leading-6 text-base-content/45">
+            The link is personal to you and works for {{ download_valid_days }} day{{ "" if download_valid_days == 1 else "s" }}.
+            Your details stay with {{ site_name }} and are never shared.
+          </p>
+        </form>
+      {% endif %}
+
     </div>
   </div>
 </section>

@@ -38,6 +38,9 @@
     <a href="{{ url_for('admin.product_waitlist', product_id=product.id) }}" class="btn btn-ghost btn-xs">
       Waitlist ({{ product.subscriber_count }})
     </a>
+    <a href="{{ url_for('admin.product_downloads', product_id=product.id) }}" class="btn btn-ghost btn-xs">
+      Downloads ({{ product.download_request_count }})
+    </a>
     <span class="sr-only" role="status" aria-live="polite" data-share-status></span>
   </div>
 {% endif %}
@@ -165,6 +168,110 @@
 
   </div>
 </form>
+
+{# ------------------------------------------------------------------
+   Downloadable file. Its own form: it is the one upload allowed past the
+   site-wide 8 MB cap, so it posts to a route that raises the cap for
+   itself alone.
+   ------------------------------------------------------------------ #}
+<div class="card mt-8 border border-base-300 bg-base-100 shadow-sm" id="download">
+  <div class="card-body gap-6">
+
+    <div>
+      <h2 class="card-title text-lg">Downloadable file</h2>
+      <p class="mt-1 text-sm text-base-content/60">
+        Visitors leave their name and email on the product page and get a
+        personal download link by email. The file is never publicly reachable.
+      </p>
+    </div>
+
+    {% if not product %}
+
+      <p class="rounded-box border border-dashed border-base-300 p-5 text-sm text-base-content/60">
+        Create the product first, then attach its installer here.
+      </p>
+
+    {% else %}
+
+      {% if product.download_file %}
+        <div class="rounded-box border border-base-300 bg-base-200/40 p-5">
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="min-w-0">
+              <p class="break-words font-medium">{{ product.download_filename }}</p>
+              <p class="mt-1 text-sm text-base-content/60">
+                {{ download_size }}
+                {% if product.download_version %} · v{{ product.download_version }}{% endif %}
+                {% if product.download_platform %} · {{ product.download_platform }}{% endif %}
+                {% if product.download_updated_at %} · uploaded {{ product.download_updated_at|datefmt("datetime") }}{% endif %}
+              </p>
+              <p class="mt-2 break-all font-mono text-[0.7rem] text-base-content/45">SHA-256 {{ product.download_sha256 }}</p>
+            </div>
+            {% if product.download_enabled and product.published %}
+              <span class="badge badge-success">Live on the product page</span>
+            {% elif product.download_enabled %}
+              <span class="badge badge-warning">On, but the product is unpublished</span>
+            {% else %}
+              <span class="badge badge-ghost">Switched off</span>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      <form
+        method="POST"
+        action="{{ url_for('admin.product_download_save', product_id=product.id) }}"
+        enctype="multipart/form-data"
+        class="flex flex-col gap-6"
+      >
+        {{ download_form.hidden_tag() }}
+
+        <div class="form-control w-full">
+          <label class="label" for="{{ download_form.file.id }}">
+            <span class="label-text font-medium">
+              {% if product.download_file %}Replace the installer (optional){% else %}{{ download_form.file.label.text }}{% endif %}
+            </span>
+          </label>
+          {{ download_form.file(class="file-input file-input-bordered w-full") }}
+          <div class="label">
+            <span class="label-text-alt text-base-content/50">
+              .exe, .msi, .msix, .zip, .dmg, .pkg, .AppImage, .deb or .rpm, up to {{ config.MAX_DOWNLOAD_UPLOAD_BYTES|filesize }}.
+              The file’s contents are checked against its type.
+            </span>
+          </div>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-2">
+          {{ afield(download_form.version) }}
+          <div class="flex items-end pb-2">{{ afield(download_form.enabled) }}</div>
+        </div>
+
+        <div class="card-actions justify-end">
+          <button type="submit" class="btn btn-primary">
+            {% if product.download_file %}Save download{% else %}Upload installer{% endif %}
+          </button>
+        </div>
+      </form>
+
+      {% if product.download_file %}
+        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 pt-5">
+          <a href="{{ url_for('admin.product_downloads', product_id=product.id) }}" class="link link-hover text-sm">
+            {{ product.download_request_count }} people requested it →
+          </a>
+          <form
+            method="POST"
+            action="{{ url_for('admin.product_download_remove', product_id=product.id) }}"
+            onsubmit="return confirm('Remove this installer? Links already emailed will stop working.');"
+          >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-error btn-outline btn-sm">Remove download</button>
+          </form>
+        </div>
+      {% endif %}
+
+    {% endif %}
+
+  </div>
+</div>
 
 {% endblock %}
 

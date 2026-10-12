@@ -1,0 +1,112 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}{{ product.title }} downloads — Admin{% endblock %}
+
+{% block admin_content %}
+
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-3xl font-bold">{{ product.title }} — downloads</h1>
+    <p class="mt-1 text-base-content/60">
+      {{ leads|length }} {{ "person" if leads|length == 1 else "people" }} requested it,
+      {{ downloaded }} downloaded it.
+      These details are only ever visible here.
+    </p>
+  </div>
+
+  <div class="flex flex-wrap gap-2">
+    {% if leads %}
+      <a href="{{ url_for('admin.product_downloads_csv', product_id=product.id) }}" class="btn btn-outline btn-sm">Export CSV</a>
+    {% endif %}
+    <a href="{{ url_for('admin.product_edit', product_id=product.id) }}#download" class="btn btn-ghost btn-sm">Edit download</a>
+    <a href="{{ url_for('admin.products_list') }}" class="btn btn-ghost btn-sm">← Products</a>
+  </div>
+</div>
+
+{% if by_source %}
+  <div class="mb-6 flex flex-wrap gap-2">
+    {% for source, count in by_source %}
+      <span class="badge badge-outline gap-2">{{ source }} <span class="font-semibold">{{ count }}</span></span>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if leads %}
+
+<div class="card border border-base-300 bg-base-200 shadow-sm">
+  <div class="card-body p-0">
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Requested</th>
+            <th>Downloads</th>
+            <th>Last download</th>
+            <th>Source</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for lead in leads %}
+          <tr>
+            <td>{{ lead.name }}</td>
+            <td class="font-mono text-xs">
+              {{ lead.email }}
+              {% if not lead.email_delivered %}
+                <span class="badge badge-warning badge-xs ml-1" title="The last link email to this address failed to send">not sent</span>
+              {% endif %}
+            </td>
+            <td class="text-xs">
+              {{ lead.created_at|datefmt("datetime") }}
+              {% if lead.request_count > 1 %}
+                <span class="text-base-content/50">· asked {{ lead.request_count }}×</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if lead.download_count %}
+                <span class="badge badge-success badge-sm">{{ lead.download_count }}</span>
+              {% else %}
+                <span class="text-base-content/40">—</span>
+              {% endif %}
+            </td>
+            <td class="text-xs">{{ lead.last_downloaded_at|datefmt("datetime") if lead.last_downloaded_at else "—" }}</td>
+            <td>
+              <span class="badge badge-ghost">{{ lead.source or "direct" }}</span>
+              {% if lead.utm_campaign or lead.utm_medium or lead.utm_content %}
+                <div class="mt-1 text-xs text-base-content/50">
+                  {{ [lead.utm_medium, lead.utm_campaign, lead.utm_content]|select|join(" · ") }}
+                </div>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+</div>
+
+{% else %}
+
+<div class="card border border-base-300 bg-base-200 shadow-sm">
+  <div class="card-body">
+    <p class="text-base-content/60">
+      {% if product.download_ready and product.published %}
+        No requests yet. Share
+        <code class="rounded bg-base-300/50 px-2 py-1 text-xs">{{ site_url.rstrip('/') }}{{ url_for('products.detail', slug=product.slug) }}?utm_source=linkedin</code>
+        to track where they come from.
+      {% else %}
+        No requests yet. The download isn’t live: it needs an installer, the
+        download switched on, and the product published.
+      {% endif %}
+    </p>
+  </div>
+</div>
+
+{% endif %}
+
+{% endblock %}
