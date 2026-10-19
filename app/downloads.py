@@ -55,6 +55,11 @@ _TYPES: dict[str, tuple[str | None, object]] = {
     "rpm": ("Linux", _starts(b"\xed\xab\xee\xdb")),
 }
 
+# Documents: lead magnets such as a free scorecard. Served exactly like an
+# installer - as an attachment with nosniff, never rendered from our origin -
+# so anything scripted inside a PDF never runs on this site.
+_TYPES["pdf"] = (None, _starts(b"%PDF-"))
+
 ALLOWED_EXTENSIONS = frozenset(_TYPES)
 # For the admin file picker. Display only: enforcement is in store_download.
 ACCEPT_ATTR = ",".join(f".{ext}" for ext in sorted(ALLOWED_EXTENSIONS))
@@ -95,6 +100,14 @@ def extension_of(filename: str | None) -> str:
 def platform_for(filename: str | None) -> str | None:
     entry = _TYPES.get(extension_of(filename))
     return entry[0] if entry else None
+
+
+def kind_for(filename: str | None) -> str | None:
+    """Short badge label: the platform for an installer, else the format ("PDF")."""
+    ext = extension_of(filename)
+    if ext not in _TYPES:
+        return None
+    return _TYPES[ext][0] or ext.upper()
 
 
 def _basename(filename: str) -> str:

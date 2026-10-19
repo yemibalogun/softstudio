@@ -24,6 +24,7 @@ from app.emails import send_product_download_link
 from app.extensions import db, limiter
 from app.models import DownloadRequest, Product, WaitlistSubscriber, utcnow
 from app.products.forms import DownloadConfirmForm, DownloadRequestForm, WaitlistForm
+from app.products.landing import initials, landing_markup, landing_points
 from app.seo import absolute_url, default_social_image_url, site_base_url
 
 bp = Blueprint("products", __name__)
@@ -111,8 +112,14 @@ def _render_detail(
     product_url = f"{site_base_url()}{url_for('products.detail', slug=product.slug)}"
     product_image_url = absolute_url(product.social_image) or default_social_image_url()
     html = render_template(
-        "products/detail.html",
+        # Same URL, same form, same handler: only the layout changes.
+        "products/landing.html" if product.shows_landing_page else "products/detail.html",
         product=product,
+        landing_headline=landing_markup(product.landing_headline or product.title),
+        landing_points=landing_points(product.landing_points),
+        owner_name=current_app.config["SITE_OWNER_NAME"],
+        owner_role=current_app.config["SITE_OWNER_ROLE"],
+        owner_initials=initials(current_app.config["SITE_OWNER_NAME"]),
         form=form or WaitlistForm(data=_form_defaults()),
         joined=joined,
         download_form=download_form or _download_form(data=_form_defaults()),

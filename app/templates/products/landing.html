@@ -1,0 +1,130 @@
+<!doctype html>
+{#
+  Focused landing layout for a product with a gated download - the page an
+  Instagram DM or ad link lands on. One offer, one form, no site navigation.
+
+  Chosen by the route (Product.shows_landing_page) for the same URL as the
+  normal product page, so share links and UTM tags work either way. The
+  form posts to the same products.request_download handler: name + email are
+  stored as a lead and the download link is emailed. The file itself is
+  never linked from here.
+
+  No JavaScript: the site's CSP allows no inline script, and a plain form
+  POST + redirect works in every in-app browser.
+#}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#050b19">
+  <title>{{ product.meta_title or product.title }} · {{ site_name }}</title>
+  <meta name="description" content="{{ product.meta_description or product.short_description }}">
+  <link rel="canonical" href="{{ product_url }}">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:site_name" content="{{ site_name }}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ product.meta_title or product.title }}">
+  <meta property="og:description" content="{{ product.meta_description or product.short_description }}">
+  <meta property="og:url" content="{{ product_url }}">
+  <meta property="og:image" content="{{ product_image_url }}">
+  <meta property="og:image:alt" content="{{ product.title }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ product.meta_title or product.title }}">
+  <meta name="twitter:description" content="{{ product.meta_description or product.short_description }}">
+  <meta name="twitter:image" content="{{ product_image_url }}">
+
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/brand/favicon.svg') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/brand/favicon-32x32.png') }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/brand/jaybalo_logo.png') }}">
+
+  <link rel="preload" href="{{ url_for('static', filename='fonts/manrope-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+</head>
+<body>
+<div class="orb a" aria-hidden="true"></div><div class="orb b" aria-hidden="true"></div>
+
+<main class="wrap">
+
+  <a class="brand" href="{{ url_for('main.index') }}">{{ site_name }}</a>
+  <h1>{{ landing_headline }}</h1>
+  <p class="lede">{{ product.short_description }}</p>
+
+  <div class="card" id="download">
+
+    {% if download_state == "sent" %}
+
+      <div class="ok" role="status">
+        <div class="tick" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#7cc4f8" stroke-width="3.2" stroke-linecap="round"/></svg>
+        </div>
+        <h2>Check your inbox.</h2>
+        <p>
+          Your download link is on its way. It works for
+          {{ download_valid_days }} day{{ "" if download_valid_days == 1 else "s" }}.
+          If it isn’t there in a few minutes, look in your spam or promotions folder.
+        </p>
+        <a class="again" href="{{ url_for('products.detail', slug=product.slug) }}#download">Send it to a different address</a>
+      </div>
+
+    {% else %}
+
+      {% if landing_points %}
+        <ul class="points">
+          {% for point in landing_points %}
+            <li>
+              <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#4a8bf8" stroke-width="3.2" stroke-linecap="round"/></svg>
+              <span>{{ point }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <form method="post" action="{{ url_for('products.request_download', slug=product.slug) }}" novalidate>
+        {{ download_form.hidden_tag() }}
+
+        {% if download_state == "failed" %}
+          <p class="alert" role="alert">We couldn’t send the email just now. Please try again in a few minutes.</p>
+        {% endif %}
+
+        <span class="label" id="send-to">Where should I send it?</span>
+
+        <div class="field">
+          <label class="sr-only" for="{{ download_form.name.id }}">Your name</label>
+          {{ download_form.name(placeholder="First name", autocomplete="given-name", required=true,
+                                **({"aria-invalid": "true", "aria-describedby": "name-error"} if download_form.name.errors else {})) }}
+          {% if download_form.name.errors %}<p class="field-error" id="name-error">{{ download_form.name.errors[0] }}</p>{% endif %}
+        </div>
+
+        <div class="field">
+          <label class="sr-only" for="{{ download_form.email.id }}">Email address</label>
+          {{ download_form.email(type="email", placeholder="you@company.com", autocomplete="email", required=true,
+                                 **({"aria-invalid": "true", "aria-describedby": "email-error"} if download_form.email.errors else {})) }}
+          {% if download_form.email.errors %}<p class="field-error" id="email-error">{{ download_form.email.errors[0] }}</p>{% endif %}
+        </div>
+
+        {# Honeypot: off-screen, filled only by bots. #}
+        <div class="hp" aria-hidden="true">{{ download_form.website(tabindex="-1", autocomplete="off") }}</div>
+
+        <button type="submit" class="cta">{{ product.landing_button_label or "Send me the download link" }}</button>
+      </form>
+      <p class="fine">
+        One email with your download link. No sequence, no spam.
+        <a href="{{ url_for('legal.privacy') }}">Privacy</a>
+      </p>
+
+    {% endif %}
+
+  </div>
+
+  <div class="sig">
+    <div class="av" aria-hidden="true">{{ owner_initials }}</div>
+    <div>
+      <div class="n">{{ owner_name }}</div>
+      <div class="r">{{ owner_role }} · <a class="mono" href="{{ url_for('main.index') }}">{{ site_url.replace('https://', '').replace('http://', '').rstrip('/') }}</a></div>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

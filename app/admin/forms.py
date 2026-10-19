@@ -216,6 +216,26 @@ class ProductForm(FlaskForm):
         validators=[Optional(), image_url, Length(max=512)],
     )
 
+    landing_page = BooleanField("Use the focused landing page (for ads and DM links)")
+    landing_headline = TextAreaField(
+        "Headline",
+        validators=[Optional(), Length(max=200)],
+        render_kw={"rows": 2, "placeholder": "Should you automate it,\nor *fix it first?*"},
+    )
+    landing_points = TextAreaField(
+        "What they get (one per line)",
+        validators=[Optional(), Length(max=2000)],
+        render_kw={
+            "rows": 4,
+            "placeholder": "The **one-line test** that separates a rule from a judgment call",
+        },
+    )
+    landing_button_label = StringField(
+        "Button label",
+        validators=[Optional(), Length(max=80)],
+        render_kw={"placeholder": "Send me the scorecard"},
+    )
+
     # Set by validate_image_file() when a valid image was uploaded.
     processed_image = None
 
@@ -254,7 +274,7 @@ class ProductDownloadForm(FlaskForm):
     """
 
     file = FileField(
-        "Installer file",
+        "File to download",
         render_kw={"accept": DOWNLOAD_ACCEPT},
     )
     version = StringField(

@@ -117,6 +117,9 @@ class BaseConfig:
     # Minimum gap between two link emails to the same address for the same
     # product, so the form cannot be used to flood someone else's inbox.
     DOWNLOAD_REQUEST_COOLDOWN = int(os.environ.get("DOWNLOAD_REQUEST_COOLDOWN", "120"))
+    # The sign-off on product landing pages (templates/products/landing.html).
+    SITE_OWNER_NAME = os.environ.get("SITE_OWNER_NAME", "Yemi Balogun")
+    SITE_OWNER_ROLE = os.environ.get("SITE_OWNER_ROLE", "Automation consultant")
     UPLOAD_ALLOWED_RESOURCE_EXT = {"pdf", "zip"}
 
     # Rate limiting (Flask-Limiter storage backend)

@@ -146,6 +146,23 @@
     <div class="divider"></div>
 
     <div>
+      <h2 class="card-title text-lg">Landing page</h2>
+      <p class="mt-1 text-sm text-base-content/60">
+        For ads and Instagram DM links: the product URL shows a focused page with one
+        form and no site menu. Only used while a downloadable file is attached and
+        switched on. In the headline, wrap words in <code>*stars*</code> for the blue
+        highlight; in the points, <code>**double stars**</code> make text bold.
+      </p>
+    </div>
+
+    {{ afield(form.landing_page) }}
+    {{ afield(form.landing_headline, rows=2) }}
+    {{ afield(form.landing_points, rows=4) }}
+    {{ afield(form.landing_button_label) }}
+
+    <div class="divider"></div>
+
+    <div>
       <h2 class="card-title text-lg">SEO overrides</h2>
       <p class="mt-1 text-sm text-base-content/60">
         Optional. Left blank, the page falls back to the title, short description and product image.
@@ -188,7 +205,7 @@
     {% if not product %}
 
       <p class="rounded-box border border-dashed border-base-300 p-5 text-sm text-base-content/60">
-        Create the product first, then attach its installer here.
+        Create the product first, then attach its file here.
       </p>
 
     {% else %}
@@ -228,13 +245,13 @@
         <div class="form-control w-full">
           <label class="label" for="{{ download_form.file.id }}">
             <span class="label-text font-medium">
-              {% if product.download_file %}Replace the installer (optional){% else %}{{ download_form.file.label.text }}{% endif %}
+              {% if product.download_file %}Replace the file (optional){% else %}{{ download_form.file.label.text }}{% endif %}
             </span>
           </label>
           {{ download_form.file(class="file-input file-input-bordered w-full") }}
           <div class="label">
             <span class="label-text-alt text-base-content/50">
-              .exe, .msi, .msix, .zip, .dmg, .pkg, .AppImage, .deb or .rpm, up to {{ config.MAX_DOWNLOAD_UPLOAD_BYTES|filesize }}.
+              A PDF, or an installer (.exe, .msi, .msix, .zip, .dmg, .pkg, .AppImage, .deb, .rpm), up to {{ config.MAX_DOWNLOAD_UPLOAD_BYTES|filesize }}.
               The file’s contents are checked against its type.
             </span>
           </div>
@@ -247,7 +264,7 @@
 
         <div class="card-actions justify-end">
           <button type="submit" class="btn btn-primary">
-            {% if product.download_file %}Save download{% else %}Upload installer{% endif %}
+            {% if product.download_file %}Save download{% else %}Upload file{% endif %}
           </button>
         </div>
       </form>
@@ -260,7 +277,7 @@
           <form
             method="POST"
             action="{{ url_for('admin.product_download_remove', product_id=product.id) }}"
-            onsubmit="return confirm('Remove this installer? Links already emailed will stop working.');"
+            onsubmit="return confirm('Remove this file? Links already emailed will stop working.');"
           >
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn btn-error btn-outline btn-sm">Remove download</button>

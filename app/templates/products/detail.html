@@ -160,7 +160,7 @@
         </p>
 
         <ul class="mt-6 flex flex-wrap gap-2 text-xs text-base-content/55">
-          {% if product.download_platform %}<li class="badge badge-outline">{{ product.download_platform }}</li>{% endif %}
+          {% if product.download_kind %}<li class="badge badge-outline">{{ product.download_kind }}</li>{% endif %}
           {% if product.download_version %}<li class="badge badge-outline">Version {{ product.download_version }}</li>{% endif %}
           {% if download_size %}<li class="badge badge-outline">{{ download_size }}</li>{% endif %}
         </ul>

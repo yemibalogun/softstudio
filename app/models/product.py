@@ -55,6 +55,14 @@ class Product(db.Model, TimestampMixin):
     download_updated_at = db.Column(db.DateTime(timezone=True))
     download_enabled = db.Column(db.Boolean, default=False, nullable=False)
 
+    # Optional focused landing layout (templates/products/landing.html) for
+    # ad and DM traffic: one offer, one form, no site navigation. Used in
+    # place of the normal product page only while a download is offered.
+    landing_page = db.Column(db.Boolean, default=False, nullable=False)
+    landing_headline = db.Column(db.String(200))     # *highlight*, line breaks
+    landing_points = db.Column(db.Text)              # one per line, **bold**
+    landing_button_label = db.Column(db.String(80))
+
     download_requests = db.relationship(
         "DownloadRequest",
         back_populates="product",
@@ -102,6 +110,17 @@ class Product(db.Model, TimestampMixin):
     def download_platform(self) -> str | None:
         from app.downloads import platform_for
         return platform_for(self.download_filename)
+
+    @property
+    def shows_landing_page(self) -> bool:
+        """The landing layout needs a live download: it is a page with one form."""
+        return bool(self.landing_page) and self.download_offered
+
+    @property
+    def download_kind(self) -> str | None:
+        """Badge label: "Windows" for an installer, "PDF" for a document."""
+        from app.downloads import kind_for
+        return kind_for(self.download_filename)
 
     @property
     def download_request_count(self) -> int:

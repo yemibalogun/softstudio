@@ -279,6 +279,10 @@ def _apply_product_form(product: Product, form: ProductForm, is_new: bool) -> No
     product.meta_title = form.meta_title.data
     product.meta_description = form.meta_description.data
     product.og_image = form.og_image.data
+    product.landing_page = form.landing_page.data
+    product.landing_headline = (form.landing_headline.data or "").strip() or None
+    product.landing_points = (form.landing_points.data or "").strip() or None
+    product.landing_button_label = (form.landing_button_label.data or "").strip() or None
 
 
 @bp.route("/products/<int:product_id>/delete", methods=["POST"])
