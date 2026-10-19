@@ -117,6 +117,17 @@
 
   </div>
 
+  {#
+    The product image, as a preview of what they get. Below the form on
+    purpose: on a phone the form stays near the top of the screen, and a
+    social card that repeats the headline does not sit right under it.
+  #}
+  {% if product.image %}
+    <figure class="cover">
+      <img src="{{ product.image }}" alt="Preview of the {{ product.title }}" loading="lazy" decoding="async">
+    </figure>
+  {% endif %}
+
   <div class="sig">
     <div class="av" aria-hidden="true">{{ owner_initials }}</div>
     <div>

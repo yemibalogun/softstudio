@@ -283,3 +283,16 @@ def test_clearing_the_landing_fields_stores_nothing(client, db, admin_user, prot
     assert product.landing_page is False
     assert product.landing_headline is None and product.landing_points is None
     assert product.landing_button_label is None
+
+
+def test_the_product_image_previews_below_the_form(client, db, scorecard):
+    scorecard.image = "/static/images/uploads/products/" + "a" * 32 + ".webp"
+    db.session.commit()
+    html = client.get(URL).data.decode()
+    assert '<figure class="cover">' in html
+    assert html.index('class="cta"') < html.index('class="cover"'), "the form comes first"
+    assert 'alt="Preview of the Automation Readiness Scorecard"' in html
+
+
+def test_no_empty_image_frame_without_an_image(client, scorecard):
+    assert 'class="cover"' not in client.get(URL).data.decode()
