@@ -1,83 +1,281 @@
 {% extends "admin/_admin_base.html" %}
 
-{% block title %}Admin Dashboard — {{ site_name }}{% endblock %}
+{#
+  Everything is rendered server-side first, then refreshed in place by
+  admin-dashboard.js. Elements the poller updates carry data-metric
+  (single values) or data-list (whole sections), so the markup here is the
+  single source of truth for how a row looks — the JS reuses these shapes.
+#}
+
+{% block title %}Dashboard — Admin{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin-dashboard.css') }}">
+{% endblock %}
+
+{% macro trend_tag(count) %}
+  {% if count %}<span class="dash-tag dash-tag--info">{{ count }}</span>{% endif %}
+{% endmacro %}
 
 {% block admin_content %}
+<div class="dash" data-dashboard data-endpoint="{{ url_for('admin.dashboard_json') }}" data-range="{{ data.range }}">
 
-<div class="mb-8">
-  <h1 class="text-3xl font-bold">Overview</h1>
-  <p class="mt-1 text-base-content/60">
-    A quick overview of your platform activity.
-  </p>
+  <!-- ===== header ===== -->
+  <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div>
+      <p class="dash__eyebrow">{{ site_name }}</p>
+      <h1 class="mt-2 text-[2.1rem] font-semibold leading-none tracking-[-0.03em]">Dashboard</h1>
+      <p class="mt-3 dash-live" data-online="{{ data.live.online_now }}">
+        <span class="dash-live__dot" aria-hidden="true"></span>
+        <span data-metric="live.online_now">{{ data.live.online_now }}</span>
+        <span>reading the site right now</span>
+        <span class="opacity-40">·</span>
+        <span data-updated-at>updated just now</span>
+      </p>
+    </div>
+
+    <nav class="dash-range" aria-label="Time range">
+      {% for key, spec in ranges.items() %}
+        <a href="{{ url_for('admin.dashboard', range=key) }}"
+           {% if key == data.range %}aria-current="page"{% endif %}>{{ key }}</a>
+      {% endfor %}
+    </nav>
+  </div>
+
+  <!-- ===== hero stats ===== -->
+  <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+    <div class="dash-card dash-card--pad">
+      <p class="dash-stat__label">Visitors · {{ data.range_label|lower }}</p>
+      <p class="dash-stat__value" data-metric="totals.visitors">{{ data.totals.visitors }}</p>
+      <p class="dash-stat__meta"><span data-metric="live.visitors_today">{{ data.live.visitors_today }}</span> today</p>
+    </div>
+
+    <div class="dash-card dash-card--pad">
+      <p class="dash-stat__label">Page views</p>
+      <p class="dash-stat__value" data-metric="totals.views">{{ data.totals.views }}</p>
+      <p class="dash-stat__meta"><span data-metric="live.views_today">{{ data.live.views_today }}</span> today</p>
+    </div>
+
+    <div class="dash-card dash-card--pad">
+      <p class="dash-stat__label">Emails collected</p>
+      <p class="dash-stat__value" data-metric="emails.total">{{ data.emails.total }}</p>
+      <p class="dash-stat__meta">
+        <span data-metric="emails.all_time">{{ data.emails.all_time }}</span> all time ·
+        {{ data.emails.waitlist }} waitlist · {{ data.emails.downloads }} downloads
+      </p>
+    </div>
+
+    <div class="dash-card dash-card--pad">
+      <p class="dash-stat__label">Errors</p>
+      <p class="dash-stat__value" data-metric="errors.total">{{ data.errors.total }}</p>
+      <p class="dash-stat__meta">
+        <a class="link link-hover" href="{{ url_for('admin.errors_list') }}">
+          <span data-metric="errors.unresolved">{{ data.errors.unresolved }}</span> unresolved
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ===== traffic ===== -->
+  <div class="dash-card dash-card--pad mt-4">
+    <div class="dash-card__title">
+      <div>
+        <p class="dash__eyebrow">Traffic</p>
+        <p class="mt-1 text-sm text-base-content/55">{{ data.range_label }}</p>
+      </div>
+      <div class="dash-legend">
+        <span><i style="background:#7CCBFF"></i> Views</span>
+        <span><i style="background:rgba(58,120,255,.85)"></i> Visitors</span>
+      </div>
+    </div>
+    <svg class="dash-chart" data-chart data-series="{{ data.series|tojson|forceescape }}"
+         viewBox="0 0 800 260" preserveAspectRatio="none"
+         role="img" aria-label="Traffic over {{ data.range_label|lower }}"></svg>
+    <noscript>
+      <p class="dash-empty">The chart needs JavaScript; the numbers above do not.</p>
+    </noscript>
+  </div>
+
+  <!-- ===== pages / sources ===== -->
+  <div class="mt-4 grid gap-4 lg:grid-cols-2">
+
+    <div class="dash-card dash-card--pad">
+      <div class="dash-card__title"><p class="dash__eyebrow">Most visited pages</p></div>
+      <div data-list="top_pages">
+        {% for row in data.top_pages %}
+          {% set share = (row.views * 100 / (data.top_pages[0].views or 1))|round|int %}
+          <div class="dash-row">
+            <div class="min-w-0">
+              <div class="dash-row__label">{{ row.path }}</div>
+              <span class="dash-bar"><span style="width: {{ share }}%"></span></span>
+            </div>
+            <div class="dash-row__value">{{ row.views }}</div>
+          </div>
+        {% else %}
+          <p class="dash-empty">No visits recorded yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="dash-card dash-card--pad">
+      <div class="dash-card__title"><p class="dash__eyebrow">Where they came from</p></div>
+      <div data-list="top_sources">
+        {% for row in data.top_sources %}
+          {% set share = (row.views * 100 / (data.top_sources[0].views or 1))|round|int %}
+          <div class="dash-row">
+            <div class="min-w-0">
+              <div class="dash-row__label">{{ row.source }}</div>
+              <span class="dash-bar"><span style="width: {{ share }}%"></span></span>
+            </div>
+            <div class="dash-row__value">{{ row.views }}</div>
+          </div>
+        {% else %}
+          <p class="dash-empty">No sources recorded yet.</p>
+        {% endfor %}
+      </div>
+
+      <div class="mt-5 flex flex-wrap gap-2" data-list="devices">
+        {% for row in data.devices %}
+          <span class="dash-tag dash-tag--muted">{{ row.device }} {{ row.percent }}%</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== products ===== -->
+  <div class="dash-card dash-card--pad mt-4">
+    <div class="dash-card__title">
+      <p class="dash__eyebrow">Products</p>
+      <a class="text-sm link link-hover text-base-content/60" href="{{ url_for('admin.products_list') }}">Manage</a>
+    </div>
+    <div data-list="products">
+      {% for row in data.products %}
+        <div class="dash-row">
+          <div class="min-w-0">
+            <div class="dash-row__label">{{ row.title }}</div>
+            <div class="dash-row__sub">/products/{{ row.slug }}</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="dash-tag dash-tag--muted">{{ row.views }} views</span>
+            {% if row.downloads %}<span class="dash-tag dash-tag--ok">{{ row.downloads }} downloads</span>{% endif %}
+            {% if row.signups %}<span class="dash-tag dash-tag--info">{{ row.signups }} waitlist</span>{% endif %}
+          </div>
+        </div>
+      {% else %}
+        <p class="dash-empty">No product activity in this period.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ===== signups / errors ===== -->
+  <div class="mt-4 grid gap-4 lg:grid-cols-2">
+
+    <div class="dash-card dash-card--pad">
+      <div class="dash-card__title"><p class="dash__eyebrow">Latest emails collected</p></div>
+      <div data-list="recent_signups">
+        {% for row in data.recent_signups %}
+          <div class="dash-row">
+            <div class="min-w-0">
+              <div class="dash-row__label">{{ row.email }}</div>
+              <div class="dash-row__sub">
+                {{ row.kind }}{% if row.product %} · {{ row.product }}{% endif %} · {{ row.source }}
+              </div>
+            </div>
+            <div class="dash-row__value text-xs">{{ row.at|datefmt }}</div>
+          </div>
+        {% else %}
+          <p class="dash-empty">No signups yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="dash-card dash-card--pad">
+      <div class="dash-card__title">
+        <p class="dash__eyebrow">Problems</p>
+        <a class="text-sm link link-hover text-base-content/60" href="{{ url_for('admin.errors_list') }}">All errors</a>
+      </div>
+      <div data-list="errors.recent">
+        {% for row in data.errors.recent %}
+          <div class="dash-row">
+            <div class="min-w-0">
+              <div class="dash-row__label">
+                <a class="link link-hover" href="{{ url_for('admin.error_detail', error_id=row.id) }}">{{ row.message }}</a>
+              </div>
+              <div class="dash-row__sub">{{ row.path or "—" }} · {{ row.occurrences }}×</div>
+            </div>
+            <span class="dash-tag {{ {'server_error': 'dash-tag--danger', 'not_found': 'dash-tag--warn', 'security': 'dash-tag--info', 'delivery': 'dash-tag--warn'}.get(row.kind, 'dash-tag--muted') }}">
+              {{ row.kind.replace('_', ' ') }}
+            </span>
+          </div>
+        {% else %}
+          <p class="dash-empty">Nothing has gone wrong in this period.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== renewals ===== -->
+  <div class="dash-card dash-card--pad mt-4">
+    <div class="dash-card__title">
+      <div>
+        <p class="dash__eyebrow">Renewals due</p>
+        <p class="mt-1 text-sm text-base-content/55">
+          {% for code, total in data.renewals.monthly_by_currency.items() %}
+            {{ code }} {{ '%.2f'|format(total) }}/mo
+            <span class="opacity-40">({{ '%.0f'|format(data.renewals.yearly_by_currency[code]) }}/yr)</span>{% if not loop.last %} · {% endif %}
+          {% else %}
+            Nothing tracked yet
+          {% endfor %}
+        </p>
+      </div>
+      <a class="text-sm link link-hover text-base-content/60" href="{{ url_for('admin.renewals_list') }}">Manage</a>
+    </div>
+
+    <div data-list="renewals.due">
+      {% for row in data.renewals.due %}
+        <div class="dash-row">
+          <div class="min-w-0">
+            <div class="dash-row__label">{{ row.name }}{% if row.vendor %} <span class="opacity-45">· {{ row.vendor }}</span>{% endif %}</div>
+            <div class="dash-row__sub">
+              {{ row.currency }} {{ '%.2f'|format(row.amount) }} · {{ row.cycle.replace('_', ' ') }} · {{ row.due_on|datefmt }}
+            </div>
+          </div>
+          <span class="dash-tag {% if row.is_overdue %}dash-tag--danger{% elif row.days_until_due <= 7 %}dash-tag--warn{% else %}dash-tag--muted{% endif %}">
+            {% if row.is_overdue %}{{ -row.days_until_due }}d overdue
+            {% elif row.days_until_due == 0 %}due today
+            {% else %}in {{ row.days_until_due }}d{% endif %}
+          </span>
+        </div>
+      {% else %}
+        <p class="dash-empty">
+          Nothing due in the next 60 days.
+          <a class="link" href="{{ url_for('admin.renewal_create') }}">Add a service</a> to track VPN, mailbox or domain renewals.
+        </p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ===== catalogue counters (kept from the old dashboard) ===== -->
+  <div class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-5">
+    {% for label, value, href in [
+      ("New inquiries", stats.new_inquiries, url_for('admin.inquiries')),
+      ("Active enrollments", stats.active_enrollments, url_for('admin.payments')),
+      ("Completed purchases", stats.completed_purchases, url_for('admin.payments')),
+      ("Published projects", stats.published_projects, url_for('admin.projects_list')),
+      ("Published courses", stats.published_courses, url_for('admin.courses_list')),
+    ] %}
+      <a class="dash-card dash-card--tight block no-underline transition-transform duration-500 hover:-translate-y-0.5" href="{{ href }}">
+        <p class="dash-stat__label text-[0.72rem]">{{ label }}</p>
+        <p class="mt-1.5 text-xl font-semibold tabular-nums">{{ value }}</p>
+      </a>
+    {% endfor %}
+  </div>
+
 </div>
 
-<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+{% endblock %}
 
-  <!-- New project inquiries -->
-  <div class="card border border-base-300 bg-base-200 shadow-sm">
-    <div class="card-body">
-      <p class="text-sm font-medium uppercase tracking-wide text-base-content/50">
-        New Inquiries
-      </p>
-
-      <h2 class="mt-2 text-3xl font-bold text-primary">
-        {{ stats.new_inquiries }}
-      </h2>
-    </div>
-  </div>
-
-  <!-- Currently active course enrollments -->
-  <div class="card border border-base-300 bg-base-200 shadow-sm">
-    <div class="card-body">
-      <p class="text-sm font-medium uppercase tracking-wide text-base-content/50">
-        Active Enrollments
-      </p>
-
-      <h2 class="mt-2 text-3xl font-bold text-info">
-        {{ stats.active_enrollments }}
-      </h2>
-    </div>
-  </div>
-
-  <!-- Completed course purchases -->
-  <div class="card border border-base-300 bg-base-200 shadow-sm">
-    <div class="card-body">
-      <p class="text-sm font-medium uppercase tracking-wide text-base-content/50">
-        Completed Purchases
-      </p>
-
-      <h2 class="mt-2 text-3xl font-bold">
-        {{ stats.completed_purchases }}
-      </h2>
-    </div>
-  </div>
-
-  <!-- Published portfolio projects -->
-  <div class="card border border-base-300 bg-base-200 shadow-sm">
-    <div class="card-body">
-      <p class="text-sm font-medium uppercase tracking-wide text-base-content/50">
-        Published Projects
-      </p>
-
-      <h2 class="mt-2 text-3xl font-bold">
-        {{ stats.published_projects }}
-      </h2>
-    </div>
-  </div>
-
-  <!-- Published courses -->
-  <div class="card border border-base-300 bg-base-200 shadow-sm">
-    <div class="card-body">
-      <p class="text-sm font-medium uppercase tracking-wide text-base-content/50">
-        Published Courses
-      </p>
-
-      <h2 class="mt-2 text-3xl font-bold">
-        {{ stats.published_courses }}
-      </h2>
-    </div>
-  </div>
-
-</div>
-
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin-dashboard.js') }}" defer></script>
 {% endblock %}

@@ -1,0 +1,134 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}Renewals — Admin{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin-dashboard.css') }}">
+{% endblock %}
+
+{% block admin_content %}
+<div class="dash">
+
+  <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="dash__eyebrow">Money</p>
+      <h1 class="mt-2 text-[2rem] font-semibold tracking-[-0.03em]">Renewals</h1>
+      <p class="mt-2 text-sm text-base-content/55">
+        VPN, mailbox, domains, the server — everything with a date you cannot miss.
+      </p>
+    </div>
+    <a href="{{ url_for('admin.renewal_create') }}" class="btn btn-primary btn-sm">+ Add a service</a>
+  </div>
+
+  <!-- spend -->
+  <div class="grid gap-4 sm:grid-cols-3">
+    <div class="dash-card dash-card--pad">
+      <p class="dash-stat__label">Per month</p>
+      {# One currency reads as a headline number; several read as a list. #}
+      <div class="mt-3 space-y-1">
+        {% for code, total in totals.monthly_by_currency.items() %}
+          <p class="flex items-baseline justify-between gap-3 {{ 'text-[1.9rem] font-semibold leading-none tracking-[-0.03em]' if totals.monthly_by_currency|length == 1 else 'text-[1.15rem] font-medium' }}">
+            <span class="text-base-content/45 {{ 'text-sm' if totals.monthly_by_currency|length > 1 }}">{{ code }}</span>
+            <span class="tabular-nums">{{ '%.2f'|format(total) }}</span>
+          </p>
+        {% else %}<p class="text-[1.9rem] font-semibold">—</p>{% endfor %}
+      </div>
+    </div>
+    <div class="dash-card dash-card--pad">
+      <p class="dash-stat__label">Per year</p>
+      {# One currency reads as a headline number; several read as a list. #}
+      <div class="mt-3 space-y-1">
+        {% for code, total in totals.yearly_by_currency.items() %}
+          <p class="flex items-baseline justify-between gap-3 {{ 'text-[1.9rem] font-semibold leading-none tracking-[-0.03em]' if totals.yearly_by_currency|length == 1 else 'text-[1.15rem] font-medium' }}">
+            <span class="text-base-content/45 {{ 'text-sm' if totals.yearly_by_currency|length > 1 }}">{{ code }}</span>
+            <span class="tabular-nums">{{ '%.2f'|format(total) }}</span>
+          </p>
+        {% else %}<p class="text-[1.9rem] font-semibold">—</p>{% endfor %}
+      </div>
+    </div>
+    <div class="dash-card dash-card--pad">
+      <p class="dash-stat__label">Tracked services</p>
+      <p class="dash-stat__value">{{ totals.active_count }}</p>
+      {% if totals.overdue_count %}
+        <p class="dash-stat__meta text-error">{{ totals.overdue_count }} overdue</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if subscriptions %}
+    <div class="dash-card dash-card--pad mt-4">
+      {% for s in subscriptions %}
+        <div class="dash-row {% if not s.is_active %}opacity-50{% endif %}">
+          <div class="min-w-0">
+            <div class="dash-row__label">
+              {{ s.name }}{% if s.vendor %} <span class="opacity-45">· {{ s.vendor }}</span>{% endif %}
+              {% if not s.auto_renew %}<span class="dash-tag dash-tag--warn ml-2">manual</span>{% endif %}
+              {% if not s.is_active %}<span class="dash-tag dash-tag--muted ml-2">inactive</span>{% endif %}
+            </div>
+            <div class="dash-row__sub">
+              {{ s.category }} · {{ s.currency }} {{ '%.2f'|format(s.amount or 0) }} / {{ s.cycle.replace('_', ' ') }}
+              {% if s.next_due_on %} · due {{ s.next_due_on|datefmt }}{% else %} · no date set{% endif %}
+              {% if s.last_paid_on %} · last paid {{ s.last_paid_on|datefmt }}{% endif %}
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-end gap-2">
+            {% if s.next_due_on %}
+              <span class="dash-tag {% if s.is_overdue %}dash-tag--danger{% elif s.is_due_soon %}dash-tag--warn{% else %}dash-tag--muted{% endif %}">
+                {% if s.is_overdue %}{{ -s.days_until_due }}d overdue
+                {% elif s.days_until_due == 0 %}due today
+                {% else %}in {{ s.days_until_due }}d{% endif %}
+              </span>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('admin.renewal_mark_paid', subscription_id=s.id) }}">
+              {{ paid_form.hidden_tag() }}
+              <button type="submit" class="btn btn-outline btn-xs" title="Record a payment and roll the due date forward">
+                Mark paid
+              </button>
+            </form>
+
+            <a href="{{ url_for('admin.renewal_edit', subscription_id=s.id) }}" class="btn btn-ghost btn-xs">Edit</a>
+
+            {% if s.manage_url %}
+              <a href="{{ s.manage_url }}" target="_blank" rel="noopener" class="btn btn-ghost btn-xs">Open</a>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('admin.renewal_delete', subscription_id=s.id) }}"
+                  onsubmit="return confirm('Remove {{ s.name }} and its payment history?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-ghost btn-xs text-error">Delete</button>
+            </form>
+          </div>
+        </div>
+
+        {% if s.payments %}
+          <details class="mb-2 ml-1 text-xs text-base-content/50">
+            <summary class="cursor-pointer py-1">{{ s.payments|length }} payment{{ "" if s.payments|length == 1 else "s" }}</summary>
+            <ul class="mt-1 space-y-1 pl-4">
+              {% for payment in s.payments[:6] %}
+                <li>{{ payment.paid_on|datefmt }} — {{ payment.currency }} {{ '%.2f'|format(payment.amount or 0) }}{% if payment.note %} · {{ payment.note }}{% endif %}</li>
+              {% endfor %}
+            </ul>
+          </details>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="dash-card dash-card--pad mt-4">
+      <p class="dash-empty">
+        Nothing tracked yet.
+        <a class="link" href="{{ url_for('admin.renewal_create') }}">Add your first service</a> —
+        the VPN, the mailbox, the domain, the server.
+      </p>
+    </div>
+  {% endif %}
+
+  <p class="mt-6 text-xs leading-6 text-base-content/40">
+    Reminders go out 14, 7 and 1 days before a due date, and once when it passes, to
+    {{ config.ADMIN_EMAIL }}. They are sent by <code class="font-mono">flask send-renewal-reminders</code>,
+    which the server runs daily.
+  </p>
+
+</div>
+{% endblock %}

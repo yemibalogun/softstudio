@@ -122,6 +122,11 @@ class BaseConfig:
     SITE_OWNER_ROLE = os.environ.get("SITE_OWNER_ROLE", "Automation consultant")
     UPLOAD_ALLOWED_RESOURCE_EXT = {"pdf", "zip"}
 
+    # First-party analytics (app/analytics.py). No cookies, no third party;
+    # set ANALYTICS_ENABLED=false to stop recording page views and errors.
+    ANALYTICS_ENABLED = _bool_env("ANALYTICS_ENABLED", True)
+    ANALYTICS_RETENTION_DAYS = int(os.environ.get("ANALYTICS_RETENTION_DAYS", 180))
+
     # Rate limiting (Flask-Limiter storage backend)
     RATELIMIT_STORAGE_URI = os.environ.get("RATELIMIT_STORAGE_URI", "memory://")
 

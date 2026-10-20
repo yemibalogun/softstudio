@@ -5,6 +5,7 @@ import io
 
 from flask import (
     Blueprint, Response, current_app, render_template, redirect, url_for, flash, abort, request,
+    jsonify,
 )
 from flask_login import login_required, current_user
 
@@ -14,10 +15,12 @@ from app.models import (
     ProjectInquiry, Purchase, Enrollment, Course, Project, ProjectImage, Technology,
     Service, CourseCategory, CourseSection, Lesson, BlogPost, BlogCategory, BlogTag,
     Testimonial, Product, WaitlistSubscriber, DownloadRequest, utcnow,
+    ErrorEvent, ServiceSubscription,
 )
 from app.admin.forms import (
     ProjectForm, ServiceForm, CourseForm, CourseCategoryForm, CourseSectionForm, LessonForm,
-    BlogPostForm, BlogCategoryForm, TestimonialForm, ProductForm, ProductDownloadForm, slugify,
+    BlogPostForm, BlogCategoryForm, TestimonialForm, ProductForm, ProductDownloadForm,
+    ServiceSubscriptionForm, MarkPaidForm, slugify,
 )
 from app.admin.services import unique_slug, parse_csv_names, get_or_create_all_by_name
 from app.uploads import delete_uploaded_image, store_image
@@ -42,6 +45,13 @@ def admin_required(view):
 @bp.route("/")
 @admin_required
 def dashboard():
+    """
+    The live dashboard. Rendered server-side on first paint, then refreshed
+    in place by admin-dashboard.js polling /admin/dashboard.json.
+    """
+    from app.admin import metrics
+
+    range_key = request.args.get("range", metrics.DEFAULT_RANGE)
     stats = {
         "new_inquiries": ProjectInquiry.query.filter_by(status="new").count(),
         "active_enrollments": Enrollment.query.filter_by(status="active").count(),
@@ -49,7 +59,190 @@ def dashboard():
         "published_projects": Project.query.filter_by(published=True).count(),
         "published_courses": Course.query.filter_by(published=True).count(),
     }
-    return render_template("admin/dashboard.html", stats=stats)
+    return render_template(
+        "admin/dashboard.html",
+        stats=stats,
+        data=metrics.dashboard_data(range_key),
+        ranges=metrics.RANGES,
+    )
+
+
+@bp.route("/dashboard.json")
+@admin_required
+def dashboard_json():
+    """Polled by the dashboard every 20s. Same numbers as the rendered page."""
+    from app.admin import metrics
+
+    data = metrics.dashboard_data(request.args.get("range", metrics.DEFAULT_RANGE))
+    return jsonify(_jsonable(data))
+
+
+def _jsonable(value):
+    """Dates and Decimals out of the metrics layer, JSON in."""
+    from datetime import date, datetime
+    from decimal import Decimal
+
+    if isinstance(value, dict):
+        return {k: _jsonable(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_jsonable(v) for v in value]
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, date):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return float(value)
+    return value
+
+
+# =====================================================================
+# Errors
+# =====================================================================
+
+@bp.route("/errors")
+@admin_required
+def errors_list():
+    kind = request.args.get("kind")
+    show_resolved = request.args.get("resolved") == "1"
+
+    query = ErrorEvent.query
+    if kind in ErrorEvent.KINDS:
+        query = query.filter_by(kind=kind)
+    if not show_resolved:
+        query = query.filter_by(resolved=False)
+
+    items = query.order_by(ErrorEvent.last_seen.desc()).limit(200).all()
+    return render_template(
+        "admin/errors_list.html", errors=items, kind=kind, show_resolved=show_resolved
+    )
+
+
+@bp.route("/errors/<int:error_id>")
+@admin_required
+def error_detail(error_id):
+    error = ErrorEvent.query.get_or_404(error_id)
+    return render_template("admin/error_detail.html", error=error)
+
+
+@bp.route("/errors/<int:error_id>/resolve", methods=["POST"])
+@admin_required
+def error_resolve(error_id):
+    error = ErrorEvent.query.get_or_404(error_id)
+    error.resolved = not error.resolved
+    db.session.commit()
+    flash("Marked resolved." if error.resolved else "Reopened.", "info")
+    return redirect(request.referrer or url_for("admin.errors_list"))
+
+
+@bp.route("/errors/<int:error_id>/delete", methods=["POST"])
+@admin_required
+def error_delete(error_id):
+    error = ErrorEvent.query.get_or_404(error_id)
+    db.session.delete(error)
+    db.session.commit()
+    flash("Error deleted.", "info")
+    return redirect(url_for("admin.errors_list"))
+
+
+# =====================================================================
+# Renewals (VPN, mailbox, domains, server)
+# =====================================================================
+
+@bp.route("/renewals")
+@admin_required
+def renewals_list():
+    from app.admin import metrics
+
+    items = ServiceSubscription.query.order_by(
+        ServiceSubscription.is_active.desc(),
+        ServiceSubscription.next_due_on.is_(None),
+        ServiceSubscription.next_due_on,
+    ).all()
+    return render_template(
+        "admin/renewals_list.html",
+        subscriptions=items,
+        totals=metrics.renewals(),
+        paid_form=MarkPaidForm(),
+    )
+
+
+@bp.route("/renewals/new", methods=["GET", "POST"])
+@admin_required
+def renewal_create():
+    form = ServiceSubscriptionForm()
+    if form.validate_on_submit():
+        subscription = ServiceSubscription()
+        _apply_renewal_form(subscription, form)
+        db.session.add(subscription)
+        db.session.commit()
+        flash("Service added.", "success")
+        return redirect(url_for("admin.renewals_list"))
+    return render_template("admin/renewal_form.html", form=form, subscription=None)
+
+
+@bp.route("/renewals/<int:subscription_id>/edit", methods=["GET", "POST"])
+@admin_required
+def renewal_edit(subscription_id):
+    subscription = ServiceSubscription.query.get_or_404(subscription_id)
+    form = ServiceSubscriptionForm(obj=subscription)
+    if form.validate_on_submit():
+        _apply_renewal_form(subscription, form)
+        db.session.commit()
+        flash("Service updated.", "success")
+        return redirect(url_for("admin.renewals_list"))
+    return render_template("admin/renewal_form.html", form=form, subscription=subscription)
+
+
+def _apply_renewal_form(subscription: ServiceSubscription, form: ServiceSubscriptionForm) -> None:
+    previous_due = subscription.next_due_on
+    subscription.name = form.name.data
+    subscription.vendor = form.vendor.data or None
+    subscription.category = form.category.data
+    subscription.amount = form.amount.data or 0
+    subscription.currency = (form.currency.data or "USD").upper()[:8]
+    subscription.cycle = form.cycle.data
+    subscription.next_due_on = form.next_due_on.data
+    subscription.auto_renew = form.auto_renew.data
+    subscription.is_active = form.is_active.data
+    subscription.manage_url = form.manage_url.data or None
+    subscription.notes = form.notes.data or None
+    if subscription.next_due_on != previous_due:
+        subscription.reminder_stage_sent = None  # a new date deserves new warnings
+
+
+@bp.route("/renewals/<int:subscription_id>/paid", methods=["POST"])
+@admin_required
+def renewal_mark_paid(subscription_id):
+    subscription = ServiceSubscription.query.get_or_404(subscription_id)
+    form = MarkPaidForm()
+    if not form.validate_on_submit():
+        flash("Could not record that payment.", "error")
+        return redirect(url_for("admin.renewals_list"))
+
+    subscription.mark_paid(
+        paid_on=form.paid_on.data,
+        amount=form.amount.data,
+        note=form.note.data or None,
+    )
+    db.session.commit()
+    if subscription.next_due_on:
+        flash(
+            "Payment recorded. Next due {:%b %d, %Y}.".format(subscription.next_due_on),
+            "success",
+        )
+    else:
+        flash("Payment recorded.", "success")
+    return redirect(url_for("admin.renewals_list"))
+
+
+@bp.route("/renewals/<int:subscription_id>/delete", methods=["POST"])
+@admin_required
+def renewal_delete(subscription_id):
+    subscription = ServiceSubscription.query.get_or_404(subscription_id)
+    db.session.delete(subscription)
+    db.session.commit()
+    flash("Service removed.", "info")
+    return redirect(url_for("admin.renewals_list"))
 
 
 @bp.route("/inquiries")

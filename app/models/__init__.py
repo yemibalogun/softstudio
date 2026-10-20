@@ -50,6 +50,8 @@ from app.models.blog import BlogPost, BlogCategory, BlogTag  # noqa: E402,F401
 from app.models.product import Product, WaitlistSubscriber, DownloadRequest  # noqa: E402,F401
 from app.models.testimonial import Testimonial  # noqa: E402,F401
 from app.models.consent import CookieConsent  # noqa: E402,F401
+from app.models.analytics import PageView, ErrorEvent  # noqa: E402,F401
+from app.models.subscription import ServiceSubscription, ServicePayment  # noqa: E402,F401
 
 __all__ = [
     "User", "Role", "OAuthIdentity", "UserSession",
@@ -61,4 +63,5 @@ __all__ = [
     "BlogPost", "BlogCategory", "BlogTag",
     "Product", "WaitlistSubscriber", "DownloadRequest",
     "Testimonial", "CookieConsent",
+    "PageView", "ErrorEvent", "ServiceSubscription", "ServicePayment",
 ]

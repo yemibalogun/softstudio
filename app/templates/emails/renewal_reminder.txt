@@ -1,0 +1,16 @@
+{{ subscription.name }} renews {{ when_phrase }}
+
+Service: {{ subscription.name }}{% if subscription.vendor %} ({{ subscription.vendor }}){% endif %}
+Due: {{ subscription.next_due_on.strftime('%B %d, %Y') }}
+Amount: {{ subscription.currency }} {{ '%.2f'|format(subscription.amount or 0) }} / {{ subscription.cycle.replace('_', ' ') }}
+Renewal: {{ "Automatic" if subscription.auto_renew else "Manual - you must pay this yourself" }}
+{% if not subscription.auto_renew %}
+This one does not auto-renew. If it lapses, the service stops.
+{% endif %}{% if subscription.notes %}
+Notes: {{ subscription.notes }}
+{% endif %}{% if subscription.manage_url %}
+Manage it: {{ subscription.manage_url }}
+{% endif %}
+Mark it paid on your dashboard and the next date rolls forward automatically.
+
+-- {{ site_name }}

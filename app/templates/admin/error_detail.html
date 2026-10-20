@@ -1,0 +1,76 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}{{ error.message|truncate(50) }} — Admin{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin-dashboard.css') }}">
+{% endblock %}
+
+{% block admin_content %}
+<div class="dash">
+
+  <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="min-w-0">
+      <p class="dash__eyebrow">{{ error.kind.replace('_', ' ') }}{% if error.status_code %} · {{ error.status_code }}{% endif %}</p>
+      <h1 class="mt-2 break-words text-[1.7rem] font-semibold leading-tight tracking-[-0.02em]">
+        {{ error.message }}
+      </h1>
+      <p class="mt-3 text-sm text-base-content/55">
+        {{ error.occurrences }} occurrence{{ "" if error.occurrences == 1 else "s" }} ·
+        first {{ error.first_seen|datefmt("datetime") }} ·
+        last {{ error.last_seen|datefmt("datetime") }}
+      </p>
+    </div>
+
+    <div class="flex shrink-0 gap-2">
+      <form method="POST" action="{{ url_for('admin.error_resolve', error_id=error.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm {{ 'btn-ghost' if error.resolved else 'btn-primary' }}">
+          {{ "Reopen" if error.resolved else "Mark resolved" }}
+        </button>
+      </form>
+      <form method="POST" action="{{ url_for('admin.error_delete', error_id=error.id) }}"
+            onsubmit="return confirm('Delete this error record?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-ghost btn-sm text-error">Delete</button>
+      </form>
+      <a href="{{ url_for('admin.errors_list') }}" class="btn btn-ghost btn-sm">← All errors</a>
+    </div>
+  </div>
+
+  <div class="dash-card dash-card--pad">
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <p class="dash-stat__label">Path</p>
+        <p class="mt-1 break-all font-mono text-sm">{{ error.method or "" }} {{ error.path or "—" }}</p>
+      </div>
+      <div>
+        <p class="dash-stat__label">Referrer</p>
+        <p class="mt-1 break-all font-mono text-sm">{{ error.last_referrer or "—" }}</p>
+      </div>
+    </div>
+  </div>
+
+  {% if error.detail %}
+    <div class="dash-card dash-card--pad mt-4">
+      <p class="dash__eyebrow mb-3">
+        {% if error.kind == 'server_error' %}Traceback{% else %}Detail{% endif %}
+      </p>
+      <pre class="overflow-x-auto whitespace-pre-wrap break-words rounded-xl bg-black/30 p-4 font-mono text-xs leading-6 text-base-content/75">{{ error.detail }}</pre>
+    </div>
+  {% endif %}
+
+  {% if error.kind == 'not_found' %}
+    <p class="mt-4 text-sm text-base-content/55">
+      A broken link. If the referrer is your own site, fix the link; if it is external
+      or a search engine, consider a redirect to the page that replaced it.
+    </p>
+  {% elif error.kind == 'delivery' %}
+    <p class="mt-4 text-sm text-base-content/55">
+      Mail or a download did not reach someone. Check the mail settings with
+      <code class="font-mono">flask verify-config</code>.
+    </p>
+  {% endif %}
+
+</div>
+{% endblock %}

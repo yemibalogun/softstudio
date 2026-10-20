@@ -97,6 +97,20 @@
               </li>
 
               <li>
+                <a href="{{ url_for('admin.errors_list') }}">
+                  <span aria-hidden="true">⚠</span>
+                  Errors
+                </a>
+              </li>
+
+              <li>
+                <a href="{{ url_for('admin.renewals_list') }}">
+                  <span aria-hidden="true">↻</span>
+                  Renewals
+                </a>
+              </li>
+
+              <li>
                 <a href="{{ url_for('admin.inquiries') }}">
                   <span aria-hidden="true">✉</span>
                   Project Inquiries

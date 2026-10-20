@@ -4,7 +4,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
 from wtforms import (
     StringField, TextAreaField, BooleanField, SelectField, DecimalField,
-    IntegerField,
+    IntegerField, DateField,
 )
 from wtforms.validators import DataRequired, Optional, Length, NumberRange, URL, ValidationError
 
@@ -181,6 +181,47 @@ class BlogPostForm(FlaskForm):
             self.processed_image = process_image(upload)
         except ImageUploadError as exc:
             raise ValidationError(str(exc)) from None
+
+
+class ServiceSubscriptionForm(FlaskForm):
+    """A recurring bill: what it is, what it costs, when it is next due."""
+
+    name = StringField("Service name", validators=[DataRequired(), Length(max=120)])
+    vendor = StringField("Vendor", validators=[Optional(), Length(max=120)])
+    category = SelectField(
+        "Category",
+        choices=[
+            ("vpn", "VPN"), ("email", "Email"), ("hosting", "Hosting / server"),
+            ("domain", "Domain"), ("software", "Software"), ("other", "Other"),
+        ],
+        default="other",
+    )
+
+    amount = DecimalField("Amount", places=2, validators=[Optional(), NumberRange(min=0)])
+    currency = StringField("Currency", default="USD", validators=[DataRequired(), Length(max=8)])
+    cycle = SelectField(
+        "Billing cycle",
+        choices=[
+            ("monthly", "Monthly"), ("quarterly", "Quarterly"),
+            ("yearly", "Yearly"), ("one_off", "One-off"),
+        ],
+        default="monthly",
+    )
+
+    next_due_on = DateField("Next due date", validators=[Optional()])
+    auto_renew = BooleanField("Renews automatically", default=True)
+    is_active = BooleanField("Active", default=True)
+
+    manage_url = StringField("Manage / billing URL", validators=[Optional(), URL(), Length(max=512)])
+    notes = TextAreaField("Notes", validators=[Optional()])
+
+
+class MarkPaidForm(FlaskForm):
+    """The Paid button: records a payment and rolls the due date forward."""
+
+    paid_on = DateField("Paid on", validators=[Optional()])
+    amount = DecimalField("Amount", places=2, validators=[Optional(), NumberRange(min=0)])
+    note = StringField("Note", validators=[Optional(), Length(max=255)])
 
 
 class ProductForm(FlaskForm):

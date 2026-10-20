@@ -31,8 +31,9 @@ def send_email(
     try:
         html_body = render_template(f"emails/{template_base}.html", **context)
         text_body = render_template(f"emails/{template_base}.txt", **context)
-    except Exception:
+    except Exception as exc:
         current_app.logger.exception("Failed to render email template '%s'", template_base)
+        _note_delivery_failure(template_base, recipients, exc)
         return False
 
     msg = Message()
@@ -45,9 +46,26 @@ def send_email(
     try:
         mail.send(msg)
         return True
-    except Exception:
+    except Exception as exc:
         current_app.logger.exception("Failed to send email '%s' to %s", template_base, recipients)
+        _note_delivery_failure(template_base, recipients, exc)
         return False
+
+
+def _note_delivery_failure(template_base: str, recipients, exc: Exception) -> None:
+    """
+    Surface the failure on the admin dashboard as well as in the log, so a
+    silently broken mailbox shows up instead of only costing a lead.
+
+    The recipient address is not stored on the error row — the dashboard
+    needs to know that sending broke, not who it was for.
+    """
+    from app.analytics import record_delivery_failure
+
+    record_delivery_failure(
+        f"Email '{template_base}' failed to send",
+        detail=f"{type(exc).__name__}: {exc} (recipients: {len(list(recipients))})",
+    )
 
 
 def send_welcome_email(user) -> bool:
@@ -142,6 +160,21 @@ def send_refund_email(payment) -> bool:
         purchase=purchase,
         course=purchase.course,
         user=purchase.user,
+    )
+
+
+def send_renewal_reminder(subscription, days_left: int) -> bool:
+    """Tell the owner a service is about to renew. Sent by the cron command."""
+    when_phrase = {0: "today", 1: "tomorrow"}.get(days_left, f"in {days_left} days")
+    if days_left < 0:
+        when_phrase = f"{abs(days_left)} days ago (overdue)"
+    return send_email(
+        subject=f"{subscription.name} renews {when_phrase}",
+        recipients=[current_app.config["ADMIN_EMAIL"]],
+        template_base="renewal_reminder",
+        subscription=subscription,
+        when_phrase=when_phrase,
+        days_left=days_left,
     )
 
 

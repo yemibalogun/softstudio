@@ -64,6 +64,28 @@ $COMPOSE up -d db
 echo "==> Applying migrations"
 $COMPOSE run --rm -T web flask db upgrade
 
+# Renewal reminders and analytics retention. Added once, by marker, so
+# re-deploying never stacks duplicate entries. If cron is unavailable the
+# commands are printed instead of failing the deploy.
+echo "==> Scheduling renewal reminders"
+if command -v crontab >/dev/null 2>&1; then
+  if crontab -l 2>/dev/null | grep -q "jaybalo-maintenance"; then
+    echo "    already scheduled"
+  else
+    {
+      crontab -l 2>/dev/null
+      echo "# jaybalo-maintenance (added by deploy.sh)"
+      echo "0 8 * * * cd $PWD && $COMPOSE run --rm -T web flask send-renewal-reminders >/dev/null 2>&1"
+      echo "30 3 * * 0 cd $PWD && $COMPOSE run --rm -T web flask prune-analytics >/dev/null 2>&1"
+    } | crontab -
+    echo "    reminders daily at 08:00, analytics pruned weekly"
+  fi
+else
+  echo "    cron not available. Run these yourself, daily and weekly:"
+  echo "      cd $PWD && $COMPOSE run --rm -T web flask send-renewal-reminders"
+  echo "      cd $PWD && $COMPOSE run --rm -T web flask prune-analytics"
+fi
+
 # ---------------------------------------------------------------- edge mode
 if [ "$MODE" = "edge" ]; then
   echo "==> Starting the app"

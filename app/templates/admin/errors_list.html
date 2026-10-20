@@ -1,0 +1,81 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}Errors — Admin{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin-dashboard.css') }}">
+{% endblock %}
+
+{% set tone = {'server_error': 'dash-tag--danger', 'not_found': 'dash-tag--warn',
+               'security': 'dash-tag--info', 'delivery': 'dash-tag--warn'} %}
+
+{% block admin_content %}
+<div class="dash">
+
+  <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="dash__eyebrow">Health</p>
+      <h1 class="mt-2 text-[2rem] font-semibold tracking-[-0.03em]">Errors</h1>
+      <p class="mt-2 text-sm text-base-content/55">
+        Grouped by what went wrong, so one recurring fault is one row.
+      </p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-ghost btn-sm">← Dashboard</a>
+  </div>
+
+  <nav class="dash-range mb-6" aria-label="Filter by kind">
+    <a href="{{ url_for('admin.errors_list', resolved='1' if show_resolved else None) }}"
+       {% if not kind %}aria-current="page"{% endif %}>All</a>
+    {% for value, label in [('server_error', 'Server'), ('not_found', 'Broken links'),
+                            ('security', 'Security'), ('delivery', 'Delivery')] %}
+      <a href="{{ url_for('admin.errors_list', kind=value, resolved='1' if show_resolved else None) }}"
+         {% if kind == value %}aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+  </nav>
+
+  <label class="mb-6 flex items-center gap-2 text-sm text-base-content/60">
+    <a class="link link-hover"
+       href="{{ url_for('admin.errors_list', kind=kind, resolved=None if show_resolved else '1') }}">
+      {{ "Hide resolved" if show_resolved else "Show resolved too" }}
+    </a>
+  </label>
+
+  {% if errors %}
+    <div class="dash-card dash-card--pad">
+      {% for error in errors %}
+        <div class="dash-row">
+          <div class="min-w-0">
+            <div class="dash-row__label">
+              <a class="link link-hover" href="{{ url_for('admin.error_detail', error_id=error.id) }}">
+                {{ error.message }}
+              </a>
+              {% if error.resolved %}<span class="dash-tag dash-tag--ok ml-2">resolved</span>{% endif %}
+            </div>
+            <div class="dash-row__sub">
+              {{ error.method or "—" }} {{ error.path or "" }}
+              · {{ error.occurrences }}× · last {{ error.last_seen|datefmt("datetime") }}
+              {% if error.last_referrer %} · from {{ error.last_referrer|truncate(60) }}{% endif %}
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="dash-tag {{ tone.get(error.kind, 'dash-tag--muted') }}">
+              {{ error.kind.replace('_', ' ') }}{% if error.status_code %} {{ error.status_code }}{% endif %}
+            </span>
+            <form method="POST" action="{{ url_for('admin.error_resolve', error_id=error.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-ghost btn-xs">
+                {{ "Reopen" if error.resolved else "Resolve" }}
+              </button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="dash-card dash-card--pad">
+      <p class="dash-empty">Nothing here. {{ "No resolved errors." if show_resolved else "No open errors — the site is behaving." }}</p>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

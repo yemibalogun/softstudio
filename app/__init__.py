@@ -25,6 +25,7 @@ def create_app(config_name: str | None = None) -> Flask:
     _register_blueprints(app)
     _register_error_handlers(app)
     _register_security_headers(app)
+    _register_analytics(app)
     _register_context_processors(app)
     _register_template_filters(app)
     _register_cli(app)
@@ -121,11 +122,63 @@ def _register_error_handlers(app: Flask) -> None:
         def handler(err):
             if status_code == 500:
                 app.logger.exception("Unhandled server error: %s", err)
+            _record_error_event(status_code, err)
             return render_template(template), status_code
         return handler
 
     for status_code, template in handlers.items():
         app.register_error_handler(status_code, make_handler(status_code, template))
+
+
+def _record_error_event(status_code: int, err) -> None:
+    """
+    Feed the admin dashboard's error log.
+
+    500s carry their traceback; 404s carry the referrer that pointed at the
+    missing page; 403/429 are the security signals. Anything that goes wrong
+    while recording is swallowed inside record_error itself.
+    """
+    import traceback
+
+    from flask import request
+
+    from app.analytics import record_error
+    from app.models import ErrorEvent
+
+    kind = {
+        500: ErrorEvent.KIND_SERVER,
+        404: ErrorEvent.KIND_NOT_FOUND,
+        403: ErrorEvent.KIND_SECURITY,
+        429: ErrorEvent.KIND_SECURITY,
+        400: ErrorEvent.KIND_SECURITY,
+        413: ErrorEvent.KIND_SECURITY,
+    }.get(status_code)
+    if kind is None:
+        return
+
+    original = getattr(err, "original_exception", None) or err
+    if status_code == 500:
+        message = f"{type(original).__name__}: {original}"
+        detail = "".join(
+            traceback.format_exception(type(original), original, original.__traceback__)
+        )
+    else:
+        message = {
+            404: f"404 Not Found: {request.path}",
+            403: f"403 Forbidden: {request.path}",
+            429: f"429 Rate limited: {request.path}",
+            400: f"400 Bad request: {request.path}",
+            413: f"413 Upload too large: {request.path}",
+        }.get(status_code, f"{status_code}: {request.path}")
+        detail = None
+
+    record_error(kind, message, status_code=status_code, detail=detail)
+
+
+def _register_analytics(app: Flask) -> None:
+    from app.analytics import record_page_view
+
+    app.after_request(record_page_view)
 
 
 def _register_security_headers(app: Flask) -> None:
