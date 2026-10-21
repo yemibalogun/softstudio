@@ -122,6 +122,35 @@ def test_a_404_is_recorded_as_a_broken_link(client):
     assert "/products/this-does-not-exist" in event.message
 
 
+@pytest.mark.parametrize("url", [
+    # The 18 that filled the production log on 2026-10-21, and their cousins.
+    "/wp-admin/install.php", "/xmlrpc.php", "/wp-json/", "/wp-includes/js/jquery/jquery.js",
+    "/wp/", "/wordpress/", "/blog/wp-json/", "/cms/wp-json/", "/media/system/js/core.js",
+    "/cms/?rest_route=/", "/news/?rest_route=/", "/press/?rest_route=/",
+    "/.env", "/.git/config", "/phpmyadmin/", "/administrator/", "/index.php", "/backup.sql",
+])
+def test_scanner_probes_are_not_logged_as_broken_links(client, url):
+    """
+    Bots sweep every site for WordPress, Joomla and leaked files. A 404 is
+    the right answer and not a fault of ours; logging them buried real
+    broken links, and they reopened every time the bots came back.
+    """
+    resp = client.get(url)
+    assert resp.status_code == 404, "still a plain 404 for the bot"
+    assert ErrorEvent.query.count() == 0
+
+
+@pytest.mark.parametrize("url", [
+    "/products/wp-guide",          # a slug that merely starts with wp-
+    "/cms/",                       # the directory alone, without the WordPress query
+    "/blog/a-post-that-moved",
+    "/products/nope?utm_source=instagram&utm_medium=dm",
+])
+def test_genuine_broken_links_are_still_logged(client, url):
+    client.get(url)
+    assert ErrorEvent.query.filter_by(kind=ErrorEvent.KIND_NOT_FOUND).count() == 1
+
+
 def test_repeated_errors_group_into_one_row(client):
     for _ in range(3):
         client.get("/nope")

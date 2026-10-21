@@ -156,6 +156,11 @@ def _record_error_event(status_code: int, err) -> None:
     if kind is None:
         return
 
+    if status_code == 404:
+        from app.analytics import is_scanner_probe
+        if is_scanner_probe(request.path, request.query_string):
+            return  # a bot looking for WordPress, not a broken link of ours
+
     original = getattr(err, "original_exception", None) or err
     if status_code == 500:
         message = f"{type(original).__name__}: {original}"

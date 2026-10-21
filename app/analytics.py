@@ -35,6 +35,33 @@ TABLET_RE = re.compile(r"ipad|tablet|kindle|silk|playbook", re.I)
 
 _SOURCE_CLEAN_RE = re.compile(r"[^a-z0-9_.-]+")
 
+# Vulnerability scanners. Bots sweep every site on the internet for
+# WordPress, Joomla, PHP admin tools and leaked dotfiles; on this Flask site
+# those 404s are the correct answer, not broken links, and recording them
+# buries the 404 that matters (a dead link on one of our own pages). Each
+# pattern targets something this app can never serve, so no real page can
+# match: no PHP, no WordPress or Joomla, no dotfiles except /.well-known/.
+_PROBE_PATH_RE = re.compile(
+    r"\.(?:php\d?|phtml|aspx?|jsp|cgi|env|ini|bak|sql|swp)(?:/|$)"   # server-side files, backups
+    r"|/wp-(?:admin|content|includes|json|login|config|cron|signup|trackback|links|load|mail"
+    r"|settings|blog-header|activate|comments-post)"   # WordPress's own folders and files
+    r"|/(?:wp|wordpress|xmlrpc|phpmyadmin|pma|cgi-bin|administrator|vendor/phpunit"
+    r"|media/system/js|boaform|hnap1|actuator|solr|owa|autodiscover)(?:/|$|\.)"
+    r"|/\.(?!well-known/)[^/]+",                       # /.env, /.git/config, /.aws, /.DS_Store
+    re.I,
+)
+# WordPress REST probes hit innocent-looking directories: /cms/?rest_route=/
+_PROBE_QUERY_RE = re.compile(r"(?:^|&)rest_route=", re.I)
+
+
+def is_scanner_probe(path: str | None, query_string: str | bytes | None = None) -> bool:
+    """True for requests that are bots probing for software this site does not run."""
+    if path and _PROBE_PATH_RE.search(path):
+        return True
+    if isinstance(query_string, bytes):
+        query_string = query_string.decode("latin-1", "replace")
+    return bool(query_string) and bool(_PROBE_QUERY_RE.search(query_string))
+
 
 def _clean(value: str | None, limit: int) -> str | None:
     if not value:
