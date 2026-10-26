@@ -22,7 +22,7 @@ from app.models import ErrorEvent, PageView
 
 # Paths that are never interesting as "visits".
 SKIP_PREFIXES = ("/static/", "/admin", "/payments/webhook", "/favicon", "/robots.txt",
-                 "/sitemap.xml", "/health")
+                 "/sitemap.xml", "/health", "/r/", "/internal/")
 
 BOT_RE = re.compile(
     r"bot|crawler|spider|crawl|slurp|bingpreview|facebookexternalhit|whatsapp|telegram|"

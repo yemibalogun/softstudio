@@ -122,6 +122,12 @@ class BaseConfig:
     SITE_OWNER_ROLE = os.environ.get("SITE_OWNER_ROLE", "Automation consultant")
     UPLOAD_ALLOWED_RESOURCE_EXT = {"pdf", "zip"}
 
+    # Short-lived reel hosting for the autoposter (app/reels/routes.py). Off
+    # unless a token is set. The cap stays under the edge nginx's 10 MB body limit.
+    REEL_HOST_TOKEN = os.environ.get("REEL_HOST_TOKEN")
+    REEL_HOST_MAX_BYTES = int(os.environ.get("REEL_HOST_MAX_BYTES", str(9_500_000)))
+    REEL_HOST_TTL_HOURS = int(os.environ.get("REEL_HOST_TTL_HOURS", "24"))
+
     # First-party analytics (app/analytics.py). No cookies, no third party;
     # set ANALYTICS_ENABLED=false to stop recording page views and errors.
     ANALYTICS_ENABLED = _bool_env("ANALYTICS_ENABLED", True)
