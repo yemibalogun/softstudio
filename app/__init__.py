@@ -92,6 +92,7 @@ def _register_blueprints(app: Flask) -> None:
     from app.payments.routes import bp as payments_bp
     from app.admin.routes import bp as admin_bp
     from app.legal.routes import bp as legal_bp
+    from app.reels.routes import bp as reels_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -106,6 +107,7 @@ def _register_blueprints(app: Flask) -> None:
     app.register_blueprint(payments_bp, url_prefix="/payments")
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(legal_bp)
+    app.register_blueprint(reels_bp)
 
 
 def _register_error_handlers(app: Flask) -> None:
