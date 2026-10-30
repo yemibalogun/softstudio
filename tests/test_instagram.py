@@ -257,3 +257,12 @@ def test_the_admin_pages_are_admin_only(client, user):
     login(client, "student@example.com", "correcthorsebattery")
     assert client.get("/admin/instagram").status_code == 403
     assert client.post("/admin/instagram", data={"url": REEL_URL}).status_code == 403
+
+
+@pytest.mark.parametrize("path", ["/cookies", "/privacy"])
+def test_the_legal_pages_explain_the_instagram_player(client, path):
+    html = client.get(path).data.decode()
+    assert "Instagram" in html and 'href="/reels"' in html
+    assert "only when you press play" in html or "Only when you press play" in html
+    assert "October 30, 2026" in html, "the effective date moved with the change"
+    assert "privacycenter.instagram.com" in html

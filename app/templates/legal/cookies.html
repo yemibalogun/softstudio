@@ -4,6 +4,8 @@
 
 {% block legal_title %}Cookie Policy{% endblock %}
 
+{% block effective_date %}October 30, 2026{% endblock %}
+
 {% block legal_body %}
 
 <p>
@@ -76,6 +78,25 @@
 <p>
   Where third-party services (such as a payment provider's checkout page)
   set their own cookies, those are governed by that provider's own policy.
+</p>
+
+<h3>Instagram videos</h3>
+
+<p>
+  Our <a href="{{ url_for('instagram.index') }}">Reels</a> page shows videos
+  from our Instagram account. Nothing from Instagram loads when you open the
+  page. Only when you press play on a video does Instagram's embedded player
+  load, provided by Instagram (part of Meta Platforms). From that moment
+  Instagram may set its own cookies and receive information such as your IP
+  address, browser details and which video you watched, as it would if you
+  visited Instagram directly.
+</p>
+
+<p>
+  Those cookies are set by Instagram, not by us, and are governed by the
+  <a href="https://privacycenter.instagram.com/policies/cookies/" target="_blank" rel="noopener noreferrer">Instagram Cookies Policy</a>.
+  If you would rather Instagram set no cookies, do not press play: the Reels
+  page itself sets none.
 </p>
 
 
