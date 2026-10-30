@@ -147,9 +147,10 @@ def test_a_self_referring_request_is_not_a_link_of_ours(client):
     assert _logged() == 0
 
 
-def test_expired_reel_links_are_not_logged(client, app):
+def test_expired_reel_links_are_not_logged(client, app, tmp_path):
     """/r/<id>.mp4 is deleted on purpose once Instagram has the video."""
     app.config["REEL_HOST_TOKEN"] = "t"
+    app.config["PROTECTED_UPLOADS_DIR"] = str(tmp_path)  # never the real /data
     client.get("/r/" + "a" * 32 + ".mp4")
     assert _logged() == 0
 
