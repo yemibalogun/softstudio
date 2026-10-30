@@ -53,14 +53,100 @@ _PROBE_PATH_RE = re.compile(
 # WordPress REST probes hit innocent-looking directories: /cms/?rest_route=/
 _PROBE_QUERY_RE = re.compile(r"(?:^|&)rest_route=", re.I)
 
+# Credential and config hunters. These rotate through thousands of names
+# (/config.json, /aws/credentials, /terraform.tfstate, /id_rsa...), so they
+# are recognised by shape rather than listed: a file type this site never
+# serves outside /static/, an /api/ segment (the site has none), or a known
+# debug console.
+_PROBE_SHAPE_RE = re.compile(
+    r"\.(?:json|ya?ml|toml|properties|xml|config|cfg|conf|ini|env|key|pem|crt|p12|pfx"
+    r"|tfstate|tfvars|backup|sqlite3?|db|zip|tar|t?gz|rar|7z|log|lock|axd|old|save|orig"
+    r"|pub|plist|rb|py|ts|hcl|sls|sh|js)~?$"
+    r"|~$|/\$\("                                       # editor backups, shell-quoted paths
+    r"|(?:^|/)(?:api|graphql|swagger(?:-ui)?|elmah|_profiler|phpinfo|actuator)(?:/|$|\.)"
+    r"|/debug/(?:default|pprof|vars)|/session/properties"
+    r"|^/(?:etc|proc|var|opt|latest|v1\.\d+|ipfs)/",     # filesystem, cloud metadata, docker API
+    re.I,
+)
+
+# 404s here are machine endpoints or admin-only pages, never a visitor's
+# broken link; their misses are probes (/internal/env, /admin/elmah.axd).
+_UNLOGGED_SECTIONS = frozenset({"admin", "internal", "static", "r"})  # /r/: reel links expire by design
+
+# Outside the site's sections, a "link from our own page" is only believed
+# for something that could be a page. Scanners fake a Referer of the home
+# page while asking for /aws/credentials or /id_rsa.
+_SECRETISH_RE = re.compile(
+    r"credential|secret|token|passw|private|apikey|api[_-]|(?:^|/)api(?:$|/)|key|id_(?:rsa|dsa|ecdsa|ed25519)"
+    r"|msmtprc|aws|s3|bucket|settings|config|well-known|\.txt$",
+    re.I,
+)
+
 
 def is_scanner_probe(path: str | None, query_string: str | bytes | None = None) -> bool:
     """True for requests that are bots probing for software this site does not run."""
-    if path and _PROBE_PATH_RE.search(path):
+    if path and "\ufffd" in path:
+        return True  # bytes that are not valid UTF-8: no page of ours, only fuzzers
+    if path and (_PROBE_PATH_RE.search(path) or (
+        not path.startswith("/static/") and _PROBE_SHAPE_RE.search(path)
+    )):
         return True
     if isinstance(query_string, bytes):
         query_string = query_string.decode("latin-1", "replace")
     return bool(query_string) and bool(_PROBE_QUERY_RE.search(query_string))
+
+
+def site_sections() -> frozenset[str]:
+    """
+    The first path segment of every page this site serves: "blog",
+    "products", "services", "about"... Worked out from the URL map, so a new
+    blueprint is covered without anyone remembering to update a list.
+    """
+    cached = current_app.extensions.get("site_sections")
+    if cached is None:
+        sections = set()
+        for rule in current_app.url_map.iter_rules():
+            first = rule.rule.lstrip("/").split("/", 1)[0]
+            if first and "<" not in first:
+                sections.add(first)
+        cached = frozenset(sections - _UNLOGGED_SECTIONS)
+        current_app.extensions["site_sections"] = cached
+    return cached
+
+
+def _linked_from_our_own_page(path: str, referrer: str | None) -> bool:
+    """
+    A different page on this site pointed at the missing one: our own broken
+    link. Scanners often set the Referer to the very URL they are requesting,
+    which a real browser never does, so that does not count.
+    """
+    if not referrer:
+        return False
+    parts = urlsplit(referrer)
+    site_host = (urlsplit(current_app.config.get("SITE_URL", "")).hostname or "").removeprefix("www.")
+    host = (parts.hostname or "").removeprefix("www.")
+    return bool(site_host) and host == site_host and (parts.path or "/") != path
+
+
+def is_reportable_404(path: str | None, query_string: str | bytes | None = None,
+                      referrer: str | None = None) -> bool:
+    """
+    Whether a 404 belongs in the error log as a broken link.
+
+    The internet's background noise is bots requesting names from wordlists
+    of other people's software; a list of their patterns is always one
+    wordlist behind. So the test is inverted: log a 404 only when it is
+    plausibly ours - one of our pages links to it, or it sits under a section
+    the site really has (/blog/<slug> that no longer exists) - and never when
+    it has the shape of a probe.
+    """
+    path = path or "/"
+    first = path.lstrip("/").split("/", 1)[0]
+    if first in _UNLOGGED_SECTIONS or is_scanner_probe(path, query_string):
+        return False
+    if first in site_sections():
+        return True
+    return _linked_from_our_own_page(path, referrer) and not _SECRETISH_RE.search(path)
 
 
 def _clean(value: str | None, limit: int) -> str | None:

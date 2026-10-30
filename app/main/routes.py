@@ -52,6 +52,33 @@ def robots():
     return Response("\n".join(lines), mimetype="text/plain")
 
 
+@bp.route("/favicon.ico")
+def favicon():
+    """
+    Browsers, feed readers and search engines ask for /favicon.ico by name,
+    whatever the page's <link rel="icon"> says. Serve the brand icon there
+    rather than a 404 on every first visit.
+    """
+    from flask import current_app, send_from_directory
+    return send_from_directory(
+        f"{current_app.static_folder}/images/brand", "favicon.ico",
+        mimetype="image/vnd.microsoft.icon", max_age=60 * 60 * 24 * 30,
+    )
+
+
+@bp.route("/login")
+def login_alias():
+    """People type /login; the page lives at /auth/login."""
+    from flask import redirect, request, url_for
+    return redirect(url_for("auth.login", **request.args), code=301)
+
+
+@bp.route("/register")
+def register_alias():
+    from flask import redirect, request, url_for
+    return redirect(url_for("auth.register", **request.args), code=301)
+
+
 @bp.route("/sitemap.xml")
 def sitemap():
     from flask import Response, current_app, url_for

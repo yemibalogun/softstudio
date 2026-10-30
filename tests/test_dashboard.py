@@ -142,7 +142,7 @@ def test_scanner_probes_are_not_logged_as_broken_links(client, url):
 
 @pytest.mark.parametrize("url", [
     "/products/wp-guide",          # a slug that merely starts with wp-
-    "/cms/",                       # the directory alone, without the WordPress query
+    "/blog/cms",                   # a section path that happens to share a probe word
     "/blog/a-post-that-moved",
     "/products/nope?utm_source=instagram&utm_medium=dm",
 ])
@@ -153,15 +153,15 @@ def test_genuine_broken_links_are_still_logged(client, url):
 
 def test_repeated_errors_group_into_one_row(client):
     for _ in range(3):
-        client.get("/nope")
+        client.get("/blog/nope")
     event = ErrorEvent.query.filter_by(kind=ErrorEvent.KIND_NOT_FOUND).one()
     assert event.occurrences == 3
     assert event.last_seen >= event.first_seen
 
 
 def test_different_paths_are_different_problems(client):
-    client.get("/nope-one")
-    client.get("/nope-two")
+    client.get("/blog/nope-one")
+    client.get("/blog/nope-two")
     assert ErrorEvent.query.filter_by(kind=ErrorEvent.KIND_NOT_FOUND).count() == 2
 
 
@@ -202,7 +202,7 @@ def test_a_failed_email_is_recorded_as_a_delivery_problem(app, monkeypatch):
 
 
 def test_resolving_an_error_and_reopening_it(client, admin_user, app):
-    client.get("/missing-page")
+    client.get("/blog/missing-page")
     event = ErrorEvent.query.one()
     _login_admin(client, admin_user)
 
@@ -210,7 +210,7 @@ def test_resolving_an_error_and_reopening_it(client, admin_user, app):
     assert ErrorEvent.query.get(event.id).resolved is True
 
     # it happening again reopens it, because it clearly is not fixed
-    client.get("/missing-page")
+    client.get("/blog/missing-page")
     assert ErrorEvent.query.get(event.id).resolved is False
 
 
@@ -280,7 +280,7 @@ def test_range_parameter_is_validated(client, admin_user):
 
 
 def test_json_is_serialisable_with_renewals_and_errors(client, admin_user, vpn):
-    client.get("/missing")
+    client.get("/blog/missing")
     _login_admin(client, admin_user)
     data = client.get("/admin/dashboard.json").get_json()
     assert data["renewals"]["due"][0]["name"] == "Mullvad VPN"

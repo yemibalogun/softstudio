@@ -122,6 +122,10 @@ def _register_error_handlers(app: Flask) -> None:
 
     def make_handler(status_code: int, template: str):
         def handler(err):
+            if status_code == 404:
+                moved = _without_trailing_slash()
+                if moved is not None:
+                    return moved
             if status_code == 500:
                 app.logger.exception("Unhandled server error: %s", err)
             _record_error_event(status_code, err)
@@ -130,6 +134,44 @@ def _register_error_handlers(app: Flask) -> None:
 
     for status_code, template in handlers.items():
         app.register_error_handler(status_code, make_handler(status_code, template))
+
+
+def _without_trailing_slash():
+    """
+    /about/ -> /about (301) when /about is a real page.
+
+    Crawlers, link shorteners and people typing URLs add a trailing slash;
+    Flask treats /about/ as a different, missing page. Redirecting keeps the
+    visitor and points search engines at the one canonical URL. Only for
+    reads, and only when the slash-less path really matches a route - a
+    route that itself wants the slash (/blog/) raises RequestRedirect and is
+    left alone, so this can never loop.
+    """
+    from urllib.parse import quote
+
+    from flask import current_app, redirect, request
+    from werkzeug.exceptions import HTTPException
+    from werkzeug.routing import RequestRedirect
+
+    from app.analytics import is_scanner_probe
+
+    path = request.path
+    if request.method not in ("GET", "HEAD") or path == "/" or not path.endswith("/"):
+        return None
+    if is_scanner_probe(path, request.query_string):
+        return None  # a bot gets its plain 404, not a redirect to follow
+    stripped = path.rstrip("/")
+    if not stripped:
+        return None
+    adapter = current_app.url_map.bind_to_environ(request.environ)
+    try:
+        adapter.match(stripped, method=request.method)
+    except (RequestRedirect, HTTPException):
+        return None
+    target = quote(stripped, safe="/:@!$&'()*+,;=-._~%")
+    if request.query_string:
+        target += "?" + request.query_string.decode("latin-1")
+    return redirect(target, code=301)
 
 
 def _record_error_event(status_code: int, err) -> None:
@@ -159,9 +201,9 @@ def _record_error_event(status_code: int, err) -> None:
         return
 
     if status_code == 404:
-        from app.analytics import is_scanner_probe
-        if is_scanner_probe(request.path, request.query_string):
-            return  # a bot looking for WordPress, not a broken link of ours
+        from app.analytics import is_reportable_404
+        if not is_reportable_404(request.path, request.query_string, request.referrer):
+            return  # a bot's wordlist, not a broken link of ours
 
     original = getattr(err, "original_exception", None) or err
     if status_code == 500:
