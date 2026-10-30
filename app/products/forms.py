@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, StringField
+from wtforms import BooleanField, HiddenField, StringField
 from wtforms.validators import DataRequired, Email, Length, Optional
 
 
@@ -31,6 +31,11 @@ class WaitlistForm(FlaskForm):
     utm_campaign = HiddenField(validators=[Optional(), Length(max=200)])
     utm_content = HiddenField(validators=[Optional(), Length(max=200)])
 
+    # Marketing consent: optional and unticked; joining never depends on it.
+    marketing_opt_in = BooleanField(
+        "Also send me occasional emails from Jaybalo Studio, not just the launch email."
+    )
+
     # Honeypot: hidden from real users, same approach as the contact form.
     website = StringField("Website", validators=[Optional()])
 
@@ -61,6 +66,8 @@ class DownloadRequestForm(FlaskForm):
     utm_medium = HiddenField(validators=[Optional(), Length(max=100)])
     utm_campaign = HiddenField(validators=[Optional(), Length(max=200)])
     utm_content = HiddenField(validators=[Optional(), Length(max=200)])
+    # Marketing consent: optional and unticked; the download never depends on it.
+    marketing_opt_in = BooleanField("Also send me occasional emails about automation.")
     website = StringField("Website", validators=[Optional()])
 
 

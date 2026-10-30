@@ -160,6 +160,13 @@ class WaitlistSubscriber(db.Model, TimestampMixin):
 
     ip_address = db.Column(db.String(64))
 
+    # Marketing email consent: given only by ticking the form's optional,
+    # unticked box (never a condition of the download or the waitlist).
+    # Withdrawn by any unsubscribe link, for every sign-up with this address.
+    marketing_consent = db.Column(db.Boolean, default=False, nullable=False)
+    consent_at = db.Column(db.DateTime(timezone=True))
+    unsubscribed_at = db.Column(db.DateTime(timezone=True))
+
     product = db.relationship("Product", back_populates="subscribers")
 
     def __repr__(self):
@@ -214,6 +221,13 @@ class DownloadRequest(db.Model, TimestampMixin):
     utm_content = db.Column(db.String(120))
 
     ip_address = db.Column(db.String(64))
+
+    # Marketing email consent: given only by ticking the form's optional,
+    # unticked box (never a condition of the download or the waitlist).
+    # Withdrawn by any unsubscribe link, for every sign-up with this address.
+    marketing_consent = db.Column(db.Boolean, default=False, nullable=False)
+    consent_at = db.Column(db.DateTime(timezone=True))
+    unsubscribed_at = db.Column(db.DateTime(timezone=True))
 
     product = db.relationship("Product", back_populates="download_requests")
 

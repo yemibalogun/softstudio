@@ -1,0 +1,8 @@
+{# Marketing consent for one sign-up; expects `lead`. #}
+{% if lead.marketing_consent %}
+  <span class="badge badge-success badge-sm" title="Opted in {{ lead.consent_at|datefmt('datetime') if lead.consent_at }}">May email</span>
+{% elif lead.unsubscribed_at %}
+  <span class="badge badge-ghost badge-sm" title="Unsubscribed {{ lead.unsubscribed_at|datefmt('datetime') }}">Unsubscribed</span>
+{% else %}
+  <span class="badge badge-ghost badge-sm" title="Did not opt in to marketing emails">No</span>
+{% endif %}

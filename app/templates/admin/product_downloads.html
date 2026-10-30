@@ -46,6 +46,8 @@
             <th>Downloads</th>
             <th>Last download</th>
             <th>Source</th>
+            <th>Emails</th>
+            <th></th>
           </tr>
         </thead>
 
@@ -80,6 +82,14 @@
                   {{ [lead.utm_medium, lead.utm_campaign, lead.utm_content]|select|join(" · ") }}
                 </div>
               {% endif %}
+            </td>
+            <td>{% include "admin/_consent_badge.html" %}</td>
+            <td>
+              <form method="POST" action="{{ url_for('admin.product_download_lead_delete', product_id=product.id, lead_id=lead.id) }}"
+                    data-confirm="Delete the sign-up for {{ lead.email }} for good? This cannot be undone.">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-ghost btn-xs text-error">Delete</button>
+              </form>
             </td>
           </tr>
           {% endfor %}

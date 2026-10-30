@@ -191,6 +191,13 @@
             </div>
           {% endfor %}
 
+          {# Marketing consent: optional and unticked. Nothing else depends on it. #}
+          <label class="flex cursor-pointer items-start gap-3 text-sm leading-6 text-base-content/70">
+            {{ download_form.marketing_opt_in(class="checkbox checkbox-primary mt-0.5 shrink-0") }}
+            <span>{{ download_form.marketing_opt_in.label.text }}
+              <span class="text-base-content/45">Optional. Unsubscribe any time.</span></span>
+          </label>
+
           {# Honeypot: off-screen, not hidden from assistive tech by display:none #}
           <div class="absolute left-[-9999px]" aria-hidden="true">
             {{ download_form.website(tabindex="-1", autocomplete="off") }}
@@ -200,7 +207,8 @@
 
           <p class="text-xs leading-6 text-base-content/45">
             The link is personal to you and works for {{ download_valid_days }} day{{ "" if download_valid_days == 1 else "s" }}.
-            Your details stay with {{ site_name }} and are never shared.
+            We send other emails only if you tick the box, and never share your details.
+            <a class="link" href="{{ url_for('legal.privacy') }}">Privacy</a>
           </p>
         </form>
       {% endif %}
@@ -260,6 +268,13 @@
             {% endfor %}
           </div>
 
+          {# Marketing consent: optional and unticked. Nothing else depends on it. #}
+          <label class="flex cursor-pointer items-start gap-3 text-sm leading-6 text-base-content/70">
+            {{ form.marketing_opt_in(class="checkbox checkbox-primary mt-0.5 shrink-0") }}
+            <span>{{ form.marketing_opt_in.label.text }}
+              <span class="text-base-content/45">Optional. Unsubscribe any time.</span></span>
+          </label>
+
           {# Honeypot: off-screen, not hidden from assistive tech by display:none #}
           <div class="absolute left-[-9999px]" aria-hidden="true">
             {{ form.website(tabindex="-1", autocomplete="off") }}
@@ -268,7 +283,8 @@
           <button type="submit" class="btn btn-primary mt-2">Join the Waitlist</button>
 
           <p class="text-xs leading-6 text-base-content/45">
-            One email when it launches. No list sharing, unsubscribe any time.
+            We’ll email you once when it launches; anything more only if you tick the box.
+            We never share your details. <a class="link" href="{{ url_for('legal.privacy') }}">Privacy</a>
           </p>
         </form>
       {% endif %}

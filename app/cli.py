@@ -216,12 +216,21 @@ def register_cli_commands(app: Flask) -> None:
 
     @app.cli.command("prune-analytics")
     @click.option("--days", default=180, show_default=True, help="Keep page views newer than this.")
-    def prune_analytics(days):
-        """Drop old raw page views. The dashboard's ranges only look back 30 days."""
+    @click.option("--lead-days", default=365, show_default=True,
+                  help="Keep sign-ups that never opted in to emails for this long.")
+    def prune_analytics(days, lead_days):
+        """
+        The weekly data-retention run (scheduled by deploy.sh). Drops page
+        views older than --days, and download and waitlist sign-ups that never
+        opted in to marketing email once older than --lead-days - the periods
+        the privacy policy states.
+        """
         from app.analytics import prune_page_views
+        from app.consent import prune_leads
 
         deleted = prune_page_views(days)
         click.echo(f"{deleted} page view(s) removed.")
+        click.echo(f"{prune_leads(lead_days)} sign-up(s) without email consent removed.")
 
 
 def _get_or_create(model, defaults=None, **kwargs):

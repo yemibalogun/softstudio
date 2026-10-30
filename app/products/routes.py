@@ -14,6 +14,7 @@ from flask import (
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
+from app.consent import record_opt_in
 from app.downloads import (
     format_size,
     hash_download_token,
@@ -186,14 +187,19 @@ def waitlist(slug):
     email = (form.email.data or "").strip().lower()
     attribution = _attribution(form)
 
-    subscriber = WaitlistSubscriber(
-        product_id=product.id,
-        email=email,
-        name=(form.name.data or "").strip() or None,
-        ip_address=request.remote_addr,
-        **attribution,
-    )
-    db.session.add(subscriber)
+    subscriber = WaitlistSubscriber.query.filter_by(product_id=product.id, email=email).first()
+    if subscriber is None:
+        subscriber = WaitlistSubscriber(
+            product_id=product.id,
+            email=email,
+            name=(form.name.data or "").strip() or None,
+            ip_address=request.remote_addr,
+            **attribution,
+        )
+        db.session.add(subscriber)
+    # Rejoining with the box ticked records consent; rejoining without it
+    # leaves any consent already given alone.
+    record_opt_in(subscriber, form.marketing_opt_in.data)
     try:
         db.session.commit()
     except IntegrityError:
@@ -242,6 +248,10 @@ def request_download(slug):
     email = form.email.data
     lead = DownloadRequest.query.filter_by(product_id=product.id, email=email).first()
 
+    if lead is not None and form.marketing_opt_in.data:
+        record_opt_in(lead, True)   # honoured even if the cooldown below skips the email
+        db.session.commit()
+
     cooldown = current_app.config["DOWNLOAD_REQUEST_COOLDOWN"]
     if lead is not None and lead.email_delivered and lead.sent_within(cooldown):
         # A link went to this address moments ago. Answer as if sent: the
@@ -264,6 +274,7 @@ def request_download(slug):
         # keeps the original attribution: first touch is what brought them.
         lead.name = form.name.data
         lead.request_count = (lead.request_count or 0) + 1
+    record_opt_in(lead, form.marketing_opt_in.data)
 
     lead.token_hash = token_hash
     lead.link_sent_at = utcnow()

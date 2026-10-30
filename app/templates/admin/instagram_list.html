@@ -67,7 +67,7 @@
               <div class="flex flex-wrap gap-2">
                 <a href="{{ url_for('admin.instagram_edit', post_id=post.id) }}" class="btn btn-secondary btn-sm">Edit</a>
                 <form method="POST" action="{{ url_for('admin.instagram_delete', post_id=post.id) }}"
-                      onsubmit="return confirm('Remove this post from the Reels page? It stays on Instagram.');">
+                      data-confirm="Remove this post from the Reels page? It stays on Instagram.">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button type="submit" class="btn btn-error btn-outline btn-sm">Remove</button>
                 </form>

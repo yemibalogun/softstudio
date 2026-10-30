@@ -277,7 +277,7 @@
           <form
             method="POST"
             action="{{ url_for('admin.product_download_remove', product_id=product.id) }}"
-            onsubmit="return confirm('Remove this file? Links already emailed will stop working.');"
+            data-confirm="Remove this file? Links already emailed will stop working."
           >
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn btn-error btn-outline btn-sm">Remove download</button>

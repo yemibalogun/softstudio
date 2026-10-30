@@ -103,13 +103,20 @@
           {% if download_form.email.errors %}<p class="field-error" id="email-error">{{ download_form.email.errors[0] }}</p>{% endif %}
         </div>
 
+        {# Marketing consent: optional and unticked. The download never depends on it. #}
+        <label class="optin">
+          {{ download_form.marketing_opt_in() }}
+          <span>{{ download_form.marketing_opt_in.label.text }}
+            <span class="optin-note">Optional. Unsubscribe any time.</span></span>
+        </label>
+
         {# Honeypot: off-screen, filled only by bots. #}
         <div class="hp" aria-hidden="true">{{ download_form.website(tabindex="-1", autocomplete="off") }}</div>
 
         <button type="submit" class="cta">{{ product.landing_button_label or "Send me the download link" }}</button>
       </form>
       <p class="fine">
-        One email with your download link. No sequence, no spam.
+        One email with your download link. More only if you tick the box.
         <a href="{{ url_for('legal.privacy') }}">Privacy</a>
       </p>
 

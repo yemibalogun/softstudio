@@ -95,7 +95,7 @@
             {% endif %}
 
             <form method="POST" action="{{ url_for('admin.renewal_delete', subscription_id=s.id) }}"
-                  onsubmit="return confirm('Remove {{ s.name }} and its payment history?');">
+                  data-confirm="Remove {{ s.name }} and its payment history?">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button type="submit" class="btn btn-ghost btn-xs text-error">Delete</button>
             </form>

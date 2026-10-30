@@ -13,6 +13,9 @@ This link is personal to you. It works for {{ valid_days }} day{{ "" if valid_da
 {% if product.download_sha256 %}
 SHA-256: {{ product.download_sha256 }}
 {% endif %}
+You're receiving this because you asked for a download at {{ site_name }}.{% if download_request.marketing_consent %} You also asked for occasional emails from us.{% endif %}
+Unsubscribe from any future emails: {{ unsubscribe_url }}
+
 —
 {{ site_name }}
 {{ site_url }}

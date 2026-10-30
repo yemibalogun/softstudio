@@ -124,6 +124,7 @@
           <form
             method="POST"
             action="{{ url_for('admin.project_image_delete', project_id=project.id, image_id=image.id) }}"
+            data-confirm="Remove this gallery image?"
           >
             <input
               type="hidden"
@@ -134,7 +135,6 @@
             <button
               type="submit"
               class="btn btn-error btn-outline btn-sm w-full"
-              onclick="return confirm('Remove this gallery image?');"
             >
               Remove
             </button>

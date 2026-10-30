@@ -125,7 +125,7 @@
                 <form
                   method="POST"
                   action="{{ url_for('admin.course_delete', course_id=course.id) }}"
-                  onsubmit="return confirm('Delete this course and all its sections/lessons?');"
+                  data-confirm="Delete this course and all its sections/lessons?"
                 >
 
                   <input

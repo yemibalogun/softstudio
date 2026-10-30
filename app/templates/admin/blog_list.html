@@ -129,7 +129,7 @@
                   <form
                     method="POST"
                     action="{{ url_for('admin.blog_delete', post_id=post.id) }}"
-                    onsubmit="return confirm('Delete this post?');"
+                    data-confirm="Delete this post?"
                   >
 
                     <input

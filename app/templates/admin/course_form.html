@@ -210,7 +210,7 @@
             <form
               method="POST"
               action="{{ url_for('admin.section_delete', course_id=course.id, section_id=section.id) }}"
-              onsubmit="return confirm('Delete this section and all its lessons?');"
+              data-confirm="Delete this section and all its lessons?"
             >
 
               <input
@@ -271,7 +271,7 @@
                   <form
                     method="POST"
                     action="{{ url_for('admin.lesson_delete', course_id=course.id, lesson_id=lesson.id) }}"
-                    onsubmit="return confirm('Delete this lesson?');"
+                    data-confirm="Delete this lesson?"
                     class="shrink-0"
                   >
 

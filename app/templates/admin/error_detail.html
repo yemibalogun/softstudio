@@ -30,7 +30,7 @@
         </button>
       </form>
       <form method="POST" action="{{ url_for('admin.error_delete', error_id=error.id) }}"
-            onsubmit="return confirm('Delete this error record?');">
+            data-confirm="Delete this error record?">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-ghost btn-sm text-error">Delete</button>
       </form>

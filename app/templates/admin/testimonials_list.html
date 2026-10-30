@@ -103,7 +103,7 @@
                 <form
                   method="POST"
                   action="{{ url_for('admin.testimonial_delete', testimonial_id=testimonial.id) }}"
-                  onsubmit="return confirm('Delete this testimonial?');"
+                  data-confirm="Delete this testimonial?"
                 >
                   <input
                     type="hidden"

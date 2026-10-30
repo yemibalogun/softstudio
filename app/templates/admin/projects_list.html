@@ -135,7 +135,7 @@
                 <form
                   method="POST"
                   action="{{ url_for('admin.project_delete', project_id=project.id) }}"
-                  onsubmit="return confirm('Delete this project? This cannot be undone.');"
+                  data-confirm="Delete this project? This cannot be undone."
                 >
                   <input
                     type="hidden"

@@ -124,7 +124,7 @@
                 <form
                   method="POST"
                   action="{{ url_for('admin.product_delete', product_id=product.id) }}"
-                  onsubmit="return confirm('Delete this product, its waitlist, its download and its list of requests? This cannot be undone.');"
+                  data-confirm="Delete this product, its waitlist, its download and its list of requests? This cannot be undone."
                 >
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button type="submit" class="btn btn-error btn-outline btn-sm">Delete</button>

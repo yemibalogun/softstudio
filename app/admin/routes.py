@@ -531,6 +531,31 @@ def product_waitlist(product_id):
     )
 
 
+@bp.route("/products/<int:product_id>/waitlist.csv")
+@admin_required
+def product_waitlist_csv(product_id):
+    product = Product.query.get_or_404(product_id)
+    subscribers = (
+        WaitlistSubscriber.query.filter_by(product_id=product.id)
+        .order_by(WaitlistSubscriber.created_at.asc())
+        .all()
+    )
+    return _leads_csv(f"{product.slug}-waitlist.csv", ["joined_at"], subscribers,
+                      lambda sub: [sub.created_at.isoformat()])
+
+
+@bp.route("/products/<int:product_id>/waitlist/<int:subscriber_id>/delete", methods=["POST"])
+@admin_required
+def product_waitlist_delete(product_id, subscriber_id):
+    """Erase one person's waitlist sign-up (a deletion request, say)."""
+    sub = WaitlistSubscriber.query.filter_by(id=subscriber_id, product_id=product_id).first_or_404()
+    email = sub.email
+    db.session.delete(sub)
+    db.session.commit()
+    flash(f"Deleted the sign-up for {email}.", "info")
+    return redirect(url_for("admin.product_waitlist", product_id=product_id))
+
+
 # ---------------------------------------------------------------------
 # Product downloads
 # ---------------------------------------------------------------------
@@ -678,29 +703,61 @@ def product_downloads_csv(product_id):
         .order_by(DownloadRequest.created_at.asc())
         .all()
     )
-    out = io.StringIO()
-    writer = csv.writer(out)
-    writer.writerow([
-        "name", "email", "requested_at", "times_requested", "downloads",
-        "first_downloaded_at", "last_downloaded_at", "source", "utm_medium",
-        "utm_campaign", "utm_content",
-    ])
-    for lead in leads:
-        writer.writerow([_csv_safe(v) for v in (
-            lead.name, lead.email, lead.created_at.isoformat(), lead.request_count,
-            lead.download_count,
+    return _leads_csv(
+        f"{product.slug}-downloads.csv",
+        ["requested_at", "times_requested", "downloads", "first_downloaded_at", "last_downloaded_at"],
+        leads,
+        lambda lead: [
+            lead.created_at.isoformat(), lead.request_count, lead.download_count,
             lead.first_downloaded_at.isoformat() if lead.first_downloaded_at else "",
             lead.last_downloaded_at.isoformat() if lead.last_downloaded_at else "",
+        ],
+    )
+
+
+def _iso(value) -> str:
+    return value.isoformat() if value else ""
+
+
+def _leads_csv(filename: str, own_columns: list[str], leads, own_values) -> Response:
+    """
+    A sign-up export. Every row carries its marketing consent and its own
+    unsubscribe link: email only rows where may_email is yes, and put that
+    row's link in anything you send, so unsubscribing always works.
+    """
+    from app.consent import unsubscribe_url
+
+    out = io.StringIO()
+    writer = csv.writer(out)
+    writer.writerow(["name", "email", *own_columns, "may_email", "consented_at", "unsubscribed_at",
+                     "unsubscribe_url", "source", "utm_medium", "utm_campaign", "utm_content"])
+    for lead in leads:
+        writer.writerow([_csv_safe(v) for v in (
+            lead.name, lead.email, *own_values(lead),
+            "yes" if lead.marketing_consent else "no", _iso(lead.consent_at), _iso(lead.unsubscribed_at),
+            unsubscribe_url(lead.email),
             lead.source, lead.utm_medium, lead.utm_campaign, lead.utm_content,
         )])
     return Response(
         out.getvalue(),
         mimetype="text/csv",
         headers={
-            "Content-Disposition": f'attachment; filename="{product.slug}-downloads.csv"',
+            "Content-Disposition": f'attachment; filename="{filename}"',
             "Cache-Control": "private, no-store",
         },
     )
+
+
+@bp.route("/products/<int:product_id>/downloads/<int:lead_id>/delete", methods=["POST"])
+@admin_required
+def product_download_lead_delete(product_id, lead_id):
+    """Erase one person's download sign-up (a deletion request, say)."""
+    lead = DownloadRequest.query.filter_by(id=lead_id, product_id=product_id).first_or_404()
+    email = lead.email
+    db.session.delete(lead)
+    db.session.commit()
+    flash(f"Deleted the sign-up for {email}.", "info")
+    return redirect(url_for("admin.product_downloads", product_id=product_id))
 
 
 # =====================================================================

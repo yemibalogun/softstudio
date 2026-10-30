@@ -23,6 +23,7 @@ def send_email(
     subject: str,
     recipients: Sequence[str | tuple[str, str]],
     template_base: str,
+    headers: dict | None = None,
     **context,
 ) -> bool:
     context.setdefault("site_name", current_app.config["SITE_NAME"])
@@ -42,6 +43,8 @@ def send_email(
     msg.html = html_body
     msg.body = text_body
     msg.sender = current_app.config["MAIL_DEFAULT_SENDER"]
+    if headers:
+        msg.extra_headers = dict(headers)
 
     try:
         mail.send(msg)
@@ -199,13 +202,21 @@ def send_product_download_link(download_request, product, download_url: str) -> 
     file: Gmail and Outlook.com refuse any message carrying an .exe, and an
     installer is usually past attachment size limits anyway.
     """
+    from app.consent import unsubscribe_url
     from app.downloads import format_size
 
     max_age = current_app.config["DOWNLOAD_LINK_MAX_AGE"]
+    unsubscribe = unsubscribe_url(download_request.email)
     return send_email(
         subject=f"Your download: {product.title}",
         recipients=[download_request.email],
         template_base="product_download",
+        # Mail apps' own "Unsubscribe" button (RFC 2369 / RFC 8058 one-click).
+        headers={
+            "List-Unsubscribe": f"<{unsubscribe}>",
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
+        unsubscribe_url=unsubscribe,
         download_request=download_request,
         product=product,
         download_url=download_url,

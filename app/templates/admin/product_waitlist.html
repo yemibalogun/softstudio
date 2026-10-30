@@ -14,6 +14,9 @@
   </div>
 
   <div class="flex gap-2">
+    {% if subscribers %}
+      <a href="{{ url_for('admin.product_waitlist_csv', product_id=product.id) }}" class="btn btn-outline btn-sm">Export CSV</a>
+    {% endif %}
     <a href="{{ url_for('admin.product_edit', product_id=product.id) }}" class="btn btn-ghost btn-sm">Edit product</a>
     <a href="{{ url_for('admin.products_list') }}" class="btn btn-ghost btn-sm">← Products</a>
   </div>
@@ -41,6 +44,8 @@
             <th>Source</th>
             <th>Campaign</th>
             <th>Joined</th>
+            <th>Emails</th>
+            <th></th>
           </tr>
         </thead>
 
@@ -56,6 +61,14 @@
               {% else %}—{% endif %}
             </td>
             <td class="text-xs">{{ subscriber.created_at|datefmt("datetime") }}</td>
+            <td>{% with lead = subscriber %}{% include "admin/_consent_badge.html" %}{% endwith %}</td>
+            <td>
+              <form method="POST" action="{{ url_for('admin.product_waitlist_delete', product_id=product.id, subscriber_id=subscriber.id) }}"
+                    data-confirm="Delete the sign-up for {{ subscriber.email }} for good? This cannot be undone.">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-ghost btn-xs text-error">Delete</button>
+              </form>
+            </td>
           </tr>
           {% endfor %}
         </tbody>

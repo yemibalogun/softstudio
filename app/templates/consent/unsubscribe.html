@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Unsubscribe · {{ site_name }}{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<section class="pb-[clamp(5rem,10vw,8rem)] pt-[clamp(4rem,9vw,7rem)]">
+  <div class="shell">
+    <div class="card mx-auto max-w-xl p-8 sm:p-10">
+      {% if done %}
+        <h1 class="text-[1.9rem] leading-tight text-base-content">You’re unsubscribed.</h1>
+        <p class="mt-4 text-[0.98rem] leading-7 text-base-content/60">
+          {{ email }} won’t receive any more emails from {{ site_name }}. If you ask for a
+          download again, we’ll still send the link you request.
+        </p>
+      {% else %}
+        <h1 class="text-[1.9rem] leading-tight text-base-content">Unsubscribe from our emails?</h1>
+        <p class="mt-4 text-[0.98rem] leading-7 text-base-content/60">
+          {{ email }} will stop receiving emails from {{ site_name }}.
+        </p>
+        <form method="POST" class="mt-8">
+          <button type="submit" class="btn btn-primary">Unsubscribe</button>
+        </form>
+      {% endif %}
+      <p class="mt-8 text-xs leading-6 text-base-content/45">
+        Want your details deleted completely? Email
+        <a class="link" href="mailto:{{ config.ADMIN_EMAIL }}">{{ config.ADMIN_EMAIL }}</a>.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

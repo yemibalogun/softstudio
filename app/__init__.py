@@ -106,6 +106,7 @@ def _register_blueprints(app: Flask) -> None:
     from app.legal.routes import bp as legal_bp
     from app.reels.routes import bp as reels_bp
     from app.instagram.routes import bp as instagram_bp
+    from app.unsubscribe.routes import bp as consent_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -122,6 +123,7 @@ def _register_blueprints(app: Flask) -> None:
     app.register_blueprint(legal_bp)
     app.register_blueprint(reels_bp)
     app.register_blueprint(instagram_bp)
+    app.register_blueprint(consent_bp)
 
 
 def _register_error_handlers(app: Flask) -> None:
