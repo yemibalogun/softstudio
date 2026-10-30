@@ -120,6 +120,9 @@ class BaseConfig:
     # The sign-off on product landing pages (templates/products/landing.html).
     SITE_OWNER_NAME = os.environ.get("SITE_OWNER_NAME", "Yemi Balogun")
     SITE_OWNER_ROLE = os.environ.get("SITE_OWNER_ROLE", "Automation consultant")
+    # The studio's Instagram account: the /reels page's follow link and the footer.
+    INSTAGRAM_HANDLE = os.environ.get("INSTAGRAM_HANDLE", "jaybalo_studio")
+    INSTAGRAM_PROFILE_URL = f"https://www.instagram.com/{INSTAGRAM_HANDLE}/"
     UPLOAD_ALLOWED_RESOURCE_EXT = {"pdf", "zip"}
 
     # Short-lived reel hosting for the autoposter (app/reels/routes.py). Off

@@ -1,0 +1,58 @@
+/*
+  /reels: Instagram posts as cards (templates/instagram/index.html).
+  Hand-written rather than Tailwind utilities so it needs no CSS rebuild.
+*/
+.reel-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15.5rem), 1fr));
+}
+.reel-card { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--radius-box, 1rem); }
+
+/* The cover and, once played, Instagram's player. Reels are 9:16. */
+.reel-stage {
+  position: relative; aspect-ratio: 9 / 16; overflow: hidden;
+  container-type: inline-size;   /* lets the player's height follow the card's width */
+  background: linear-gradient(160deg, #0d1d44 0%, #0a1430 45%, #060c1d 100%);
+  border-bottom: 1px solid rgba(124, 196, 248, .12);
+}
+.reel-cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  transition: transform 1.2s cubic-bezier(.16, 1, .3, 1); }
+.reel-card:hover .reel-cover { transform: scale(1.03); }
+
+.reel-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end;
+  gap: .6rem; padding: 1.4rem;
+  background:
+    radial-gradient(120% 70% at 85% 10%, rgba(74, 139, 248, .35), transparent 60%),
+    radial-gradient(90% 60% at 0% 100%, rgba(124, 196, 248, .15), transparent 70%); }
+.reel-placeholder__brand { font-size: .62rem; letter-spacing: .28em; text-transform: uppercase; color: rgba(205, 222, 255, .55); }
+.reel-placeholder__title { font-size: 1.25rem; line-height: 1.2; font-weight: 600; letter-spacing: -.02em; color: #eef4ff; }
+
+.reel-play {
+  position: absolute; left: 50%; top: 50%; translate: -50% -50%;
+  width: 4.25rem; height: 4.25rem; border-radius: 999px;
+  display: grid; place-items: center; color: #fff;
+  background: rgba(8, 16, 38, .45); border: 1px solid rgba(255, 255, 255, .35);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  transition: transform .25s ease, background .25s ease;
+}
+.reel-play svg { margin-left: 3px; }
+.reel-stage:hover .reel-play, .reel-play:focus-visible { transform: scale(1.08); background: rgba(74, 139, 248, .7); }
+.reel-play:focus-visible { outline: 3px solid #7cc4f8; outline-offset: 3px; }
+
+/* Playing: Instagram's embed is a ~54px header, the video at 5:4 and ~160px of
+   likes and comments, so its height is 1.25 x width + 215px (measured). */
+.reel-stage.is-playing { aspect-ratio: auto; height: auto; background: #fff; }
+.reel-iframe { display: block; width: 100%; border: 0; height: 40rem; height: calc(125cqw + 215px); }
+
+.reel-meta { display: flex; flex: 1; flex-direction: column; gap: .9rem; padding: 1.15rem 1.25rem 1.3rem; }
+.reel-title { font-size: 1rem; line-height: 1.4; font-weight: 500; letter-spacing: -.01em; }
+.reel-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+  font-size: .75rem; color: rgba(205, 222, 255, .5); }
+.reel-foot a { color: rgba(205, 222, 255, .72); text-decoration: none; }
+.reel-foot a:hover { color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reel-cover, .reel-play { transition: none; }
+  .reel-card:hover .reel-cover { transform: none; }
+}

@@ -78,6 +78,18 @@ def _init_extensions(app: Flask) -> None:
     app.config["OAUTH_PROVIDERS"] = oauth_providers
 
 
+# One policy for the whole site. A page that needs more - /reels frames
+# Instagram's player - extends this rather than copying it, so the two can
+# never drift apart.
+CONTENT_SECURITY_POLICY = (
+    "default-src 'self'; "
+    "img-src 'self' data: https:; "
+    "style-src 'self' 'unsafe-inline'; "
+    "script-src 'self'; "
+    "frame-ancestors 'none';"
+)
+
+
 def _register_blueprints(app: Flask) -> None:
     from app.main.routes import bp as main_bp
     from app.auth.routes import bp as auth_bp
@@ -93,6 +105,7 @@ def _register_blueprints(app: Flask) -> None:
     from app.admin.routes import bp as admin_bp
     from app.legal.routes import bp as legal_bp
     from app.reels.routes import bp as reels_bp
+    from app.instagram.routes import bp as instagram_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -108,6 +121,7 @@ def _register_blueprints(app: Flask) -> None:
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(legal_bp)
     app.register_blueprint(reels_bp)
+    app.register_blueprint(instagram_bp)
 
 
 def _register_error_handlers(app: Flask) -> None:
@@ -247,11 +261,7 @@ def _register_security_headers(app: Flask) -> None:
         # third-party embeds (payment SDKs, video players) are added.
         response.headers.setdefault(
             "Content-Security-Policy",
-            "default-src 'self'; "
-            "img-src 'self' data: https:; "
-            "style-src 'self' 'unsafe-inline'; "
-            "script-src 'self'; "
-            "frame-ancestors 'none';",
+            CONTENT_SECURITY_POLICY,
         )
         return response
 

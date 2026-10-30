@@ -1,0 +1,87 @@
+{% extends "admin/_admin_base.html" %}
+
+{% block title %}Reels page — Admin{% endblock %}
+
+{% block admin_content %}
+
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-3xl font-bold">Reels page</h1>
+    <p class="mt-1 text-base-content/60">
+      Instagram posts shown at
+      <a class="link" href="{{ url_for('instagram.index') }}" target="_blank" rel="noopener">/reels</a>.
+      The autoposter adds each reel it publishes; add others by pasting their link.
+    </p>
+  </div>
+</div>
+
+<form method="POST" enctype="multipart/form-data" class="card mb-8 border border-base-300 bg-base-100 shadow-sm">
+  <div class="card-body gap-6">
+    <h2 class="card-title text-lg">Add a post</h2>
+    {% set post = none %}
+    {% include "admin/_instagram_fields.html" %}
+    <div class="card-actions justify-end">
+      <button type="submit" class="btn btn-primary">Add to the Reels page</button>
+    </div>
+  </div>
+</form>
+
+{% if posts %}
+<div class="card border border-base-300 bg-base-200 shadow-sm">
+  <div class="card-body p-0">
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+        <thead>
+          <tr><th>Post</th><th>Added by</th><th>Shown</th><th>Order</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for post in posts %}
+          <tr>
+            <td>
+              <div class="flex items-center gap-3">
+                {% if post.cover_image %}
+                  <img src="{{ post.cover_image }}" alt="" class="h-16 w-9 rounded object-cover">
+                {% else %}
+                  <div class="h-16 w-9 rounded bg-base-300" aria-hidden="true"></div>
+                {% endif %}
+                <div class="min-w-0">
+                  <div class="font-medium">{{ post.heading }}</div>
+                  <a class="link link-hover font-mono text-xs text-base-content/60" href="{{ post.permalink }}"
+                     target="_blank" rel="noopener noreferrer">{{ post.kind }}/{{ post.shortcode }}</a>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-ghost">{{ post.source }}</span></td>
+            <td>
+              <form method="POST" action="{{ url_for('admin.instagram_toggle', post_id=post.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                {% if post.published %}
+                  <button type="submit" class="badge badge-success cursor-pointer" title="Click to hide">Shown</button>
+                {% else %}
+                  <button type="submit" class="badge badge-ghost cursor-pointer" title="Click to show">Hidden</button>
+                {% endif %}
+              </form>
+            </td>
+            <td class="tabular-nums">{{ post.display_order }}</td>
+            <td>
+              <div class="flex flex-wrap gap-2">
+                <a href="{{ url_for('admin.instagram_edit', post_id=post.id) }}" class="btn btn-secondary btn-sm">Edit</a>
+                <form method="POST" action="{{ url_for('admin.instagram_delete', post_id=post.id) }}"
+                      onsubmit="return confirm('Remove this post from the Reels page? It stays on Instagram.');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-error btn-outline btn-sm">Remove</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% else %}
+<p class="text-base-content/60">No posts yet.</p>
+{% endif %}
+
+{% endblock %}

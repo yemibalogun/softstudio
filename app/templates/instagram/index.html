@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+
+{#
+  The studio's reels, played from Instagram.
+
+  Each card is a cover and a play control. Nothing from Instagram loads until
+  a visitor presses play: static/js/instagram-embed.js then swaps the cover
+  for Instagram's own player. Without JavaScript the play control is a plain
+  link to the post. Only this page's CSP admits Instagram frames (see
+  app/instagram/routes.py).
+#}
+{% block title %}Reels · {{ site_name }}{% endblock %}
+
+{% block meta_description %}
+Short videos on automating the right things, from the {{ site_name }} Instagram.
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reels.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<section class="pb-[clamp(5rem,10vw,8rem)] pt-[clamp(4rem,9vw,7rem)]">
+  <div class="shell">
+
+    {{ page_header("Reels", "Short videos on", lean="automation.",
+                   lede="Practical, one-minute answers to the questions we hear most: what to automate, what to fix first, and when AI is worth it.") }}
+
+    <div class="mt-10 flex flex-wrap items-center gap-3" data-reveal>
+      <a href="{{ profile_url }}" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+        Follow @{{ handle }} on Instagram
+      </a>
+    </div>
+
+    {% if posts %}
+      <div class="reel-grid mt-16 md:mt-20" data-reveal-group="110">
+        {% for post in posts %}
+          <article class="reel-card card" data-reveal>
+
+            <div class="reel-stage" data-ig-frame data-embed-src="{{ post.embed_url }}"
+                 data-embed-title="{{ post.heading }} — Instagram reel">
+              {% if post.cover_image %}
+                <img class="reel-cover" src="{{ post.cover_image }}" alt="" loading="lazy" decoding="async">
+              {% else %}
+                <div class="reel-placeholder" aria-hidden="true">
+                  <span class="reel-placeholder__brand">{{ site_name }}</span>
+                  <span class="reel-placeholder__title">{{ post.heading }}</span>
+                </div>
+              {% endif %}
+
+              {# A link without JavaScript; the script turns it into play-in-place. #}
+              <a class="reel-play" href="{{ post.permalink }}" target="_blank" rel="noopener noreferrer"
+                 data-ig-play aria-label="Play “{{ post.heading }}” (loads Instagram)">
+                <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+              </a>
+            </div>
+
+            <div class="reel-meta">
+              <h2 class="reel-title">{{ post.heading }}</h2>
+              <div class="reel-foot">
+                {% if post.posted_at %}
+                  <time datetime="{{ post.posted_at.isoformat() }}">{{ post.posted_at|datefmt }}</time>
+                {% else %}<span></span>{% endif %}
+                <a href="{{ post.permalink }}" target="_blank" rel="noopener noreferrer">Open on Instagram ↗</a>
+              </div>
+            </div>
+
+          </article>
+        {% endfor %}
+      </div>
+
+      <p class="reel-note mt-10 text-xs text-base-content/45">
+        Videos play from Instagram, which loads only when you press play.
+      </p>
+    {% else %}
+      <div class="mt-16 max-w-xl text-base-content/60">
+        <p>New reels appear here as they are published. In the meantime, they are all on
+          <a class="link" href="{{ profile_url }}" target="_blank" rel="noopener noreferrer">Instagram</a>.</p>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/instagram-embed.js') }}" defer></script>
+{% endblock %}

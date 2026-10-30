@@ -52,6 +52,7 @@ from app.models.testimonial import Testimonial  # noqa: E402,F401
 from app.models.consent import CookieConsent  # noqa: E402,F401
 from app.models.analytics import PageView, ErrorEvent  # noqa: E402,F401
 from app.models.subscription import ServiceSubscription, ServicePayment  # noqa: E402,F401
+from app.models.instagram import InstagramPost  # noqa: E402,F401
 
 __all__ = [
     "User", "Role", "OAuthIdentity", "UserSession",
@@ -61,7 +62,7 @@ __all__ = [
     "Purchase", "Payment", "Coupon",
     "ProjectInquiry",
     "BlogPost", "BlogCategory", "BlogTag",
-    "Product", "WaitlistSubscriber", "DownloadRequest",
+    "Product", "WaitlistSubscriber", "DownloadRequest", "InstagramPost",
     "Testimonial", "CookieConsent",
     "PageView", "ErrorEvent", "ServiceSubscription", "ServicePayment",
 ]

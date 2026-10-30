@@ -325,3 +325,43 @@ class ProductDownloadForm(FlaskForm):
         render_kw={"placeholder": "2.0.0"},
     )
     enabled = BooleanField("Offer this download on the product page")
+
+
+class InstagramPostForm(FlaskForm):
+    """A post for the /reels page, added by its Instagram link."""
+
+    url = StringField(
+        "Instagram link",
+        filters=[lambda v: v.strip() if isinstance(v, str) else v],
+        validators=[DataRequired(), Length(max=300)],
+        render_kw={"placeholder": "https://www.instagram.com/reel/…/"},
+    )
+    title = StringField(
+        "Title (optional - the caption's first line is used otherwise)",
+        validators=[Optional(), Length(max=160)],
+    )
+    caption = TextAreaField("Caption (optional)", validators=[Optional(), Length(max=2200)])
+    cover_file = FileField("Cover image (optional)", render_kw={"accept": IMAGE_ACCEPT})
+    remove_cover = BooleanField("Remove the current cover")
+    published = BooleanField("Show on the Reels page", default=True)
+    display_order = IntegerField("Display order (lower first)", default=0, validators=[Optional()])
+
+    # Set by the validators below.
+    parsed = None
+    processed_cover = None
+
+    def validate_url(self, field):
+        from app.models.instagram import parse_instagram_url
+        self.parsed = parse_instagram_url(field.data)
+        if self.parsed is None:
+            raise ValidationError("Paste a link to an Instagram reel or post, like "
+                                  "https://www.instagram.com/reel/ABC123/.")
+
+    def validate_cover_file(self, field):
+        upload = field.data
+        if not upload or not getattr(upload, "filename", ""):
+            return
+        try:
+            self.processed_cover = process_image(upload)
+        except ImageUploadError as exc:
+            raise ValidationError(str(exc)) from None

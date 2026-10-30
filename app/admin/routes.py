@@ -14,13 +14,13 @@ from app.extensions import csrf, db
 from app.models import (
     ProjectInquiry, Purchase, Enrollment, Course, Project, ProjectImage, Technology,
     Service, CourseCategory, CourseSection, Lesson, BlogPost, BlogCategory, BlogTag,
-    Testimonial, Product, WaitlistSubscriber, DownloadRequest, utcnow,
+    Testimonial, Product, WaitlistSubscriber, DownloadRequest, InstagramPost, utcnow,
     ErrorEvent, ServiceSubscription,
 )
 from app.admin.forms import (
     ProjectForm, ServiceForm, CourseForm, CourseCategoryForm, CourseSectionForm, LessonForm,
     BlogPostForm, BlogCategoryForm, TestimonialForm, ProductForm, ProductDownloadForm,
-    ServiceSubscriptionForm, MarkPaidForm, slugify,
+    ServiceSubscriptionForm, MarkPaidForm, InstagramPostForm, slugify,
 )
 from app.admin.services import unique_slug, parse_csv_names, get_or_create_all_by_name
 from app.uploads import delete_uploaded_image, store_image
@@ -701,6 +701,106 @@ def product_downloads_csv(product_id):
             "Cache-Control": "private, no-store",
         },
     )
+
+
+# =====================================================================
+# Instagram posts (the public /reels page)
+# =====================================================================
+
+def _apply_instagram_form(post: InstagramPost, form: InstagramPostForm) -> None:
+    post.kind, post.shortcode = form.parsed
+    post.title = (form.title.data or "").strip() or None
+    post.caption = (form.caption.data or "").strip() or None
+    post.published = form.published.data
+    post.display_order = form.display_order.data or 0
+    if form.processed_cover is not None:
+        post.cover_image = store_image(form.processed_cover, "reels")
+    elif form.remove_cover.data:
+        post.cover_image = None
+
+
+def _save_instagram_post(post: InstagramPost, previous_cover: str | None) -> None:
+    """Commit, and keep the cover files in step with what was stored."""
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        if post.cover_image != previous_cover:
+            delete_uploaded_image(post.cover_image)   # don't orphan the new file
+        raise
+    if previous_cover and previous_cover != post.cover_image:
+        delete_uploaded_image(previous_cover)
+
+
+def _shortcode_taken(shortcode: str, except_id: int | None = None) -> bool:
+    query = InstagramPost.query.filter(InstagramPost.shortcode == shortcode)
+    if except_id is not None:
+        query = query.filter(InstagramPost.id != except_id)
+    return db.session.query(query.exists()).scalar()
+
+
+@bp.route("/instagram", methods=["GET", "POST"])
+@admin_required
+def instagram_list():
+    form = InstagramPostForm()
+    if form.validate_on_submit():
+        if _shortcode_taken(form.parsed[1]):
+            flash("That post is already on the Reels page.", "info")
+            return redirect(url_for("admin.instagram_list"))
+        post = InstagramPost(source=InstagramPost.SOURCE_ADMIN)
+        _apply_instagram_form(post, form)
+        db.session.add(post)
+        _save_instagram_post(post, previous_cover=None)
+        flash("Added to the Reels page.", "success")
+        return redirect(url_for("admin.instagram_list"))
+
+    posts = InstagramPost.query.order_by(
+        InstagramPost.display_order,
+        InstagramPost.posted_at.desc().nullslast(),
+        InstagramPost.created_at.desc(),
+    ).all()
+    return render_template("admin/instagram_list.html", form=form, posts=posts)
+
+
+@bp.route("/instagram/<int:post_id>/edit", methods=["GET", "POST"])
+@admin_required
+def instagram_edit(post_id):
+    post = InstagramPost.query.get_or_404(post_id)
+    form = InstagramPostForm(obj=post)
+    if request.method == "GET":
+        form.url.data = post.permalink
+    if form.validate_on_submit():
+        if _shortcode_taken(form.parsed[1], except_id=post.id):
+            flash("Another entry already uses that Instagram link.", "error")
+            return render_template("admin/instagram_form.html", form=form, post=post)
+        previous_cover = post.cover_image
+        _apply_instagram_form(post, form)
+        _save_instagram_post(post, previous_cover)
+        flash("Saved.", "success")
+        return redirect(url_for("admin.instagram_list"))
+    return render_template("admin/instagram_form.html", form=form, post=post)
+
+
+@bp.route("/instagram/<int:post_id>/toggle", methods=["POST"])
+@admin_required
+def instagram_toggle(post_id):
+    post = InstagramPost.query.get_or_404(post_id)
+    post.published = not post.published
+    db.session.commit()
+    return redirect(url_for("admin.instagram_list"))
+
+
+@bp.route("/instagram/<int:post_id>/delete", methods=["POST"])
+@admin_required
+def instagram_delete(post_id):
+    """Removes it from the Reels page only; the post stays on Instagram."""
+    post = InstagramPost.query.get_or_404(post_id)
+    cover = post.cover_image
+    db.session.delete(post)
+    db.session.commit()
+    delete_uploaded_image(cover)
+    flash("Removed from the Reels page. It is still on Instagram.", "info")
+    return redirect(url_for("admin.instagram_list"))
 
 
 # =====================================================================

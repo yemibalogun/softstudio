@@ -1,0 +1,27 @@
+{% from "components/admin_form_field.html" import afield %}
+{# Shared by the add form (instagram_list.html) and the edit page. #}
+{{ form.hidden_tag() }}
+{{ afield(form.url) }}
+{{ afield(form.title) }}
+{{ afield(form.caption, rows=3) }}
+
+<div class="form-control w-full">
+  <label class="label" for="{{ form.cover_file.id }}">
+    <span class="label-text font-medium">{{ form.cover_file.label.text }}</span>
+  </label>
+  {{ form.cover_file(class="file-input file-input-bordered w-full") }}
+  {% for error in form.cover_file.errors %}
+    <div class="label"><span class="label-text-alt text-error">{{ error }}</span></div>
+  {% endfor %}
+  <div class="label">
+    <span class="label-text-alt text-base-content/50">
+      Portrait works best (9:16). Reels sent by the autoposter get their cover frame automatically.
+    </span>
+  </div>
+</div>
+
+<div class="grid gap-6 md:grid-cols-3">
+  {{ afield(form.published) }}
+  {% if post and post.cover_image %}{{ afield(form.remove_cover) }}{% endif %}
+  {{ afield(form.display_order) }}
+</div>

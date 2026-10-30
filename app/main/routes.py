@@ -90,6 +90,7 @@ def sitemap():
         url_for("courses.index"),
         url_for("services.index"),
         url_for("blog.index"),
+        url_for("instagram.index"),
         url_for("main.about"),
         url_for("contact.index"),
         url_for("legal.privacy"),
