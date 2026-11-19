@@ -94,6 +94,7 @@ def sitemap():
         url_for("main.about"),
         url_for("contact.index"),
         url_for("legal.privacy"),
+        url_for("legal.privacy_jswm_abbreviator"),
         url_for("legal.cookies"),
         url_for("legal.terms"),
         url_for("legal.refunds"),

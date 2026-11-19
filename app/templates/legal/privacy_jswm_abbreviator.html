@@ -1,0 +1,94 @@
+{% extends "legal/_legal_base.html" %}
+
+{#
+  Privacy policy for the JSWM Abbreviator Android app. Google Play links to
+  this page from the app's store listing, so it must name the app and match
+  the app's Data safety answers (no data collected or shared). Keep it in
+  step with android/play-store/privacy-policy.html in service_abbreviations.
+#}
+
+{% set crumbs = [("Privacy Policy", url_for("legal.privacy")), ("JSWM Abbreviator", None)] %}
+
+{% block title %}JSWM Abbreviator Privacy Policy — {{ site_name }}{% endblock %}
+
+{% block legal_title %}JSWM Abbreviator Privacy Policy{% endblock %}
+
+{% block effective_date %}November 20, 2026{% endblock %}
+
+{% block legal_body %}
+
+<p>
+  JSWM Abbreviator ("the app") is a writing aid from {{ site_name }} for
+  looking up Joint Service Writing Manual abbreviations and abbreviating Word
+  documents. This policy explains what happens to your information when you
+  use the Android app. For this website, see our
+  <a href="{{ url_for('legal.privacy') }}">Privacy Policy</a>.
+</p>
+
+
+<h2>Information We Collect</h2>
+
+<p>
+  <strong>None.</strong> The app does not collect, store on any server,
+  share or sell any personal or usage data. It has no accounts, no analytics,
+  no advertising and no crash reporting, and it does not request permission
+  to use the internet, so it cannot send anything off your device.
+</p>
+
+
+<h2>Your Documents</h2>
+
+<p>
+  When you choose or share a Word document with the app, it is read on your
+  device only, so the app can list the terms it contains. A temporary working
+  copy is kept in the app's private cache while you review it and is deleted
+  when the app next starts. The abbreviated copy is saved only where you
+  choose with Android's save picker. Your original document is never changed.
+</p>
+
+
+<h2>Information Kept on Your Device</h2>
+
+<p>
+  The app remembers your review choices (which terms you untick and which
+  alternative abbreviations you prefer) and the "States &amp; countries"
+  setting in its private storage on your phone. Android's own device backup
+  may include these preferences if you have backup turned on; documents are
+  never included. Uninstalling the app, or clearing its data, removes them.
+</p>
+
+
+<h2>Clipboard</h2>
+
+<p>
+  When you tap a result, its abbreviation is copied to your device's
+  clipboard so you can paste it. The app does not read the clipboard.
+</p>
+
+
+<h2>Children</h2>
+
+<p>
+  The app is not directed at children and collects no information from
+  anyone.
+</p>
+
+
+<h2>Changes to This Policy</h2>
+
+<p>
+  If this policy changes, the new version will be published at this address
+  with a new effective date.
+</p>
+
+
+<h2>Contact</h2>
+
+<p>
+  Questions about this policy can be sent to
+  <a href="mailto:{{ config.ADMIN_EMAIL }}">
+    {{ config.ADMIN_EMAIL }}
+  </a>.
+</p>
+
+{% endblock %}
